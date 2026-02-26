@@ -3,17 +3,16 @@
 
 """
 NSGA-II (Batch-level encoding) — Scheme A + Program B timetable semantics
-✅ 2-objective version (Cost, Makespan) — based on v3 (corridor constraints)
-✅ Carbon tax REMOVED (no carbon sheet needed; emission no longer an objective)
-✅ HV computed AFTER normalisation using P* bounds (2D)
+✅ UPDATED: Hypervolume (HV) is computed AFTER normalisation (min-max) using P* bounds.
 
-修改说明（vs v3 carbon版本）：
-1. objectives 改为 (cost, makespan) — 去掉 emission 作为目标（无碳税则排放无意义）
-2. Carbon tax 计算完全移除（carbon_tax_map 不再被使用）
-3. Lateness 保持在 penalty（不加入 cost/objectives），避免算法选贵但快路径
-4. HV_REF_NORM = (1.2, 1.2) 二维
-5. 所有图改为 2D（Cost vs Makespan）
-6. dominates/nondominated/metrics 函数适配2目标
+修复清单 (vs 上一版本):
+1. 新增 CHINA_BORDER_NODES 常量
+2. 新增 china_border_monotone_ok() 函数（口岸单调性约束）
+3. random_dfs_paths() 恢复 node_region 参数，加入走廊剪枝
+4. build_path_library() 恢复 node_region 参数，加入 region_monotone_ok 过滤
+5. augment_batches_to_20() 排除口岸节点作为批次起点
+6. mutate_roulette_adaptive() 修复 evaluate_individual 缩进错误
+7. path_from_arcs() 正确传递 node_region 给 china_border_monotone_ok
 """
 
 import math
@@ -29,6 +28,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
 
 # ========================
@@ -37,15 +37,21 @@ import matplotlib.pyplot as plt
 
 TIME_BUCKET_H = 1.0
 
+# ✅ 基于实际数据：Region 列的真实值为 CN / KZ / KG / UZ / RU / BY / EE / WE
 CHINA_REGIONS = {"CN"}
-EUROPE_REGIONS = {"EE", "WE"}
-TRANSIT_REGIONS = {"KZ", "KG", "UZ", "RU", "BY"}
+EUROPE_REGIONS = {"EE", "WE"}          # EE=东欧, WE=西欧
+TRANSIT_REGIONS = {"KZ", "KG", "UZ", "RU", "BY"}  # 中亚+俄罗斯+白俄过渡区域
 
+# RegionGroup 走廊方向顺序（单调向前，不允许回退）
+# CN=0 → CA=1（中亚）→ RU=2（俄/白俄）→ EE=3（东欧）→ WE=4（西欧）
 CORRIDOR_ORDER: Dict[str, int] = {"CN": 0, "CA": 1, "RU": 2, "EE": 3, "WE": 4}
 
+# ✅ 口岸节点集合：从 Node_Border 表动态加载（见 load_network_from_extended）
+# 这里保留一个默认值作为后备，实际运行时会被数据覆盖
 CHINA_BORDER_NODES: set = {"Erenhot", "Manzhouli", "Khorgos", "Lianyungang",
                             "Chongqing", "Yiwu"}
 
+# 节点 → RegionGroup 映射（从数据动态加载，见 load_network_from_extended）
 NODE_GROUP: Dict[str, str] = {}
 
 HARD_TIME_WINDOW = False
@@ -57,8 +63,7 @@ PEN_NODE_CAP_EXCESS_PER_TEU = 5e7
 
 WAITING_COST_PER_TEU_HOUR_DEFAULT = 0.5
 WAIT_EMISSION_gCO2_per_TEU_H_DEFAULT = 0.0
-# ✅ Lateness stays in penalty only — NOT added to cost or objectives
-LATE_COST_PER_TEU_HOUR = 1e6  # used only inside penalty computation
+LATE_COST_PER_TEU_HOUR = 1e6
 
 W_ADD = 0.25
 W_DEL = 0.20
@@ -73,26 +78,11 @@ ROULETTE_SCORE_EPS = 1e-3
 CROSSOVER_RATE = 0.92
 MUTATION_RATE = 0.25
 
-# ✅ 扩大路径库：2目标时需要更多样的路径覆盖Cost-Emission的权衡空间
-PATHS_TOPK_PER_CRITERION = 20   # was 15
-PATH_LIB_CAP_TOTAL = 60         # was 45
-DFS_MAX_PATHS_PER_OD = 300      # was 150
+PATHS_TOPK_PER_CRITERION = 15
+PATH_LIB_CAP_TOTAL = 45
+DFS_MAX_PATHS_PER_OD = 150   # 走廊约束已保证路径质量，无需大量搜索
 
 CROSSOVER_SEGMENT_PROB = 0.50
-
-# ========================
-# Diversity settings (2-obj特有问题：Cost-Emission高度正相关导致Front0=1)
-# ========================
-
-# ε-支配档案：将归一化目标空间划分为 EPSILON_GRID x EPSILON_GRID 格子
-# 每个格子最多保留1个代表解 → 强制保留不同权衡区域的解
-EPSILON_GRID = 0.05          # 每格宽度（归一化空间），越小档案越精细
-
-# 多样性注入：当Front0的大小连续 DIVERSITY_STAGNATION_GENS 代 ≤ DIVERSITY_INJECT_THRESHOLD
-# 时，用随机个体替换部分种群（比例 DIVERSITY_INJECT_FRAC）
-DIVERSITY_INJECT_THRESHOLD = 3   # Front0 ≤ 这个数时触发
-DIVERSITY_STAGNATION_GENS  = 10  # 连续这么多代 front 小才注入
-DIVERSITY_INJECT_FRAC      = 0.15  # 每次注入的种群比例（~11个体）
 
 # ========================
 # Analytics speed knobs
@@ -105,8 +95,7 @@ PSTAR_TAIL_GENS = 30
 PSTAR_CAP_PER_GEN = 40
 PSTAR_MAX_TOTAL = 50000
 
-# ✅ 2D ref point (Cost, Emission)
-HV_REF_NORM = (1.2, 1.2)
+HV_REF_NORM = (1.2, 1.2, 1.2)
 HV_MC_SEED = 12345
 
 
@@ -115,6 +104,13 @@ HV_MC_SEED = 12345
 # ========================
 
 def china_border_monotone_ok(nodes: List[str], node_region: Dict[str, str]) -> bool:
+    """
+    口岸单调性约束：
+    1. 经过口岸节点后，不得再访问任何中国节点（内地或其他口岸）
+    2. 一旦离开中国区域，不得再回到中国区域
+    特殊情况：若起点本身是口岸节点（如 Yiwu 出发），
+    则第一个节点不触发 passed_border，允许先访问其他节点再出境。
+    """
     passed_border = False
     left_china = False
     start_is_border = (len(nodes) > 0 and nodes[0] in CHINA_BORDER_NODES)
@@ -124,11 +120,15 @@ def china_border_monotone_ok(nodes: List[str], node_region: Dict[str, str]) -> b
         in_china = (r in CHINA_REGIONS)
         is_border = (n in CHINA_BORDER_NODES)
 
+        # 规则1：离开中国后不得折返
         if left_china and in_china:
             return False
+
         if in_china:
+            # 规则2：经过口岸后，不得再访问任何中国节点（含内地和其他口岸）
             if passed_border:
                 return False
+            # 标记经过口岸（起点是口岸时，第一个节点不触发）
             if is_border and not (i == 0 and start_is_border):
                 passed_border = True
         else:
@@ -138,15 +138,23 @@ def china_border_monotone_ok(nodes: List[str], node_region: Dict[str, str]) -> b
 
 
 def region_monotone_ok(nodes: List[str], node_region: Dict[str, str]) -> bool:
-    max_level = -1
+    """
+    走廊方向单调性：沿 CN→CA→RU→EE→WE 方向前进，RegionGroup 只能向前不能回退。
+    允许在同一 RegionGroup 内部跳转（如 WE 内部 Hamburg→Berlin），
+    但不允许回到更早的 RegionGroup（如 WE→RU、EE→KZ 等）。
+    未知 RegionGroup 的节点（如 Ningbo/Shanghai 水运中转港）跳过检查。
+    """
+    max_level = -1  # 已到达的最高走廊级别
+
     for n in nodes:
         grp = NODE_GROUP.get(n, "")
         level = CORRIDOR_ORDER.get(grp, -1)
         if level < 0:
-            continue
+            continue  # 未知节点跳过（不影响检查）
         if level < max_level:
-            return False
+            return False  # 回退了走廊方向
         max_level = level
+
     return True
 
 
@@ -184,9 +192,14 @@ def parse_distance_km(x) -> float:
 
 
 def norm_region(x: str) -> str:
+    """
+    保留数据原始区域标签（CN/KZ/KG/UZ/RU/BY/EE/WE）。
+    仅做基本清理和别名归一化。
+    """
     s = str(x).strip()
     if not s or s.lower() in {"nan", "none", ""}:
         return ""
+    # 处理常见别名
     sl = s.lower()
     if sl in {"china", "prc", "chn"}:
         return "CN"
@@ -194,19 +207,19 @@ def norm_region(x: str) -> str:
         return "WE"
     if sl in {"ee", "east europe", "eastern europe"}:
         return "EE"
+    # 直接返回大写原值
     return s.upper()
 
 
 def unique_objective_tuples(
-    objs: List[Tuple[float, float]],
+    objs: List[Tuple[float, float, float]],
     tol: float = 1e-9
-) -> List[Tuple[float, float]]:
-    """✅ 2D version"""
-    out: List[Tuple[float, float]] = []
+) -> List[Tuple[float, float, float]]:
+    out: List[Tuple[float, float, float]] = []
     for o in objs:
         dup = False
         for p in out:
-            if all(abs(o[i] - p[i]) <= tol for i in range(2)):
+            if all(abs(o[i] - p[i]) <= tol for i in range(3)):
                 dup = True
                 break
         if not dup:
@@ -242,13 +255,12 @@ def _ffill_nan(arr: np.ndarray) -> np.ndarray:
     return x
 
 
-def _finite_points_array(pts, expected_dim: int = 2) -> np.ndarray:
-    """✅ 支持2D或3D，默认2D"""
+def _finite_points_array(pts: List[Tuple[float, float, float]]) -> np.ndarray:
     if not pts:
-        return np.empty((0, expected_dim), dtype=float)
+        return np.empty((0, 3), dtype=float)
     arr = np.array(pts, dtype=float)
-    if arr.ndim != 2 or arr.shape[1] != expected_dim:
-        return np.empty((0, expected_dim), dtype=float)
+    if arr.ndim != 2 or arr.shape[1] != 3:
+        return np.empty((0, 3), dtype=float)
     mask = np.all(np.isfinite(arr), axis=1)
     return arr[mask]
 
@@ -329,8 +341,7 @@ class PathAllocation:
 @dataclass(eq=False)
 class Individual:
     od_allocations: Dict[Tuple[str, str, int], List[PathAllocation]] = field(default_factory=dict)
-    # ✅ 2 objectives: (cost, makespan)
-    objectives: Tuple[float, float] = (float("inf"), float("inf"))
+    objectives: Tuple[float, float, float] = (float("inf"), float("inf"), float("inf"))
     penalty: float = 0.0
     feasible: bool = False
     feasible_hard: bool = False
@@ -505,7 +516,7 @@ def load_waiting_params(xls: pd.ExcelFile) -> Tuple[float, float]:
 
 
 def load_network_from_extended(filename: str):
-    global CHINA_BORDER_NODES, NODE_GROUP
+    global CHINA_BORDER_NODES, NODE_GROUP  # ✅ 声明在函数最前
     xls = pd.ExcelFile(filename)
 
     carbon_tax_map = load_carbon_tax_map(xls)
@@ -516,32 +527,35 @@ def load_network_from_extended(filename: str):
     nodes_df = pd.read_excel(xls, "Nodes")
     node_names = nodes_df["EnglishName"].astype(str).str.strip().tolist()
 
+    # ✅ 使用 norm_region 统一标签
     node_region = {
         str(name).strip(): norm_region(reg)
         for name, reg in zip(nodes_df["EnglishName"], nodes_df["Region"])
     }
 
+    # ✅ 加载 NODE_GROUP（RegionGroup 列），用于走廊方向单调性约束
     if "RegionGroup" in nodes_df.columns:
         NODE_GROUP = {
             str(name).strip(): str(grp).strip()
             for name, grp in zip(nodes_df["EnglishName"], nodes_df["RegionGroup"])
             if str(grp).strip() not in ("", "nan", "None")
         }
-
-    SEAPORT_NODES = {"Ningbo", "Shanghai"}
+    # 补充弧中出现但 Nodes 表缺失的节点（如 Ningbo/Shanghai 为中国港口节点）
+    SEAPORT_NODES = {"Ningbo", "Shanghai"}  # 中国海港中转节点，不作为批次起点
     for n in SEAPORT_NODES:
         if n not in node_region:
             node_region[n] = "CN"
             NODE_GROUP[n] = "CN"
             if n not in node_names:
                 node_names.append(n)
-
+    # 将海港节点视为口岸节点，防止被选为补充批次起点（在下面 Node_Border 加载后再 update）
     print("[CHECK] Example regions:",
           {k: node_region.get(k) for k in ["Erenhot", "Manzhouli", "Lianyungang", "Chengdu", "Hamburg", "Ningbo"]
            if k in node_region})
     print("[CHECK] Unique region labels:", sorted(set(node_region.values())))
     print(f"[CHECK] NODE_GROUP sample: {dict(list(NODE_GROUP.items())[:5])}")
 
+    # ✅ 从 Node_Border 表加载真实口岸节点集合，更新全局 CHINA_BORDER_NODES
     if "Node_Border" in xls.sheet_names:
         try:
             nb_df = pd.read_excel(xls, "Node_Border")
@@ -558,13 +572,14 @@ def load_network_from_extended(filename: str):
             print(f"[WARN] Failed to load Node_Border: {e}. Using default CHINA_BORDER_NODES.")
     else:
         print(f"[INFO] Node_Border sheet not found. Using default CHINA_BORDER_NODES: {sorted(CHINA_BORDER_NODES)}")
-
+    # 将海港中转节点也视为口岸节点（防止成为补充批次起点，防止口岸约束绕过）
     CHINA_BORDER_NODES.update({"Ningbo", "Shanghai"})
 
     DAILY_HOURS = 24.0
     node_caps: Dict[str, float] = {}
     for _, row in nodes_df.iterrows():
         n = str(row.get("EnglishName", "")).strip()
+        # ✅ 优先读 NodeCap_TEUday（每天），其次 NodeCap_TEUh×24
         if "NodeCap_TEUday" in nodes_df.columns and not pd.isna(row.get("NodeCap_TEUday", np.nan)):
             raw = safe_float(row.get("NodeCap_TEUday"), default=None)
             if raw is not None:
@@ -612,6 +627,7 @@ def load_network_from_extended(filename: str):
         to_region = str(node_region.get(dest, "")).strip()
         distance = parse_distance_km(row.get("Distance_km", 0.0))
 
+        # ✅ 容量：优先读 Capacity_TEUday（每天），其次 Capacity_TEUh×24，保持与批次量级一致
         if "Capacity_TEUday" in arcs_df.columns and not pd.isna(row.get("Capacity_TEUday", np.nan)):
             capacity = safe_float(row.get("Capacity_TEUday"), default=1e9)
         elif "Capacity_TEUh" in arcs_df.columns and not pd.isna(row.get("Capacity_TEUh", np.nan)):
@@ -693,6 +709,7 @@ def load_network_from_extended(filename: str):
         print(f"[WARN] Timetable cleaning skipped {skipped_tt_rows} invalid row(s).")
 
     bdf = pd.read_excel(xls, "Batches")
+    # ✅ 先记录原始批次行数，augment 时对补充批次排除口岸起点
     bdf = augment_batches_to_20(bdf, node_region=node_region, random_seed=2026)
 
     batches: List[Batch] = []
@@ -754,19 +771,28 @@ def build_arc_lookup(arcs: List[Arc]) -> Dict[Tuple[str, str, str], Arc]:
 
 def random_dfs_paths(graph, origin, dest, node_region, max_len=12, max_paths=200,
                      timeout_sec=8.0) -> List[List[Arc]]:
+    """
+    迭代式随机路径搜索（栈模拟DFS），带超时保护。
+    约束：
+    - china_border_monotone_ok: 口岸单调性
+    - region_monotone_ok: 走廊方向单调性 CN→CA→RU→EE→WE
+    """
     import time
     deadline = time.time() + timeout_sec
     paths: List[List[Arc]] = []
-    found_set: set = set()
+    found_set: set = set()  # 去重
 
+    # 每次随机从起点出发做一次深度优先遍历
+    # 使用迭代栈：(node, arc_list, visited_set, node_list)
     attempts = 0
-    max_attempts = max_paths * 20
+    max_attempts = max_paths * 20  # 最多尝试次数
 
     while len(paths) < max_paths and attempts < max_attempts:
         if time.time() > deadline:
             break
         attempts += 1
 
+        # 单次随机游走（贪心随机DFS，找到一条路就收）
         node = origin
         cur_arcs: List[Arc] = []
         visited = {origin}
@@ -781,6 +807,7 @@ def random_dfs_paths(graph, origin, dest, node_region, max_len=12, max_paths=200
                 ok = False
                 break
 
+            # 随机打乱，优先选择走廊方向正确的邻居
             random.shuffle(neighbors)
             moved = False
             for nxt, arc in neighbors:
@@ -803,6 +830,7 @@ def random_dfs_paths(graph, origin, dest, node_region, max_len=12, max_paths=200
                 break
 
         if ok and node == dest and cur_arcs:
+            # 去重（用节点序列作为 key）
             key = tuple(cur_nodes)
             if key not in found_set:
                 found_set.add(key)
@@ -859,6 +887,7 @@ def select_topk_by_cost_time_emis(paths: List[Path], k: int = 30, cap_total: int
 def build_path_library(
     node_names, node_region, arcs, batches, tt_dict, arc_lookup
 ) -> Dict[Tuple[str, str], List[Path]]:
+    """✅ 恢复 node_region 参数，加入走廊过滤"""
     graph = build_graph(arcs)
     path_lib: Dict[Tuple[str, str], List[Path]] = {}
     next_path_id = 0
@@ -882,10 +911,16 @@ def build_path_library(
                 continue
 
             nodes = [repaired[0].from_node] + [a.to_node for a in repaired]
+
+            # 去重检查
             if len(set(nodes)) != len(nodes):
                 continue
+
+            # ✅ 走廊单调性过滤
             if not region_monotone_ok(nodes, node_region):
                 continue
+
+            # ✅ 口岸单调性过滤（双重保险）
             if not china_border_monotone_ok(nodes, node_region):
                 continue
 
@@ -911,6 +946,7 @@ def build_path_library(
                 cap_total=PATH_LIB_CAP_TOTAL
             )
 
+    # ✅ 强制后置过滤：清除任何仍然违反口岸约束的路径
     removed = 0
     for od in list(path_lib.keys()):
         before = len(path_lib[od])
@@ -1007,6 +1043,7 @@ def simulate_path_time_capacity(
         total_wait += wait_here
         arr = dep + travel_time
 
+        # ✅ 容量 slot 按天分桶（容量单位 TEU/day）
         start_slot = int(dep // 24)
         arc_key = (arc.from_node, arc.to_node, arc.mode)
         slot_key = (arc_key, start_slot)
@@ -1033,17 +1070,15 @@ def evaluate_individual(
     carbon_tax_map: Optional[Dict[str, float]] = None,
     trans_map: Optional[Dict[Tuple[str, str, str], Dict[str, float]]] = None,
 ):
-    # ✅ objectives = (cost, emission_gCO2)
-    # ✅ lateness goes ONLY into penalty — not into cost or objectives
-    # ✅ time/makespan tracked as diagnostic only (vio_breakdown)
     total_cost = 0.0
-    makespan = 0.0  # diagnostic only
+    total_emission_g = 0.0
+    makespan = 0.0
 
     arc_flow_map: Dict[Tuple[Tuple[str, str, str], int], float] = {}
     node_flow_map: Dict[Tuple[str, int], float] = {}
     arc_caps = {(a.from_node, a.to_node, a.mode): a.capacity for a in arcs}
 
-    # carbon_tax_map intentionally ignored — no carbon objective in this version
+    carbon_tax_map = carbon_tax_map or {}
     trans_map = trans_map or {}
 
     miss_alloc = 0
@@ -1057,6 +1092,7 @@ def evaluate_individual(
     trans_time_h_total = 0.0
     trans_teu_h_total = 0.0
     trans_cost_total = 0.0
+    carbon_cost_total = 0.0
 
     for b in batches:
         key = (b.origin, b.destination, b.batch_id)
@@ -1073,11 +1109,20 @@ def evaluate_individual(
             flow = alloc.share * b.quantity
             p = alloc.path
 
-            # 1) Base transport cost
             base_transport_cost = p.base_cost_per_teu * flow
+            base_transport_emis_g = p.base_emission_per_teu * flow
             total_cost += base_transport_cost
+            total_emission_g += base_transport_emis_g
 
-            # 2) Transshipment cost → goes into COST
+            carbon_cost_this_alloc = 0.0
+            for arc in p.arcs:
+                emis_g = arc.emission_per_teu_km * arc.distance * flow
+                region = getattr(arc, "from_region", "") or ""
+                ct = float(carbon_tax_map.get(region, 0.0))
+                carbon_cost_this_alloc += (emis_g / 1e6) * ct
+            total_cost += carbon_cost_this_alloc
+            carbon_cost_total += carbon_cost_this_alloc
+
             trans_cost_this_alloc = 0.0
             for i in range(1, len(p.arcs)):
                 prev_arc = p.arcs[i - 1]
@@ -1090,7 +1135,6 @@ def evaluate_individual(
             total_cost += trans_cost_this_alloc
             trans_cost_total += trans_cost_this_alloc
 
-            # 4) Time simulation
             travel_time, wait_h, trans_h, mtt = simulate_path_time_capacity(
                 p, b, flow, tt_dict, arc_flow_map, node_flow_map, trans_map=trans_map
             )
@@ -1099,11 +1143,11 @@ def evaluate_individual(
                 miss_tt += mtt
                 continue
 
-            # 5) Waiting cost → goes into COST
             wait_teu_h = flow * wait_h
             wait_teu_h_total += wait_teu_h
             wait_h_total += alloc.share * wait_h
             total_cost += waiting_cost_per_teu_h * wait_teu_h
+            total_emission_g += wait_emis_g_per_teu_h * wait_teu_h
 
             trans_time_h_total += alloc.share * trans_h
             trans_teu_h_total += flow * trans_h
@@ -1111,29 +1155,26 @@ def evaluate_individual(
             arrival_time = b.ET + travel_time
             batch_finish_time = max(batch_finish_time, arrival_time)
 
-            # 6) ✅ Lateness → goes ONLY into penalty (NOT into cost/objectives)
             if arrival_time > b.LT:
                 late_h = arrival_time - b.LT
                 late_h_total += alloc.share * late_h
                 late_teu_h = flow * late_h
                 late_teu_h_total += late_teu_h
-                # ✅ NO: total_cost += LATE_COST_PER_TEU_HOUR * late_teu_h  ← removed
+                # ✅ 迟到不加入 total_cost，而是计入 penalty（见下方）
 
         makespan = max(makespan, batch_finish_time)
 
-    # Arc cap excess
     for (arc_key, slot), flow in arc_flow_map.items():
         cap = arc_caps.get(arc_key, 1e9)
         if flow > cap:
             cap_excess += (flow - cap)
 
-    # Node cap excess
     for (node, slot), flow in node_flow_map.items():
         cap = node_caps.get(node, 1e12)
         if flow > cap:
             node_cap_excess += (flow - cap)
 
-    # ✅ penalty includes lateness (so infeasible solutions still get pushed away)
+    # ✅ penalty 包含迟到惩罚（不加入 objectives）
     late_penalty = LATE_COST_PER_TEU_HOUR * late_teu_h_total
     penalty = (
         PEN_MISS_ALLOC * float(miss_alloc) +
@@ -1143,13 +1184,13 @@ def evaluate_individual(
         late_penalty
     )
 
-    # ✅ 2 objectives: cost and makespan
-    ind.objectives = (float(total_cost), float(makespan))
+    ind.objectives = (float(total_cost), float(total_emission_g), float(makespan))
     ind.penalty = float(penalty)
 
     hard_ok = (miss_alloc == 0 and miss_tt == 0 and cap_excess <= 1e-9 and node_cap_excess <= 1e-9)
     strict_no_late = (late_h_total <= 1e-9)
     ind.feasible_hard = bool(hard_ok and strict_no_late)
+    # ✅ 迟到惩罚已移入 penalty，feasible 必须要求无迟到，否则 dominates 无法淘汰迟到解
     ind.feasible = bool(hard_ok and strict_no_late)
 
     ind.vio_breakdown = {
@@ -1164,7 +1205,7 @@ def evaluate_individual(
         "trans_h": float(trans_time_h_total),
         "trans_teu_h": float(trans_teu_h_total),
         "trans_cost": float(trans_cost_total),
-        "makespan_h": float(makespan),
+        "carbon_cost": float(carbon_cost_total),
     }
 
 
@@ -1211,6 +1252,7 @@ def path_from_arcs(new_arcs: List[Arc], origin: str, destination: str, path_id: 
         return None
     if len(set(nodes)) != len(nodes):
         return None
+    # ✅ 口岸单调性检查
     if node_region is not None:
         if not china_border_monotone_ok(nodes, node_region):
             return None
@@ -1309,6 +1351,7 @@ def crossover_common_node(
             child1.od_allocations[key] = [clone_gene(x) for x in g1]
             child2.od_allocations[key] = [clone_gene(x) for x in g1]
             continue
+
         c1_allocs = [clone_gene(x) for x in g1]
         c2_allocs = [clone_gene(x) for x in g2]
         p1 = random.choice(g1).path
@@ -1322,6 +1365,7 @@ def crossover_common_node(
                 c1_allocs.append(PathAllocation(path=new_p_for_c1, share=0.20))
             if new_p_for_c2 is not None:
                 c2_allocs.append(PathAllocation(path=new_p_for_c2, share=0.20))
+
         child1.od_allocations[key] = merge_and_normalize(c1_allocs)
         child2.od_allocations[key] = merge_and_normalize(c2_allocs)
     return child1, child2
@@ -1354,12 +1398,13 @@ def random_initial_individual(batches: List[Batch], path_lib: Dict[Tuple[str, st
 
 
 def greedy_initial_individual(batches: List[Batch], path_lib: Dict[Tuple[str, str], List[Path]]) -> Individual:
-    """✅ 贪心初始化：选择基础旅行时间最短的路径（最大化初始可行率）"""
+    """✅ 贪心初始化：每个批次选择基础旅行时间最短的路径，最大化初始可行率"""
     ind = Individual()
     for b in batches:
         paths = path_lib.get((b.origin, b.destination), [])
         if not paths:
             continue
+        # 按基础旅行时间排序，选最快路径
         best = min(paths, key=lambda p: p.base_travel_time_h)
         ind.od_allocations[(b.origin, b.destination, b.batch_id)] = [PathAllocation(path=best, share=1.0)]
     return ind
@@ -1459,6 +1504,7 @@ def augment_batches_to_20(
         print(f"[INFO] Batches rows={len(df)} (>=20). Skip augmentation.")
         return df
 
+    # ✅ 排除口岸节点作为起点，只选中国内地城市
     china_nodes = [
         n for n, r in node_region.items()
         if r in CHINA_REGIONS and n not in CHINA_BORDER_NODES
@@ -1473,14 +1519,17 @@ def augment_batches_to_20(
     q_min = int(q_vals.min()) if len(q_vals) > 0 else 80
     q_max = int(q_vals.max()) if len(q_vals) > 0 else 150
 
+    # ✅ LT 参考原始批次中合理的时间窗（排除过短的异常值）
     lt_vals = pd.to_numeric(df["LT"], errors="coerce").dropna()
+    # 只取 LT >= 300h 的（物理上从中国到欧洲最快也要 ~150-200h）
     lt_reasonable = lt_vals[lt_vals >= 300]
     if len(lt_reasonable) > 0:
         lt_min = int(lt_reasonable.min())
         lt_max = int(lt_reasonable.max())
     else:
+        # 无合理参考值，使用保守默认值
         lt_min = 360
-        lt_max = 504
+        lt_max = 504  # 21天
 
     existing_ids = set(pd.to_numeric(df["BatchID"], errors="coerce").dropna().astype(int).tolist())
     next_id = max(existing_ids) + 1 if existing_ids else 11
@@ -1601,6 +1650,7 @@ def mutate_roulette_adaptive(
         return op, False, False
 
     repair_missing_allocations(ind, batches, path_lib)
+    # ✅ 修复缩进：evaluate_individual 与上面代码对齐
     evaluate_individual(
         ind, batches, arcs, tt_dict,
         waiting_cost_per_teu_h, wait_emis_g_per_teu_h, node_caps,
@@ -1612,7 +1662,7 @@ def mutate_roulette_adaptive(
 
 
 # ========================
-# NSGA-II components (2D)
+# NSGA-II components
 # ========================
 
 def dominates(a: Individual, b: Individual) -> bool:
@@ -1688,166 +1738,43 @@ def tournament_select(pop: List[Individual], dists: Dict[Individual, float], ran
 
 
 # ========================
-# HV calculator (Monte Carlo, 2D)
+# HV calculator (Monte Carlo)
 # ========================
 
 class HypervolumeCalculator:
-    """Monte Carlo HV approximation for 2D minimisation."""
-    def __init__(self, ref_point: Tuple[float, float], num_samples=2000, seed: Optional[int] = None):
+    def __init__(self, ref_point: Tuple[float, float, float], num_samples=2000, seed: Optional[int] = None):
         self.ref_point = np.array(ref_point, dtype=float)
-        self.dim = len(self.ref_point)
         self.num_samples = int(num_samples)
-        self.ideal_point = np.zeros(self.dim, dtype=float)
+        self.ideal_point = np.zeros(3, dtype=float)
+        if seed is not None:
+            rng = np.random.default_rng(seed)
+            self.samples = rng.uniform(low=self.ideal_point, high=self.ref_point, size=(self.num_samples, 3))
+        else:
+            self.samples = np.random.uniform(low=self.ideal_point, high=self.ref_point, size=(self.num_samples, 3))
 
-        if np.any(self.ref_point <= self.ideal_point):
-            raise ValueError(f"Invalid ref_point {ref_point}; must be > 0 in all dims.")
-
-        rng = np.random.default_rng(seed) if seed is not None else np.random.default_rng()
-        self.samples = rng.uniform(low=self.ideal_point, high=self.ref_point,
-                                    size=(self.num_samples, self.dim))
-
-    def calculate_points(self, points: List[Tuple[float, float]]) -> float:
+    def calculate_points(self, points: List[Tuple[float, float, float]]) -> float:
         if not points:
             return 0.0
         front_objs = np.array(points, dtype=float)
-        if front_objs.ndim != 2 or front_objs.shape[1] != self.dim:
-            return 0.0
-        valid_mask = (np.all(front_objs <= self.ref_point, axis=1) &
-                      np.all(front_objs >= self.ideal_point, axis=1))
+        valid_mask = np.all(front_objs <= self.ref_point, axis=1)
         valid_objs = front_objs[valid_mask]
         if len(valid_objs) == 0:
             return 0.0
-        S = self.samples[:, np.newaxis, :]   # (Ns,1,d)
-        O = valid_objs[np.newaxis, :, :]     # (1,Np,d)
-        dominated = np.all(O <= S, axis=2)   # (Ns,Np)
+        S = self.samples[:, np.newaxis, :]
+        O = valid_objs[np.newaxis, :, :]
+        dominated = np.all(O <= S, axis=2)
         dominated_samples = np.any(dominated, axis=1)
-        hv_ratio = float(np.mean(dominated_samples))
-        box_volume = float(np.prod(self.ref_point - self.ideal_point))
-        return hv_ratio * box_volume
-
-
-# ========================
-# ε-支配档案 (Epsilon-Dominance Archive)
-# ========================
-
-class EpsilonArchive:
-    """
-    维护一个基于 ε-支配的外部档案。
-    将归一化目标空间划分为 (1/epsilon)^2 个格子，每个格子保留一个代表解。
-    作用：在 Cost-Emission 高度正相关时，强制保留不同权衡区域的可行解，
-    防止 Front0 退化为单点。
-    """
-    def __init__(self, epsilon: float = 0.05):
-        self.epsilon = float(epsilon)
-        self.grid: Dict[Tuple[int, int], "Individual"] = {}
-        self._ref_mins: Optional[np.ndarray] = None
-        self._ref_maxs: Optional[np.ndarray] = None
-
-    def _grid_key(self, obj: Tuple[float, float],
-                  mins: np.ndarray, maxs: np.ndarray) -> Tuple[int, int]:
-        norm = [(obj[i] - mins[i]) / max(maxs[i] - mins[i], 1e-12) for i in range(2)]
-        return (int(norm[0] / self.epsilon), int(norm[1] / self.epsilon))
-
-    def _update_ref(self, candidates: List["Individual"]):
-        feasible = [ind for ind in candidates if ind.feasible]
-        if not feasible:
-            return
-        costs  = np.array([ind.objectives[0] for ind in feasible])
-        emises = np.array([ind.objectives[1] for ind in feasible])
-        new_mins = np.array([float(np.min(costs)),  float(np.min(emises))])
-        new_maxs = np.array([float(np.max(costs)),  float(np.max(emises))])
-        if self._ref_mins is None:
-            self._ref_mins = new_mins.copy()
-            self._ref_maxs = new_maxs.copy()
-        else:
-            self._ref_mins = np.minimum(self._ref_mins, new_mins)
-            self._ref_maxs = np.maximum(self._ref_maxs, new_maxs)
-
-    def update(self, population: List["Individual"]):
-        """用当前种群更新档案。"""
-        self._update_ref(population)
-        if self._ref_mins is None:
-            return
-        mins, maxs = self._ref_mins, self._ref_maxs
-        for ind in population:
-            if not ind.feasible:
-                continue
-            key = self._grid_key(ind.objectives, mins, maxs)
-            existing = self.grid.get(key)
-            if existing is None:
-                self.grid[key] = ind
-            else:
-                if dominates(ind, existing):
-                    self.grid[key] = ind
-                elif not dominates(existing, ind):
-                    # 同格内非支配：保留 cost 较小的（鼓励探索低成本方向）
-                    if ind.objectives[0] < existing.objectives[0]:
-                        self.grid[key] = ind
-
-        # 剔除被其他档案成员支配的格子
-        keys = list(self.grid.keys())
-        arch_vals = [self.grid[k] for k in keys]
-        to_remove = set()
-        for i in range(len(keys)):
-            for j in range(len(keys)):
-                if i == j:
-                    continue
-                if dominates(arch_vals[j], arch_vals[i]):
-                    to_remove.add(keys[i])
-                    break
-        for k in to_remove:
-            self.grid.pop(k, None)
-
-    def get_members(self) -> List["Individual"]:
-        return list(self.grid.values())
-
-    def size(self) -> int:
-        return len(self.grid)
-
-
-def inject_archive_into_population(
-    population: List["Individual"],
-    archive: EpsilonArchive,
-    inject_frac: float = 0.15,
-) -> List["Individual"]:
-    """
-    将档案中的成员注入种群，替换最差的个体（infeasible 优先被替换）。
-    注入数量 = min(档案大小, inject_frac * pop_size)。
-    """
-    members = archive.get_members()
-    if not members:
-        return population
-
-    n_inject = min(len(members), max(1, int(len(population) * inject_frac)))
-    inject_pool = random.sample(members, min(n_inject, len(members)))
-
-    # 按"最差"排序：infeasible > 高penalty > 高objectives之和
-    pop_sorted = sorted(
-        enumerate(population),
-        key=lambda x: (
-            0 if x[1].feasible else 1,
-            x[1].penalty,
-            -sum(x[1].objectives),
-        ),
-        reverse=True,
-    )
-
-    new_pop = list(population)
-    for inj, (idx, _) in zip(inject_pool, pop_sorted):
-        new_pop[idx] = inj
-
-    return new_pop
+        return float(np.sum(dominated_samples) / float(self.num_samples))
 
 
 def unique_individuals_by_objectives(front: List[Individual], tol: float = 1e-3) -> List[Individual]:
-    """✅ 2D version"""
     uniq: List[Individual] = []
-    seen: List[Tuple[float, float]] = []
+    seen: List[Tuple[float, float, float]] = []
     for ind in front:
         obj = ind.objectives
         is_dup = False
         for o in seen:
-            if all(abs(obj[i] - o[i]) <= tol for i in range(2)):
+            if (abs(obj[0] - o[0]) <= tol and abs(obj[1] - o[1]) <= tol and abs(obj[2] - o[2]) <= tol):
                 is_dup = True
                 break
         if not is_dup:
@@ -1857,14 +1784,14 @@ def unique_individuals_by_objectives(front: List[Individual], tol: float = 1e-3)
 
 
 # ========================
-# Metrics: P*, IGD+, Spacing (2D)
+# Metrics: P*, IGD+, Spacing
 # ========================
 
-def dominates_obj(a: Tuple[float, float], b: Tuple[float, float]) -> bool:
-    return all(a[i] <= b[i] for i in range(2)) and any(a[i] < b[i] for i in range(2))
+def dominates_obj(a: Tuple[float, float, float], b: Tuple[float, float, float]) -> bool:
+    return all(a[i] <= b[i] for i in range(3)) and any(a[i] < b[i] for i in range(3))
 
 
-def nondominated_set(points: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+def nondominated_set(points: List[Tuple[float, float, float]]) -> List[Tuple[float, float, float]]:
     pts = unique_objective_tuples(points, tol=1e-9)
     nd = []
     for i, p in enumerate(pts):
@@ -1880,25 +1807,28 @@ def nondominated_set(points: List[Tuple[float, float]]) -> List[Tuple[float, flo
     return nd
 
 
-def normalize_points(points, mins, maxs):
+def normalize_points(points: List[Tuple[float, float, float]], mins, maxs):
     out = []
     for p in points:
         pp = []
-        for i in range(2):
+        for i in range(3):
             rng = maxs[i] - mins[i]
-            pp.append(0.0 if rng <= 1e-12 else (p[i] - mins[i]) / rng)
+            if rng <= 1e-12:
+                pp.append(0.0)
+            else:
+                pp.append((p[i] - mins[i]) / rng)
         out.append(tuple(pp))
     return out
 
 
-def clip_points(points, ref):
+def clip_points(points: List[Tuple[float, float, float]], ref: Tuple[float, float, float]):
     out = []
     for p in points:
-        out.append(tuple(min(max(p[i], 0.0), ref[i]) for i in range(2)))
+        out.append(tuple(min(max(p[i], 0.0), ref[i]) for i in range(3)))
     return out
 
 
-def igd_plus(P_star, A) -> float:
+def igd_plus(P_star: List[Tuple[float, float, float]], A: List[Tuple[float, float, float]]) -> float:
     if not P_star or not A:
         return float("inf")
     P = np.array(P_star, dtype=float)
@@ -1912,7 +1842,7 @@ def igd_plus(P_star, A) -> float:
     return float(np.mean(dists))
 
 
-def spacing_metric(A) -> float:
+def spacing_metric(A: List[Tuple[float, float, float]]) -> float:
     if A is None or len(A) < 2:
         return 0.0
     Q = np.array(A, dtype=float)
@@ -1934,8 +1864,8 @@ def spacing_metric(A) -> float:
 def build_P_star_fast(run_front_hist,
                       tail_gens=PSTAR_TAIL_GENS,
                       cap_per_gen=PSTAR_CAP_PER_GEN,
-                      max_total=PSTAR_MAX_TOTAL):
-    pts = []
+                      max_total=PSTAR_MAX_TOTAL) -> List[Tuple[float, float, float]]:
+    pts: List[Tuple[float, float, float]] = []
     for r in range(len(run_front_hist)):
         hist = run_front_hist[r]
         tail = hist[-tail_gens:] if (tail_gens is not None and tail_gens > 0) else hist
@@ -2116,8 +2046,7 @@ def plot_hv_curve(gen, hv_mean, hv_std=None, save="hv_curve.png"):
     print("Saved:", save)
 
 
-def plot_feasible_ratio_curve(gen, fr_mean, fr_std=None, frs_mean=None, frs_std=None,
-                               save="feasible_ratio_curve.png"):
+def plot_feasible_ratio_curve(gen, fr_mean, fr_std=None, frs_mean=None, frs_std=None, save="feasible_ratio_curve.png"):
     plt.figure(figsize=(10, 4), dpi=300)
     plt.plot(gen, fr_mean, linewidth=2.2, label="Feasible Ratio (soft, mean)", zorder=3)
     if fr_std is not None:
@@ -2140,120 +2069,75 @@ def _pick_overlay_gens(generations: int, n: int = 5) -> List[int]:
     if generations <= 1:
         return [0]
     cand = [0, generations // 4, generations // 2, (3 * generations) // 4, generations - 1]
-    return sorted(list(dict.fromkeys([int(x) for x in cand if 0 <= int(x) < generations])))
-
-
-def plot_2d_pareto_final(pareto_points, save="pareto_2d_best_run_final.png", title=""):
-    """✅ 2D Pareto front: Cost vs Makespan"""
-    if not pareto_points:
-        print("[WARN] No final Pareto points to plot.")
-        return
-    A = _finite_points_array(pareto_points, expected_dim=2)
-    if A.shape[0] == 0:
-        return
-    # Sort by cost for a connected line
-    idx = np.argsort(A[:, 0])
-    A = A[idx]
-    plt.figure(figsize=(7, 5), dpi=300)
-    plt.plot(A[:, 0], A[:, 1], "o-", markersize=6, linewidth=1.5, alpha=0.9)
-    plt.xlabel("Cost ($)")
-    plt.ylabel("Makespan (h)")
-    plt.title(title)
-    plt.grid(True, linestyle=":", alpha=0.4)
-    plt.tight_layout(); plt.savefig(save); plt.close()
-    print("Saved:", save)
-
-
-def plot_2d_pareto_all_generations(
-    all_gen_points_with_gen,  # List of (cost, emis, gen)
-    final_pareto_points=None,
-    save="pareto_2d_allgens_best_run.png",
-    title="Pareto Points Across All Generations (Best Run)",
-    cmap_name="turbo",
-):
-    """✅ 2D scatter across generations, coloured by generation"""
-    if not all_gen_points_with_gen:
-        print("[WARN] No all-generation Pareto points to plot.")
-        return
-    raw = np.array([(c, e, g) for (c, e, g) in all_gen_points_with_gen], dtype=float)
-    mask = np.all(np.isfinite(raw[:, :2]), axis=1)
-    raw = raw[mask]
-    if raw.shape[0] == 0:
-        return
-    P = raw[:, :2]; G = raw[:, 2]
-    plt.figure(figsize=(7, 6), dpi=300)
-    sc = plt.scatter(P[:, 0], P[:, 1], c=G, cmap=cmap_name, s=12, alpha=0.55)
-    cbar = plt.colorbar(sc, pad=0.02, fraction=0.05)
-    cbar.set_label("Generation")
-    if final_pareto_points:
-        F = _finite_points_array(final_pareto_points, expected_dim=2)
-        if F.shape[0] > 0:
-            plt.scatter(F[:, 0], F[:, 1], marker="^", s=50, alpha=0.95,
-                        color="red", label="Final feasible Pareto")
-            plt.legend(loc="best")
-    plt.xlabel("Cost ($)"); plt.ylabel("Makespan (h)")
-    plt.title(title)
-    plt.grid(True, linestyle=":", alpha=0.4)
-    plt.tight_layout(); plt.savefig(save); plt.close()
-    print("Saved:", save)
+    cand = sorted(list(dict.fromkeys([int(x) for x in cand if 0 <= int(x) < generations])))
+    return cand
 
 
 def plot_2d_evolution_overlays(front_hist, generations, save_prefix="evolution2d", gens_to_plot=None):
-    """✅ Single 2D overlay: Cost vs Makespan"""
     if not front_hist:
+        print("[WARN] Empty front_hist, skip 2D evolution overlays.")
         return
     if gens_to_plot is None:
         gens_to_plot = _pick_overlay_gens(generations, n=5)
-
-    outname = f"{save_prefix}_cost_time.png"
-    plt.figure(figsize=(6.6, 5.2), dpi=300)
-    plotted_any = False
-    for g in gens_to_plot:
-        pts = front_hist[g] if (0 <= g < len(front_hist)) else []
-        arr = _finite_points_array(pts, expected_dim=2)
-        if arr.shape[0] == 0:
+    pairs = [
+        (0, 1, "Cost", "Emission (gCO2)", f"{save_prefix}_cost_emis.png"),
+        (0, 2, "Cost", "Time", f"{save_prefix}_cost_time.png"),
+        (1, 2, "Emission (gCO2)", "Time", f"{save_prefix}_emis_time.png"),
+    ]
+    for xi, yi, xl, yl, outname in pairs:
+        plt.figure(figsize=(6.6, 5.2), dpi=300)
+        plotted_any = False
+        for g in gens_to_plot:
+            pts = front_hist[g] if (0 <= g < len(front_hist)) else []
+            arr = _finite_points_array(pts)
+            if arr.shape[0] == 0:
+                continue
+            plt.scatter(arr[:, xi], arr[:, yi], s=18, alpha=0.70, label=f"Gen {g}")
+            plotted_any = True
+        if not plotted_any:
+            plt.close()
             continue
-        plt.scatter(arr[:, 0], arr[:, 1], s=18, alpha=0.70, label=f"Gen {g}")
-        plotted_any = True
-
-    if not plotted_any:
-        plt.close()
-        print(f"[WARN] No finite points for {outname}, skipped.")
-        return
-
-    plt.xlabel("Cost ($)"); plt.ylabel("Makespan (h)")
-    plt.title("2D Evolution Overlay (Best Run): Cost vs Makespan")
-    plt.grid(True, linestyle=":", alpha=0.5); plt.legend(frameon=True)
-    plt.tight_layout(); plt.savefig(outname); plt.close()
-    print("Saved:", outname)
+        plt.xlabel(xl); plt.ylabel(yl)
+        plt.title(f"2D Evolution Overlay (Best Run): {xl} vs {yl}")
+        plt.grid(True, linestyle=":", alpha=0.5); plt.legend(frameon=True)
+        plt.tight_layout(); plt.savefig(outname); plt.close()
+        print("Saved:", outname)
 
 
 def extract_min_objectives(front_hist, generations):
-    """✅ 2D: returns min_cost, min_time arrays"""
     min_cost = np.full(generations, np.nan, dtype=float)
+    min_emis = np.full(generations, np.nan, dtype=float)
     min_time = np.full(generations, np.nan, dtype=float)
     gmax = min(generations, len(front_hist))
     for g in range(gmax):
-        arr = _finite_points_array(front_hist[g], expected_dim=2)
+        pts = front_hist[g]
+        if not pts:
+            continue
+        arr = _finite_points_array(pts)
         if arr.shape[0] == 0:
             continue
         try:
             min_cost[g] = float(np.nanmin(arr[:, 0]))
-            min_time[g] = float(np.nanmin(arr[:, 1]))
+            min_emis[g] = float(np.nanmin(arr[:, 1]))
+            min_time[g] = float(np.nanmin(arr[:, 2]))
         except Exception:
             continue
-    return _ffill_nan(min_cost), _ffill_nan(min_time)
+    return _ffill_nan(min_cost), _ffill_nan(min_emis), _ffill_nan(min_time)
 
 
-def plot_min_objective_curves(gen, min_cost, min_time,
+def plot_min_objective_curves(gen, min_cost, min_emis, min_time,
                               save_cost="min_cost_curve.png",
+                              save_emis="min_emission_curve.png",
                               save_time="min_time_curve.png"):
     for data, ylabel, title, save in [
-        (min_cost, "Min Cost ($)", "Best-run Min Cost per Generation (feasible solutions)", save_cost),
-        (min_time, "Min Makespan (h)", "Best-run Min Makespan per Generation (feasible solutions)", save_time),
+        (min_cost, "Min Cost (feasible only)", "Best-run Min Cost per Generation (feasible solutions)", save_cost),
+        (min_emis, "Min Emission gCO2 (feasible only)", "Best-run Min Emission per Generation (feasible solutions)", save_emis),
+        (min_time, "Min Time h (feasible only)", "Best-run Min Time per Generation (feasible solutions)", save_time),
     ]:
         plt.figure(figsize=(10, 4), dpi=300)
+        # NaN 段不绘制，体现早期无可行解阶段
         plt.plot(gen, data, linewidth=2.2)
+        # 标注首次出现可行解的代数
         finite_mask = np.isfinite(data)
         if finite_mask.any():
             first_feas_gen = int(np.where(finite_mask)[0][0])
@@ -2269,14 +2153,13 @@ def plot_min_objective_curves(gen, min_cost, min_time,
 
 def export_gen_metrics_best_run(front_hist, hv_hist, fr_hist, frs_hist, vio_hist, generations,
                                 out_csv="gen_metrics_best_run.csv"):
-    min_cost, min_time = extract_min_objectives(front_hist, generations)
+    min_cost, min_emis, min_time = extract_min_objectives(front_hist, generations)
     df = pd.DataFrame({
         "gen": np.arange(generations, dtype=int),
         "HV_norm": np.array(hv_hist[:generations], dtype=float),
         "feasible_ratio_soft": np.array(fr_hist[:generations], dtype=float),
         "feasible_ratio_strict": np.array(frs_hist[:generations], dtype=float),
-        "min_cost": min_cost,
-        "min_makespan_h": min_time,
+        "min_cost": min_cost, "min_emission_gCO2": min_emis, "min_time": min_time,
     })
     if vio_hist:
         for k, series in vio_hist.items():
@@ -2285,6 +2168,56 @@ def export_gen_metrics_best_run(front_hist, hv_hist, fr_hist, frs_hist, vio_hist
     df.to_csv(out_csv, index=False)
     print("Saved:", out_csv)
     return df
+
+
+# ========================
+# Pareto 3D plots
+# ========================
+
+def plot_pareto_3d_final_only(pareto_points, save, title):
+    if not pareto_points:
+        print("[WARN] No final Pareto points to plot.")
+        return
+    A = _finite_points_array(pareto_points)
+    if A.shape[0] == 0:
+        return
+    fig = plt.figure(figsize=(7, 6), dpi=300)
+    ax = fig.add_subplot(111, projection="3d")
+    ax.scatter(A[:, 0], A[:, 1], A[:, 2], marker="o", s=30, alpha=0.9)
+    ax.set_xlabel("Cost"); ax.set_ylabel("Emission (gCO2)"); ax.set_zlabel("Time")
+    ax.set_title(title); ax.grid(True, linestyle=":", alpha=0.4)
+    plt.tight_layout(); plt.savefig(save); plt.close(fig)
+    print("Saved:", save)
+
+
+def plot_pareto_3d_all_generations(all_gen_points_with_gen, final_pareto_points=None,
+                                   save="pareto_3d_allgens_best_run.png",
+                                   title="Pareto Points Across All Generations (Best Run)",
+                                   cmap_name="turbo"):
+    if not all_gen_points_with_gen:
+        return
+    raw = np.array([(c, e, t, g) for (c, e, t, g) in all_gen_points_with_gen], dtype=float)
+    mask = np.all(np.isfinite(raw[:, :3]), axis=1)
+    raw = raw[mask]
+    if raw.shape[0] == 0:
+        return
+    P = raw[:, :3]; G = raw[:, 3]
+    fig = plt.figure(figsize=(7, 6), dpi=300)
+    ax = fig.add_subplot(111, projection="3d")
+    sc = ax.scatter(P[:, 0], P[:, 1], P[:, 2], c=G, cmap=cmap_name, s=10, alpha=0.55)
+    cbar = plt.colorbar(sc, ax=ax, pad=0.10, fraction=0.04)
+    cbar.set_label("Generation")
+    gmin, gmax = int(np.min(G)), int(np.max(G))
+    cbar.set_ticks(np.linspace(gmin, gmax, num=6).astype(int))
+    if final_pareto_points:
+        F = _finite_points_array(final_pareto_points)
+        if F.shape[0] > 0:
+            ax.scatter(F[:, 0], F[:, 1], F[:, 2], marker="^", s=40, alpha=0.95, label="Final feasible Pareto")
+            ax.legend(loc="best")
+    ax.set_xlabel("Cost"); ax.set_ylabel("Emission (gCO2)"); ax.set_zlabel("Time")
+    ax.set_title(title); ax.grid(True, linestyle=":", alpha=0.4)
+    plt.tight_layout(); plt.savefig(save); plt.close(fig)
+    print("Saved:", save)
 
 
 # ========================
@@ -2302,6 +2235,7 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
     arc_lookup = build_arc_lookup(arcs)
 
     print("Building path library...")
+    # ✅ 传入 node_region
     path_lib = build_path_library(node_names, node_region, arcs, batches, tt_dict, arc_lookup)
     sanity_check_path_lib(batches, path_lib)
 
@@ -2311,11 +2245,8 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
         ema_alpha=ROULETTE_EMA_ALPHA, min_prob=ROULETTE_MIN_PROB, score_eps=ROULETTE_SCORE_EPS
     )
 
-    # ✅ ε-支配档案：强制保留不同 Cost-Makespan 权衡区域的可行解
-    archive = EpsilonArchive(epsilon=EPSILON_GRID)
-
     population: List[Individual] = []
-    n_greedy = max(1, pop_size // 3)
+    n_greedy = max(1, pop_size // 3)  # 前1/3用贪心初始化（最快路径）
     for i in range(pop_size):
         if i < n_greedy:
             ind = greedy_initial_individual(batches, path_lib)
@@ -2329,10 +2260,9 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
         )
         population.append(ind)
 
-    front_hist_objs: List[List[Tuple[float, float]]] = []
+    front_hist_objs: List[List[Tuple[float, float, float]]] = []
     feasible_ratio_hist: List[float] = []
     feasible_ratio_strict_hist: List[float] = []
-    archive_size_hist: List[int] = []
     vio_mean_hist: Dict[str, List[float]] = {
         k: [] for k in ["miss_alloc", "miss_tt", "cap_excess", "node_cap_excess", "late_h", "wait_h"]
     }
@@ -2341,9 +2271,6 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
         "success": {op: [0] * generations for op in OPS},
         "prob": {op: [0.0] * generations for op in OPS},
     }
-
-    # ✅ 多样性退化计数器
-    stagnation_counter = 0
 
     for gen in range(generations):
         for op in OPS:
@@ -2355,44 +2282,11 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
         base_front = feasible_front0 if feasible_front0 else front0
         front0_unique = unique_individuals_by_objectives(base_front, tol=1e-3)
 
-        # ✅ 更新 ε 档案
-        archive.update(population)
-        archive_size_hist.append(archive.size())
-
-        # ✅ 多样性退化检测与注入
-        front0_size = len(front0_unique)
-        if front0_size <= DIVERSITY_INJECT_THRESHOLD:
-            stagnation_counter += 1
-        else:
-            stagnation_counter = 0
-
-        if stagnation_counter >= DIVERSITY_STAGNATION_GENS and archive.size() > 1:
-            population = inject_archive_into_population(
-                population, archive, inject_frac=DIVERSITY_INJECT_FRAC
-            )
-            stagnation_counter = 0
-            # 重新排序
-            fronts = non_dominated_sort(population)
-            front0 = fronts[0]
-            feasible_front0 = [ind for ind in front0 if ind.feasible]
-            base_front = feasible_front0 if feasible_front0 else front0
-            front0_unique = unique_individuals_by_objectives(base_front, tol=1e-3)
-            if gen % 10 == 0 or gen == generations - 1:
-                print(f"  [DIVERSITY] Gen {gen}: injected archive members "
-                      f"(archive_size={archive.size()})")
-
-        # ✅ front_hist 包含档案成员，让 P* 更全面
-        arch_feasible_objs = [ind.objectives for ind in archive.get_members() if ind.feasible]
-        front_objs_this_gen = [ind.objectives for ind in front0_unique if ind.feasible]
-        combined_hist_objs = list({o: None for o in (front_objs_this_gen + arch_feasible_objs)}.keys())
-        front_hist_objs.append(combined_hist_objs)
-
-        feasible_ratio_hist.append(
-            sum(1 for ind in population if ind.feasible) / float(len(population))
-        )
-        feasible_ratio_strict_hist.append(
-            sum(1 for ind in population if ind.feasible_hard) / float(len(population))
-        )
+        front_hist_objs.append([
+            ind.objectives for ind in front0_unique if ind.feasible
+        ])
+        feasible_ratio_hist.append(sum(1 for ind in population if ind.feasible) / float(len(population)))
+        feasible_ratio_strict_hist.append(sum(1 for ind in population if ind.feasible_hard) / float(len(population)))
 
         for k in vio_mean_hist.keys():
             vals = [ind.vio_breakdown.get(k, 0.0) for ind in population]
@@ -2402,11 +2296,9 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
             feas_n = len(feasible_front0)
             best_pen = min(ind.penalty for ind in front0_unique) if front0_unique else float("inf")
             best_cost = min(ind.objectives[0] for ind in front0_unique) if front0_unique else float("inf")
-            best_make = min(ind.objectives[1] for ind in front0_unique) if front0_unique else float("inf")
             print(f"Gen {gen:03d} | Front0={len(front0):2d} | FeasFront0={feas_n:2d} | "
-                  f"Archive={archive.size():2d} | "
                   f"FeasRatio={feasible_ratio_hist[-1]:.2%} | StrictFeas={feasible_ratio_strict_hist[-1]:.2%} | "
-                  f"BestCost={best_cost:.3e} | BestMakespan={best_make:.1f}h | BestPenalty={best_pen:.3e}")
+                  f"BestCost={best_cost:.3e} | BestPenalty={best_pen:.3e}")
 
         ranks: Dict[Individual, int] = {}
         for r, fr in enumerate(fronts):
@@ -2433,10 +2325,10 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
 
             repair_missing_allocations(c1, batches, path_lib)
             repair_missing_allocations(c2, batches, path_lib)
-            evaluate_individual(c1, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h,
-                                node_caps, carbon_tax_map=carbon_tax_map, trans_map=trans_map)
-            evaluate_individual(c2, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h,
-                                node_caps, carbon_tax_map=carbon_tax_map, trans_map=trans_map)
+            evaluate_individual(c1, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h, node_caps,
+                                carbon_tax_map=carbon_tax_map, trans_map=trans_map)
+            evaluate_individual(c2, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h, node_caps,
+                                carbon_tax_map=carbon_tax_map, trans_map=trans_map)
 
             if random.random() < MUTATION_RATE:
                 snap = deepcopy(c1)
@@ -2462,10 +2354,10 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
 
             repair_missing_allocations(c1, batches, path_lib)
             repair_missing_allocations(c2, batches, path_lib)
-            evaluate_individual(c1, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h,
-                                node_caps, carbon_tax_map=carbon_tax_map, trans_map=trans_map)
-            evaluate_individual(c2, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h,
-                                node_caps, carbon_tax_map=carbon_tax_map, trans_map=trans_map)
+            evaluate_individual(c1, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h, node_caps,
+                                carbon_tax_map=carbon_tax_map, trans_map=trans_map)
+            evaluate_individual(c2, batches, arcs, tt_dict, waiting_cost_per_teu_h, wait_emis_g_per_teu_h, node_caps,
+                                carbon_tax_map=carbon_tax_map, trans_map=trans_map)
 
             offspring.append(c1)
             offspring.append(c2)
@@ -2483,22 +2375,15 @@ def run_nsga2_analytics(filename="data.xlsx", pop_size=75, generations=160):
                 break
         population = new_pop
 
-    # ✅ 最终 Pareto：合并种群 + 档案，取所有可行非支配解
     final_fronts = non_dominated_sort(population)
     f0 = final_fronts[0]
-    all_candidates = list({id(ind): ind for ind in (f0 + archive.get_members())}.values())
-    feasible_candidates = [ind for ind in all_candidates if ind.feasible]
-    nd_feasible = []
-    for ind in feasible_candidates:
-        if not any(dominates(other, ind) for other in feasible_candidates if other is not ind):
-            nd_feasible.append(ind)
-
-    pareto = unique_individuals_by_objectives(nd_feasible, tol=1e-3)
+    feasible_f0 = [ind for ind in f0 if ind.feasible]
+    pareto = unique_individuals_by_objectives(feasible_f0, tol=1e-3)
 
     return (population, pareto, batches,
             front_hist_objs,
             feasible_ratio_hist, feasible_ratio_strict_hist,
-            vio_mean_hist, mut_tracker, archive_size_hist)
+            vio_mean_hist, mut_tracker)
 
 
 # ========================
@@ -2521,17 +2406,17 @@ def save_pareto_solutions(pareto: List[Individual], batches: List[Batch], filena
     pareto = unique_individuals_by_objectives(pareto, tol=1e-3)
     pareto = [ind for ind in pareto if ind.feasible]
     with open(filename, "w", encoding="utf-8") as f:
-        f.write("===== NSGA-II Pareto Solutions (Feasible Only, 2 Obj: Cost/Makespan) =====\n\n")
+        f.write("===== NSGA-II Pareto Solutions (Feasible Only) =====\n\n")
         if not pareto:
             f.write("NO FEASIBLE SOLUTION FOUND.\n")
             print(f"Saved 0 feasible Pareto solutions to {filename}")
             return
         for i, ind in enumerate(pareto):
-            cost, makespan = ind.objectives
+            cost, emis, t = ind.objectives
             f.write(f"===== Pareto Sol {i} =====\n")
-            f.write(f"Objectives: Cost={cost:.6f}, Makespan_h={makespan:.2f}, "
+            f.write(f"Objectives: Cost={cost:.6f}, Emission_gCO2={emis:.6f}, Time={t:.6f}, "
                     f"Penalty={ind.penalty:.6f}, Feasible={ind.feasible}, "
-                    f"FeasibleHard={ind.feasible_hard}, Breakdown={ind.vio_breakdown}\n\n")
+                    f"FeasibleHardNoLate={ind.feasible_hard}, Breakdown={ind.vio_breakdown}\n\n")
             for b in batches:
                 key = (b.origin, b.destination, b.batch_id)
                 allocs = ind.od_allocations.get(key, [])
@@ -2556,10 +2441,9 @@ def export_pareto_points_json(pareto: List[Individual], batches: List[Batch], ou
         sol = {
             "objectives": {
                 "cost": float(ind.objectives[0]),
-                "makespan_h": float(ind.objectives[1]),
+                "emission_gCO2": float(ind.objectives[1]),
+                "time_h": float(ind.objectives[2]),
                 "penalty": float(ind.penalty),
-                # ✅ makespan as diagnostic field only
-                "makespan_h_diagnostic": float(ind.vio_breakdown.get("makespan_h", float("nan"))),
             },
             "feasible_soft": bool(ind.feasible),
             "feasible_strict": bool(ind.feasible_hard),
@@ -2599,26 +2483,23 @@ if __name__ == "__main__":
     run_feasible_ratio = []
     run_feasible_ratio_strict = []
     run_vio_mean = []
-    run_archive_sizes = []
     mut_runs = []
     run_rows = []
     run_paretos: List[List[Individual]] = []
     run_batches_list: List[List[Batch]] = []
 
-    print(f"[CONFIG] Objectives: Cost + Makespan (2D NSGA-II)")
-    print(f"[CONFIG] Carbon tax REMOVED (emission not an objective)")
-    print(f"[CONFIG] Lateness in PENALTY only (not in cost/objectives)")
     print(f"[CONFIG] HARD_TIME_WINDOW={HARD_TIME_WINDOW}")
-    print(f"[CONFIG] LATE_COST_PER_TEU_HOUR={LATE_COST_PER_TEU_HOUR:.3e} (penalty only)")
+    print(f"[CONFIG] CHINA_BORDER_NODES={CHINA_BORDER_NODES}")
+    print(f"[CONFIG] Waiting default: cost_per_teu_h={WAITING_COST_PER_TEU_HOUR_DEFAULT}, "
+          f"emis_g_per_teu_h={WAIT_EMISSION_gCO2_per_TEU_H_DEFAULT}")
+    print(f"[CONFIG] Lateness in cost: LATE_COST_PER_TEU_HOUR={LATE_COST_PER_TEU_HOUR:.3e}")
     print(f"[CONFIG] Penalties: MISS_ALLOC={PEN_MISS_ALLOC:.2e}, MISS_TT={PEN_MISS_TT:.2e}, "
           f"ARC_CAP={PEN_CAP_EXCESS_PER_TEU:.2e}, NODE_CAP={PEN_NODE_CAP_EXCESS_PER_TEU:.2e}")
     print(f"[CONFIG] Path lib: topK={PATHS_TOPK_PER_CRITERION}, cap_total={PATH_LIB_CAP_TOTAL}, "
           f"dfs_pool={DFS_MAX_PATHS_PER_OD}")
     print(f"[CONFIG] GA rates: CROSSOVER_RATE={CROSSOVER_RATE}, MUTATION_RATE={MUTATION_RATE}, "
           f"segment_prob={CROSSOVER_SEGMENT_PROB}")
-    print(f"[CONFIG] HV: 2D ref={HV_REF_NORM}, samples={HV_SAMPLES}, HV_EVERY={HV_EVERY}")
-    print(f"[CONFIG] Diversity: epsilon={EPSILON_GRID}, inject_thresh={DIVERSITY_INJECT_THRESHOLD}, "
-          f"stagnation={DIVERSITY_STAGNATION_GENS}, inject_frac={DIVERSITY_INJECT_FRAC}")
+    print(f"[CONFIG] HV: ref={HV_REF_NORM}, samples={HV_SAMPLES}, HV_EVERY={HV_EVERY}, MC_seed={HV_MC_SEED}")
 
     for run_id in range(runs):
         seed = 1000 + run_id
@@ -2628,7 +2509,7 @@ if __name__ == "__main__":
         print(f"\n========== RUN {run_id}/{runs-1}, seed={seed} ==========")
         t0 = time.perf_counter()
 
-        pop, pareto, batches, front_hist, fr_hist, fr_strict_hist, vio_hist, mut_tracker, arch_size_hist = run_nsga2_analytics(
+        pop, pareto, batches, front_hist, fr_hist, fr_strict_hist, vio_hist, mut_tracker = run_nsga2_analytics(
             filename=filename, pop_size=pop_size, generations=generations
         )
 
@@ -2639,7 +2520,6 @@ if __name__ == "__main__":
         run_feasible_ratio.append(fr_hist)
         run_feasible_ratio_strict.append(fr_strict_hist)
         run_vio_mean.append(vio_hist)
-        run_archive_sizes.append(arch_size_hist)
         mut_runs.append(mut_tracker)
         run_paretos.append(pareto)
         run_batches_list.append(batches)
@@ -2657,7 +2537,7 @@ if __name__ == "__main__":
     df_runs = pd.DataFrame(run_rows).sort_values("run_id").reset_index(drop=True)
 
     # ========================
-    # Build P* and normalisation (2D)
+    # Build P* and normalisation
     # ========================
     t_ps = time.perf_counter()
     P_star = build_P_star_fast(run_front_hist, tail_gens=PSTAR_TAIL_GENS,
@@ -2669,11 +2549,11 @@ if __name__ == "__main__":
         mins = np.min(P_arr, axis=0)
         maxs = np.max(P_arr, axis=0)
     else:
-        mins = np.zeros(2, dtype=float)
-        maxs = np.ones(2, dtype=float)
+        mins = np.zeros(3, dtype=float)
+        maxs = np.ones(3, dtype=float)
 
     # ========================
-    # HV (normalised, 2D)
+    # HV (normalised)
     # ========================
     hv_calc_norm = HypervolumeCalculator(ref_point=HV_REF_NORM, num_samples=HV_SAMPLES, seed=HV_MC_SEED)
     hv_norm_runs = []
@@ -2682,7 +2562,7 @@ if __name__ == "__main__":
         last_hv = 0.0
         for gi, gen_front in enumerate(run_front_hist[r]):
             if gi % HV_EVERY == 0:
-                finite_pts = [tuple(x) for x in _finite_points_array(gen_front, expected_dim=2)]
+                finite_pts = [tuple(x) for x in _finite_points_array(gen_front)]
                 An = normalize_points(finite_pts, mins, maxs) if finite_pts else []
                 An = clip_points(An, HV_REF_NORM)
                 last_hv = hv_calc_norm.calculate_points(An) if An else 0.0
@@ -2701,7 +2581,7 @@ if __name__ == "__main__":
     print("Saved: run_time_summary.xlsx")
 
     # ========================
-    # IGD+/Spacing (2D)
+    # IGD+/Spacing
     # ========================
     Pn = normalize_points(P_star, mins, maxs) if P_star else []
     igd_runs, sp_runs = [], []
@@ -2710,7 +2590,7 @@ if __name__ == "__main__":
         last_igd, last_sp = float("inf"), 0.0
         for gi, gen_front in enumerate(run_front_hist[r]):
             if gi % METRIC_EVERY == 0:
-                finite_pts = [tuple(x) for x in _finite_points_array(gen_front, expected_dim=2)]
+                finite_pts = [tuple(x) for x in _finite_points_array(gen_front)]
                 An = normalize_points(finite_pts, mins, maxs) if finite_pts else []
                 last_igd = igd_plus(Pn, An) if (Pn and An) else float("inf")
                 last_sp = spacing_metric(An) if An else 0.0
@@ -2753,7 +2633,7 @@ if __name__ == "__main__":
     best_run_hv = float(hv_runs[best_run_idx, -1])
 
     print("\n=========== SUMMARY OVER RUNS (Final Generation) ===========")
-    print(f"Runs: {runs} | Objectives: Cost + Emission_gCO2")
+    print(f"Runs: {runs}")
     print(f"HV_norm (↑) | best={hv_best:.4f}, worst={hv_worst:.4f}, mean={hv_m:.4f}, std={hv_s:.4f}")
     print(f"IGD+    (↓) | best={igd_best:.4f}, worst={igd_worst:.4f}, mean={igd_m:.4f}, std={igd_s:.4f}")
     print(f"Spacing (↓) | best={sp_best:.4f}, worst={sp_worst:.4f}, mean={sp_m:.4f}, std={sp_s:.4f}")
@@ -2778,29 +2658,23 @@ if __name__ == "__main__":
             [ind.objectives for ind in best_pareto if ind.feasible], tol=1e-9
         )
 
-    # ========================
-    # 2D Pareto plots
-    # ========================
-    plot_2d_pareto_final(
-        pareto_points=best_final_points,
-        save="pareto_2d_best_run_final.png",
-        title=f"Pareto Front (Cost vs Makespan) — Best Run #{best_run_idx}"
-    )
+    plot_pareto_3d_final_only(best_final_points, save="pareto_3d_best_run_final.png",
+                               title=f"Pareto Front (Final Gen) - Best Run #{best_run_idx}")
 
     all_points_best_with_gen = []
     if best_front_hist:
         seen = set()
         for g, gen_pts in enumerate(best_front_hist):
             for p in gen_pts:
-                key_t = (round(p[0], 6), round(p[1], 6), g)
-                if key_t not in seen:
-                    seen.add(key_t)
-                    all_points_best_with_gen.append((p[0], p[1], g))
+                key = (round(p[0], 6), round(p[1], 6), round(p[2], 6), g)
+                if key not in seen:
+                    seen.add(key)
+                    all_points_best_with_gen.append((p[0], p[1], p[2], g))
 
-    plot_2d_pareto_all_generations(
+    plot_pareto_3d_all_generations(
         all_gen_points_with_gen=all_points_best_with_gen,
         final_pareto_points=best_final_points if best_final_points else None,
-        save="pareto_2d_allgens_best_run.png",
+        save="pareto_3d_allgens_best_run.png",
         title=f"Pareto Points Across {generations} Generations (Best Run #{best_run_idx})"
     )
 
@@ -2815,21 +2689,18 @@ if __name__ == "__main__":
     plot_convergence_curves(gen, hv_mean, hv_std, igd_mean, igd_std)
     plot_spacing_curve(gen, sp_mean, sp_std)
     plot_feasible_ratio(gen, fr_mean, fr_std, save="feasible_ratio_soft.png",
-                        title="Constraint Handling: Feasible Ratio (soft)",
-                        ylabel="Feasible Ratio (soft)")
+                        title="Constraint Handling: Feasible Ratio (soft)", ylabel="Feasible Ratio (soft)")
     plot_feasible_ratio(gen, frs_mean, frs_std, save="feasible_ratio_strict.png",
-                        title="Constraint Handling: Feasible Ratio (strict no-late)",
-                        ylabel="Feasible Ratio (strict)")
+                        title="Constraint Handling: Feasible Ratio (strict no-late)", ylabel="Feasible Ratio (strict)")
     plot_violation_breakdown_stacked(gen, vio_mean_dict_mean)
     plot_hv_curve(gen, hv_mean, hv_std)
     plot_feasible_ratio_curve(gen, fr_mean, fr_std, frs_mean=frs_mean, frs_std=frs_std)
 
     if best_front_hist:
-        plot_2d_evolution_overlays(best_front_hist, generations,
-                                   save_prefix="evolution2d_best_run",
+        plot_2d_evolution_overlays(best_front_hist, generations, save_prefix="evolution2d_best_run",
                                    gens_to_plot=_pick_overlay_gens(generations))
-        min_cost, min_time = extract_min_objectives(best_front_hist, generations)
-        plot_min_objective_curves(gen, min_cost, min_time)
+        min_cost, min_emis, min_time = extract_min_objectives(best_front_hist, generations)
+        plot_min_objective_curves(gen, min_cost, min_emis, min_time)
 
     export_gen_metrics_best_run(
         front_hist=best_front_hist,
@@ -2841,19 +2712,3 @@ if __name__ == "__main__":
     )
 
     print("\n✅ All outputs saved.")
-    print(" - pareto_2d_best_run_final.png         (Cost vs Makespan Pareto)")
-    print(" - pareto_2d_allgens_best_run.png        (all-gen scatter)")
-    print(" - mutation_attempt_stacked.png")
-    print(" - mutation_success_rate.png")
-    print(" - mutation_effective_contribution.png")
-    print(" - mutation_adaptive_prob_stacked.png (if available)")
-    print(" - convergence_hv_igd.png")
-    print(" - diversity_spacing.png")
-    print(" - feasible_ratio_soft.png / feasible_ratio_strict.png")
-    print(" - violation_breakdown.png")
-    print(" - hv_curve.png / feasible_ratio_curve.png")
-    print(" - evolution2d_best_run_cost_time.png")
-    print(" - min_cost_curve.png / min_time_curve.png")
-    print(" - gen_metrics_best_run.csv")
-    print(" - run_time_summary.xlsx")
-    print(" - result.txt / nsga_pareto_points.json")
