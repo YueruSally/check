@@ -39,3 +39,20 @@ and comparator algorithms on the same total number of solution evaluations.
 
 The committed smoke run only verifies that the pipeline is executable. It is
 not evidence for a research conclusion.
+
+## Multi-seed output contract
+
+The batch runner fixes the seed sequence before optimization and writes five
+compact artifacts:
+
+- `runs.csv`: feasibility, extrema, normalized hypervolume, spacing and time
+  for every independent run;
+- `fronts.csv`: every final feasible non-dominated objective point;
+- `aggregate.csv`: median, quartiles and success rate across seeds;
+- `combined_pareto.csv`: the non-dominated union over all seeds;
+- `manifest.json`: source/config hashes, evaluation budget and seed list.
+
+Within each case/scenario group, all runs share pooled ideal and nadir values
+and the normalized hypervolume reference point (1.1, 1.1). For algorithm
+comparisons, recompute indicators using bounds pooled across every compared
+algorithm; do not compare separately normalized hypervolumes.
