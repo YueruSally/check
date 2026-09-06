@@ -9,6 +9,7 @@ import time
 
 from .config import load_config
 from .evidence_workbook import read_baseline_inputs
+from .experiment import run_batch_experiment
 from .io import load_model_data, select_case
 from .nsga2 import load_nsga2_config, run_nsga2
 from .validation import validate_model_data
@@ -104,11 +105,44 @@ def main() -> None:
     optimize.add_argument("--generations", type=int)
     optimize.add_argument("--seed", type=int)
     optimize.add_argument("--output", type=Path, required=True)
+
+    batch = subparsers.add_parser("run-experiment")
+    batch.add_argument("data_directory")
+    batch.add_argument("--config", default="configs/nsga2_pilot.toml")
+    batch.add_argument("--cases", nargs="+", default=["D1", "D2", "D3"])
+    batch.add_argument("--scenarios", nargs="+", default=["pilot_baseline"])
+    batch.add_argument("--seed-start", type=int, default=20260906)
+    batch.add_argument("--runs", type=int, default=30)
+    batch.add_argument("--workers", type=int, default=1)
+    batch.add_argument("--population", type=int)
+    batch.add_argument("--generations", type=int)
+    batch.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "validate-evidence":
         values = read_baseline_inputs(args.workbook)
         print(f"Validated {len(values)} baseline evidence inputs.")
+        return
+
+    if args.command == "run-experiment":
+        if args.runs < 1:
+            parser.error("--runs must be positive")
+        seeds = range(args.seed_start, args.seed_start + args.runs)
+        runs = run_batch_experiment(
+            args.data_directory,
+            args.config,
+            args.output,
+            args.cases,
+            args.scenarios,
+            seeds,
+            workers=args.workers,
+            population_size=args.population,
+            generations=args.generations,
+        )
+        print(
+            f"Completed {len(runs)} independent NSGA-II runs; "
+            f"summary written to {args.output}."
+        )
         return
 
     config = load_config(args.config, args.scenario)
