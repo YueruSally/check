@@ -13,6 +13,7 @@ from .domain import (
     TransferRule,
 )
 from .evaluator import EvaluationResult, evaluate_solution
+from .nsga2 import NSGA2Config, NSGA2Result, run_nsga2
 from .validation import DataValidationError, validate_model_data
 
 __all__ = [
@@ -22,6 +23,8 @@ __all__ = [
     "ModelConfig",
     "ModelData",
     "Mode",
+    "NSGA2Config",
+    "NSGA2Result",
     "Node",
     "NodeKind",
     "RouteAllocation",
@@ -30,5 +33,6 @@ __all__ = [
     "TransferRule",
     "evaluate_solution",
     "load_config",
+    "run_nsga2",
     "validate_model_data",
 ]
