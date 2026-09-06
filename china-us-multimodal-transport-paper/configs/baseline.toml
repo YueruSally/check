@@ -1,0 +1,79 @@
+[model]
+quantity_unit = "FEU"
+objectives = ["total_cost_usd", "makespan_h"]
+active_scenario = "pilot_baseline"
+
+[constraints]
+enforce_timetable = true
+enforce_capacity = true
+hard_due_time = false
+allow_split = true
+max_paths_per_shipment = 3
+max_legs_per_path = 8
+max_mode_changes = 4
+allocation_tolerance_feu = 0.000001
+
+[penalties]
+# Soft due dates: set a documented value before experiments if due_h is populated.
+tardiness_usd_per_feu_h = 0.0
+infeasible_objective = 1000000000000000.0
+
+[evidence]
+shanghai_la_usd_per_feu = 5861.75
+shanghai_ny_usd_per_feu = 7482.0
+average_usec_premium_usd_per_feu = 1620.25
+la_chicago_rail_usd_per_load = 2100.0
+us_road_usd_per_mile = 2.93
+terminal_handling_usd_per_feu = 250.0
+la_chicago_rail_transit_h = 72.0
+observed_freight_gap_low_usd_per_feu = 940.0
+observed_freight_gap_high_usd_per_feu = 2515.0
+
+[scenarios.pilot_baseline]
+panama_availability_multiplier = 1.0
+uswc_ocean_cost_multiplier = 1.0
+usec_ocean_cost_multiplier = 1.0
+port_capacity_multiplier = 1.0
+demand_multiplier = 1.0
+
+[scenarios.panama_restricted]
+panama_availability_multiplier = 0.9
+uswc_ocean_cost_multiplier = 1.0
+usec_ocean_cost_multiplier = 1.0
+port_capacity_multiplier = 1.0
+demand_multiplier = 1.0
+
+[scenarios.panama_stress]
+panama_availability_multiplier = 0.8
+uswc_ocean_cost_multiplier = 1.0
+usec_ocean_cost_multiplier = 1.0
+port_capacity_multiplier = 1.0
+demand_multiplier = 1.0
+
+[scenarios.freight_gap_low]
+panama_availability_multiplier = 1.0
+uswc_ocean_cost_multiplier = 1.0
+usec_ocean_cost_multiplier = 0.9090817963
+port_capacity_multiplier = 1.0
+demand_multiplier = 1.0
+
+[scenarios.freight_gap_high]
+panama_availability_multiplier = 1.0
+uswc_ocean_cost_multiplier = 1.0
+usec_ocean_cost_multiplier = 1.1195870088
+port_capacity_multiplier = 1.0
+demand_multiplier = 1.0
+
+[scenarios.port_capacity_80pct]
+panama_availability_multiplier = 1.0
+uswc_ocean_cost_multiplier = 1.0
+usec_ocean_cost_multiplier = 1.0
+port_capacity_multiplier = 0.8
+demand_multiplier = 1.0
+
+[scenarios.demand_125pct]
+panama_availability_multiplier = 1.0
+uswc_ocean_cost_multiplier = 1.0
+usec_ocean_cost_multiplier = 1.0
+port_capacity_multiplier = 1.0
+demand_multiplier = 1.25
