@@ -44,6 +44,12 @@ python -m china_us_multimodal.cli validate-network \
 python -m china_us_multimodal.cli run-nsga2 \
   data/pilot_v2 --config configs/nsga2_pilot.toml \
   --case D1 --output results/D1
+
+python -m china_us_multimodal.cli run-experiment \
+  data/pilot_v2 --config configs/nsga2_pilot.toml \
+  --cases D1 D2 D3 --scenarios pilot_baseline \
+  --seed-start 20260906 --runs 30 --workers 4 \
+  --output results/baseline_30seeds
 ```
 
 Use D1 for Chicago, D2 for Memphis and D3 for Columbus. Scenario overrides use
@@ -62,3 +68,7 @@ dominance and deterministic seeds.
 The committed smoke outputs only prove that the full pipeline runs. They are
 not paper findings. Follow `docs/experiment_protocol.md` for multi-seed paper
 experiments and equal evaluation budgets across NSGA-II, SPEA2 and MOEA/D.
+`run-experiment` writes per-run metrics, every final objective-space front,
+the cross-seed non-dominated union and an experiment manifest. Hypervolume and
+spacing are calculated after normalizing every run in a case/scenario group
+against the same pooled ideal and nadir points.
