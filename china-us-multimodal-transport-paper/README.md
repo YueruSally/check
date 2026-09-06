@@ -1,63 +1,64 @@
 # China–US Scheduled Multimodal Freight Routing
 
-This project studies scheduled multi-batch freight routing between China and the United States. The pilot compares West Coast landbridge routes with East Coast all-water routes.
+This project studies scheduled multi-batch freight routing between China and
+the United States. The pilot compares West Coast landbridge routes with East
+Coast all-water routes for Chicago, Memphis and Columbus.
 
-## Research design
+## Solver-ready v2 network
 
-- Objectives: minimize total cost and makespan.
-- Candidate paths: Martins bi-objective label-setting algorithm.
-- Allocation optimization: improved NSGA-II is the planned primary algorithm; SPEA2 and MOEA/D will be retained as benchmarks.
-- Main scenarios: Panama service restrictions and the US West Coast–East Coast ocean freight-rate differential.
-- Preferred inland destinations: Chicago, Memphis and Columbus, subject to completion of solver-ready network data.
+`data/pilot_v2` is generated from
+`data/source/ChinaUS_Gateway_Model_Ready_v2.xlsx` and contains:
 
-## Current implementation
+- 9 nodes and 28 directed arcs;
+- 17 scheduled services and 496 departures over an eight-week horizon;
+- 32 transfer rules;
+- three independent 40-batch OD cases (120 records in one table).
 
-The first model layer is now in place:
+The workbook uses TEU while the solver uses FEU. The conversion is explicit:
+quantities and capacities are divided by two; per-TEU costs and tardiness rates
+are multiplied by two. `conversion_report.json` records the source hash and all
+integrity checks.
 
-- typed nodes, arcs, recurring services, shipments and transfer rules;
-- strict schema and network validation;
-- China-to-US stage-sequence validation;
-- recurring timetable and cutoff handling;
-- service/voyage, daily arc and daily node capacity checks;
-- split-allocation and path-complexity constraints;
-- soft or hard due-date treatment;
-- one shared cost–makespan evaluator for every algorithm;
-- Martins candidate-path generation;
-- configurable Panama, ocean-rate, port-capacity and demand scenarios.
+## Optimization flow
 
-No optimizer result should be generated until the CSV network tables pass validation. The supplied Excel workbook is a calibration/evidence workbook, not a complete node–arc–service instance.
+1. Validate workbook cross-references and generate FEU CSV tables.
+2. Validate node, arc, service, transfer and shipment constraints.
+3. Run Martins separately through each US gateway and merge unique paths.
+4. Allocate each shipment across at most three paths with constrained NSGA-II.
+5. Evaluate every solution with the same timetable, capacity, cost and makespan
+   evaluator.
 
-## Repository structure
+Gateway-aware path generation is intentional: a static global dominance filter
+could discard the East Coast all-water option before Panama, schedule and
+capacity scenarios are evaluated.
 
-```text
-configs/                   model constraints and scenario values
-data/source/               original evidence workbook
-data/templates/            solver-ready CSV schemas
-src/china_us_multimodal/   shared model, validation and evaluation code
-tests/                     unit tests for timetable and evaluation logic
-```
-
-## Quantity and cost convention
-
-The pilot uses FEU throughout: one FEU is one 40-foot-equivalent container. Source values expressed in TEU must be converted explicitly before loading. Ocean rates from the workbook are already USD per 40-foot container and therefore map directly to USD/FEU.
-
-## Install and validate
+## Commands
 
 ```bash
-python -m pip install -e ".[dev]"
-china-us-model validate-evidence data/source/ChinaUS_Gateway_Data.xlsx
-china-us-model validate-network data/templates --config configs/baseline.toml
-pytest
+python scripts/build_pilot_from_workbook.py \
+  data/source/ChinaUS_Gateway_Model_Ready_v2.xlsx data/pilot_v2
+
+python -m china_us_multimodal.cli validate-network \
+  data/pilot_v2 --config configs/nsga2_pilot.toml
+
+python -m china_us_multimodal.cli run-nsga2 \
+  data/pilot_v2 --config configs/nsga2_pilot.toml \
+  --case D1 --output results/D1
 ```
 
-The template network intentionally contains headers only. `validate-network` must fail until the missing network data is populated; this prevents missing costs, times or capacities from silently becoming zero.
+Use D1 for Chicago, D2 for Memphis and D3 for Columbus. Scenario overrides use
+`--scenario`, for example `--scenario panama_restricted`.
 
-## Constraint policy
+## Model coverage
 
-The baseline enables timetable and capacity constraints and allows at most three paths per shipment. Due dates are soft by default, but tardiness remains explicitly reported. Each ablation must change exactly one model mechanism while keeping algorithms, operators, seeds and evaluation budgets fixed.
+The shared evaluator includes arc and transfer cost, timetable waiting and
+processing cost, shipment-specific tardiness penalties, service capacity,
+daily arc capacity, daily node capacity, flow conservation, split limits, leg
+limits and mode-change limits. NSGA-II uses feasibility-first constrained
+dominance and deterministic seeds.
 
-The Panama multiplier is applied only to services on arcs marked `via_panama=true`. It represents effective service availability, not the physical TEU capacity of the canal. The 0.8 case is a hypothetical stress test.
+## Reproducibility
 
-## Next implementation step
-
-Populate the five CSV tables with a complete pilot network, then verify hand-calculated routes before connecting improved NSGA-II, SPEA2 and MOEA/D to the shared evaluator.
+The committed smoke outputs only prove that the full pipeline runs. They are
+not paper findings. Follow `docs/experiment_protocol.md` for multi-seed paper
+experiments and equal evaluation budgets across NSGA-II, SPEA2 and MOEA/D.
