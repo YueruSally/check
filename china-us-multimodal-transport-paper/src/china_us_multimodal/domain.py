@@ -70,6 +70,8 @@ class Shipment:
     quantity_feu: float
     release_h: float = 0.0
     due_h: float | None = None
+    tardiness_usd_per_feu_h: float | None = None
+    case_id: str | None = None
 
 
 @dataclass(frozen=True)
