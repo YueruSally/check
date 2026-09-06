@@ -34,9 +34,7 @@ def test_cost_schedule_transfer_and_makespan_are_shared():
         ),
         "us-road": Arc("us-road", "la", "chicago", Mode.ROAD, 10, 200),
     }
-    services = {
-        "sailing": Service("sailing", "ocean", (24,), 168, 20),
-    }
+    services = {"sailing": Service("sailing", "ocean", (24,), 168, 20)}
     shipment = Shipment("b1", "xian", "chicago", 1, due_h=300)
     transfers = {}
     for node, from_mode, to_mode, duration in [
@@ -60,5 +58,25 @@ def test_cost_schedule_transfer_and_makespan_are_shared():
         config,
     )
     assert result.feasible
+    assert result.constraint_violation == 0
     assert result.total_cost_usd == 1800
     assert result.makespan_h == 280
+
+
+def test_shipment_specific_tardiness_penalty_overrides_fallback():
+    nodes = {
+        "a": Node("a", "A", NodeKind.CN_ORIGIN, "CN"),
+        "b": Node("b", "B", NodeKind.DESTINATION, "US"),
+    }
+    arcs = {"road": Arc("road", "a", "b", Mode.ROAD, 10, 5)}
+    shipment = Shipment("s", "a", "b", 2, due_h=5, tardiness_usd_per_feu_h=3)
+    data = ModelData(nodes, arcs, {}, {"s": shipment})
+    config = ModelConfig(
+        "FEU",
+        ("total_cost_usd", "makespan_h"),
+        ConstraintConfig(enforce_timetable=False, enforce_capacity=False),
+        PenaltyConfig(tardiness_usd_per_feu_h=99),
+        ScenarioConfig("test"),
+    )
+    result = evaluate_solution(data, [RouteAllocation("s", 2, ("road",))], config)
+    assert result.total_cost_usd == 40
