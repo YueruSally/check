@@ -1,0 +1,10 @@
+id,name,kind,country,capacity_feu_per_day,source_sheet,source_row
+xian,Xi'an,cn_origin,CN,3000.0,Nodes,4
+shanghai,Shanghai,cn_port,CN,3000.0,Nodes,5
+ningbo,Ningbo,cn_port,CN,3000.0,Nodes,6
+la_lb,Los Angeles/Long Beach,us_port,US,3000.0,Nodes,7
+seattle_tacoma,Seattle/Tacoma,us_port,US,3000.0,Nodes,8
+ny_nj,New York/New Jersey,us_port,US,3000.0,Nodes,9
+chicago,Chicago,destination,US,3000.0,Nodes,10
+memphis,Memphis,destination,US,3000.0,Nodes,11
+columbus,Columbus,destination,US,3000.0,Nodes,12
