@@ -301,7 +301,10 @@ def build(source: Path, output: Path) -> dict[str, Any]:
                 "capacity_feu": daily_capacity_feu * headway_h / 24,
                 "cutoff_h": 0,
                 "source_sheet": "Service_Departures_8wk",
-                "source_rows": f"3:{2 + len(departures_raw)}",
+                "source_rows": (
+                    f"{departures_header_row + 1}:"
+                    f"{departures_header_row + len(departures_raw)}"
+                ),
             }
         )
     service_id_map = {item["id"].upper(): item["id"] for item in services}
