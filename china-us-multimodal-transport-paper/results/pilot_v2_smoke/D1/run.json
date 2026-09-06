@@ -1,0 +1,1488 @@
+{
+  "metadata": {
+    "case": "D1",
+    "scenario": "pilot_baseline",
+    "quantity_unit": "FEU",
+    "algorithm": {
+      "population_size": 48,
+      "generations": 40,
+      "crossover_rate": 0.9,
+      "mutation_rate": 0.12,
+      "max_paths_per_gateway": 4,
+      "seed": 20260906
+    },
+    "elapsed_seconds": 3.6370836249552667,
+    "source_workbook": "ChinaUS_Gateway_Model_Ready_v2.xlsx",
+    "source_sha256": "45532957d7c63f5ef928468986d4d6de2f8bc5da340747281cbf3d44b188616a",
+    "note": "Pipeline validation run; not a paper result unless replicated under the experiment protocol."
+  },
+  "summary": {
+    "population_size": 48,
+    "pareto_front_size": 1,
+    "candidate_paths_per_shipment": {
+      "D1-01": 12,
+      "D1-02": 12,
+      "D1-03": 12,
+      "D1-04": 12,
+      "D1-05": 12,
+      "D1-06": 12,
+      "D1-07": 12,
+      "D1-08": 12,
+      "D1-09": 12,
+      "D1-10": 12,
+      "D1-11": 12,
+      "D1-12": 12,
+      "D1-13": 12,
+      "D1-14": 12,
+      "D1-15": 12,
+      "D1-16": 12,
+      "D1-17": 12,
+      "D1-18": 12,
+      "D1-19": 12,
+      "D1-20": 12,
+      "D1-21": 12,
+      "D1-22": 12,
+      "D1-23": 12,
+      "D1-24": 12,
+      "D1-25": 12,
+      "D1-26": 12,
+      "D1-27": 12,
+      "D1-28": 12,
+      "D1-29": 12,
+      "D1-30": 12,
+      "D1-31": 12,
+      "D1-32": 12,
+      "D1-33": 12,
+      "D1-34": 12,
+      "D1-35": 12,
+      "D1-36": 12,
+      "D1-37": 12,
+      "D1-38": 12,
+      "D1-39": 12,
+      "D1-40": 12
+    }
+  },
+  "history": [
+    {
+      "generation": 0,
+      "feasible_count": 31,
+      "first_front_size": 1,
+      "min_cost_usd": 41557488.32847193,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 1,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 41557488.32847193,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 2,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 41093025.61078666,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 3,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 40232721.53155408,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 4,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 37053963.6211978,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 5,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 36184221.90980206,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 6,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 36184221.90980206,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 7,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 35089048.73106635,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 8,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 34603816.85438579,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 9,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 34027125.55183663,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 10,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 32172453.753649842,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 11,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 32172453.753649842,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 12,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 32131136.885366976,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 13,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 30957454.976526417,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 14,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 30784948.221896604,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 15,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 30673212.651427228,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 16,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 30135097.332131956,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 17,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 30044734.91841684,
+      "min_makespan_h": 962.0,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 18,
+      "feasible_count": 48,
+      "first_front_size": 2,
+      "min_cost_usd": 29443138.699606005,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 19,
+      "feasible_count": 48,
+      "first_front_size": 2,
+      "min_cost_usd": 29443138.699606005,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 20,
+      "feasible_count": 48,
+      "first_front_size": 2,
+      "min_cost_usd": 29270468.62997518,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 21,
+      "feasible_count": 48,
+      "first_front_size": 2,
+      "min_cost_usd": 28746108.909860957,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 22,
+      "feasible_count": 48,
+      "first_front_size": 2,
+      "min_cost_usd": 28746108.909860957,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 23,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 28545958.365496833,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 24,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 28379449.65011494,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 25,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 28379449.65011494,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 26,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 28198780.318611536,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 27,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 28093246.615439504,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 28,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 28093246.615439504,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 29,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 28036383.267085277,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 30,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 27606582.742405426,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 31,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 27606582.742405426,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 32,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 27521761.683360633,
+      "min_makespan_h": 897.4,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 33,
+      "feasible_count": 48,
+      "first_front_size": 2,
+      "min_cost_usd": 27344348.44556498,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 34,
+      "feasible_count": 48,
+      "first_front_size": 2,
+      "min_cost_usd": 27344348.44556498,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 35,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 27073751.741805602,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 36,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 27064999.635867245,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 37,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 26966773.281844214,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 38,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 26938707.63490332,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 39,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 26938707.63490332,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    },
+    {
+      "generation": 40,
+      "feasible_count": 48,
+      "first_front_size": 1,
+      "min_cost_usd": 26913791.000066742,
+      "min_makespan_h": 748.8,
+      "min_constraint_violation": 0.0
+    }
+  ],
+  "solutions": [
+    {
+      "solution_id": 1,
+      "objectives": {
+        "total_cost_usd": 26913791.000066742,
+        "makespan_h": 748.8
+      },
+      "max_lead_time_h": 748.8,
+      "total_tardiness_feu_h": 14046.656098025584,
+      "allocations": [
+        {
+          "shipment_id": "D1-01",
+          "quantity_feu": 41.38265545410452,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-01",
+          "quantity_feu": 6.251014314903321,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-01",
+          "quantity_feu": 12.366330230992155,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-02",
+          "quantity_feu": 7.2154021722700366,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-02",
+          "quantity_feu": 24.221847261707346,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-02",
+          "quantity_feu": 23.56275056602262,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-03",
+          "quantity_feu": 18.991351092324013,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-03",
+          "quantity_feu": 19.763552888037726,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-03",
+          "quantity_feu": 11.245096019638261,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-04",
+          "quantity_feu": 5.350042325068549,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-04",
+          "quantity_feu": 33.63176451543965,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-04",
+          "quantity_feu": 8.518193159491801,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-05",
+          "quantity_feu": 14.365154603897219,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-05",
+          "quantity_feu": 7.022152600716211,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-05",
+          "quantity_feu": 43.61269279538657,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-06",
+          "quantity_feu": 48.50964475907529,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-06",
+          "quantity_feu": 0.02273210964311408,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-06",
+          "quantity_feu": 8.967623131281591,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-07",
+          "quantity_feu": 5.071173671771234,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-07",
+          "quantity_feu": 34.05939181868063,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-07",
+          "quantity_feu": 13.369434509548135,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-08",
+          "quantity_feu": 10.318743698043859,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-08",
+          "quantity_feu": 26.953293804465623,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-08",
+          "quantity_feu": 7.727962497490516,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-09",
+          "quantity_feu": 14.601720965456508,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-09",
+          "quantity_feu": 25.243956046733214,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-09",
+          "quantity_feu": 22.654322987810275,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-10",
+          "quantity_feu": 16.702704151536896,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-10",
+          "quantity_feu": 32.420724613267275,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-10",
+          "quantity_feu": 20.876571235195826,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-11",
+          "quantity_feu": 15.36054186273368,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-11",
+          "quantity_feu": 14.816658688948724,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-11",
+          "quantity_feu": 10.322799448317596,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-12",
+          "quantity_feu": 19.444087759373755,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-12",
+          "quantity_feu": 33.04676278785733,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-12",
+          "quantity_feu": 10.00914945276891,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-13",
+          "quantity_feu": 12.48781932309213,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-13",
+          "quantity_feu": 15.653056257819047,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-13",
+          "quantity_feu": 37.35912441908882,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-14",
+          "quantity_feu": 5.595502805158029,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-14",
+          "quantity_feu": 13.639324803739957,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-14",
+          "quantity_feu": 26.265172391102013,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-15",
+          "quantity_feu": 36.61133007501158,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-15",
+          "quantity_feu": 3.8358888220344256,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-15",
+          "quantity_feu": 20.552781102953993,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-16",
+          "quantity_feu": 11.314516551555501,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-16",
+          "quantity_feu": 28.163290789415647,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-16",
+          "quantity_feu": 23.522192659028853,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-17",
+          "quantity_feu": 31.581666807140532,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-17",
+          "quantity_feu": 3.8259442247297653,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-17",
+          "quantity_feu": 9.592388968129704,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-18",
+          "quantity_feu": 11.659413597118863,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-18",
+          "quantity_feu": 8.717912032634189,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-18",
+          "quantity_feu": 29.122674370246948,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-19",
+          "quantity_feu": 18.03766055257679,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-19",
+          "quantity_feu": 22.8679317400073,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-19",
+          "quantity_feu": 34.09440770741591,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-20",
+          "quantity_feu": 11.444451668201554,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-20",
+          "quantity_feu": 12.694150062711875,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-20",
+          "quantity_feu": 27.36139826908657,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-21",
+          "quantity_feu": 32.65561013297945,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-21",
+          "quantity_feu": 27.634226664844405,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-21",
+          "quantity_feu": 12.710163202176147,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-22",
+          "quantity_feu": 9.081875767657273,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-22",
+          "quantity_feu": 26.69277137764772,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-22",
+          "quantity_feu": 11.225352854695004,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-23",
+          "quantity_feu": 34.31804150503691,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-23",
+          "quantity_feu": 22.08935303229781,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-23",
+          "quantity_feu": 4.592605462665276,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-24",
+          "quantity_feu": 12.007360412254657,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-24",
+          "quantity_feu": 32.029281504586336,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-24",
+          "quantity_feu": 9.963358083159008,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-25",
+          "quantity_feu": 30.909774240543882,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-25",
+          "quantity_feu": 10.396430472426625,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-25",
+          "quantity_feu": 2.193795287029495,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-26",
+          "quantity_feu": 36.7809249313029,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-26",
+          "quantity_feu": 5.95509251317514,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-26",
+          "quantity_feu": 13.763982555521963,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-27",
+          "quantity_feu": 23.718803047960346,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-27",
+          "quantity_feu": 19.518095874660105,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-27",
+          "quantity_feu": 31.263101077379545,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-28",
+          "quantity_feu": 31.56883757697127,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-28",
+          "quantity_feu": 12.663653683443455,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-28",
+          "quantity_feu": 8.267508739585274,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-29",
+          "quantity_feu": 11.012601269377878,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-29",
+          "quantity_feu": 27.71416364917982,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-29",
+          "quantity_feu": 2.2732350814423015,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-30",
+          "quantity_feu": 29.214489672637683,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-30",
+          "quantity_feu": 14.881220914923189,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-30",
+          "quantity_feu": 23.904289412439127,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-31",
+          "quantity_feu": 27.839565783135555,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-31",
+          "quantity_feu": 3.9331715569514323,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-31",
+          "quantity_feu": 34.72726265991301,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-32",
+          "quantity_feu": 15.628563302619277,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-32",
+          "quantity_feu": 24.374576539348475,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-32",
+          "quantity_feu": 5.9968601580322485,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-33",
+          "quantity_feu": 42.45451358923261,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-33",
+          "quantity_feu": 4.17945406392394,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-33",
+          "quantity_feu": 2.366032346843447,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-34",
+          "quantity_feu": 14.292975561066315,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-34",
+          "quantity_feu": 22.294184099717228,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-34",
+          "quantity_feu": 16.41284033921646,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-35",
+          "quantity_feu": 1.6986263737094107,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-35",
+          "quantity_feu": 7.07135158794089,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-35",
+          "quantity_feu": 49.2300220383497,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-36",
+          "quantity_feu": 29.642227806825055,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-36",
+          "quantity_feu": 5.6989588894715,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-36",
+          "quantity_feu": 15.158813303703447,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-37",
+          "quantity_feu": 12.471064803888021,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-37",
+          "quantity_feu": 17.015123076076982,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-37",
+          "quantity_feu": 11.513812120034999,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-38",
+          "quantity_feu": 23.142666614275964,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-38",
+          "quantity_feu": 13.411598466533569,
+          "arc_ids": [
+            "cn-r-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-38",
+          "quantity_feu": 5.445734919190471,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-39",
+          "quantity_feu": 6.076130630278516,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-r-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-39",
+          "quantity_feu": 41.53034810031962,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-03",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-39",
+          "quantity_feu": 22.393521269401866,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-40",
+          "quantity_feu": 45.84871176473985,
+          "arc_ids": [
+            "cn-d-02",
+            "sea-04",
+            "us-r-04"
+          ]
+        },
+        {
+          "shipment_id": "D1-40",
+          "quantity_feu": 1.0625361990036173,
+          "arc_ids": [
+            "cn-r-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        },
+        {
+          "shipment_id": "D1-40",
+          "quantity_feu": 9.58875203625653,
+          "arc_ids": [
+            "cn-d-01",
+            "sea-01",
+            "us-d-01"
+          ]
+        }
+      ]
+    }
+  ]
+}
