@@ -93,6 +93,11 @@ def validate_model_data(data: ModelData) -> None:
             errors.append(f"Shipment {shipment.id} has invalid quantity or release time.")
         if shipment.due_h is not None and shipment.due_h < shipment.release_h:
             errors.append(f"Shipment {shipment.id} due time precedes release time.")
+        if (
+            shipment.tardiness_usd_per_feu_h is not None
+            and shipment.tardiness_usd_per_feu_h < 0
+        ):
+            errors.append(f"Shipment {shipment.id} has a negative tardiness rate.")
         if not _reachable(data, shipment.origin, shipment.destination):
             errors.append(f"Shipment {shipment.id} has no topological route.")
 
