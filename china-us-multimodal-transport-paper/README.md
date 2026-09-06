@@ -1,34 +1,63 @@
-# China–US Multimodal Transport Paper
+# China–US Scheduled Multimodal Freight Routing
 
-## 项目说明
+This project studies scheduled multi-batch freight routing between China and the United States. The pilot compares West Coast landbridge routes with East Coast all-water routes.
 
-本目录用于从头开展有关中国与美国多式联运的论文研究与写作，与仓库中的既有工作分开管理。
+## Research design
 
-## 暂定研究主题
+- Objectives: minimize total cost and makespan.
+- Candidate paths: Martins bi-objective label-setting algorithm.
+- Allocation optimization: improved NSGA-II is the planned primary algorithm; SPEA2 and MOEA/D will be retained as benchmarks.
+- Main scenarios: Panama service restrictions and the US West Coast–East Coast ocean freight-rate differential.
+- Preferred inland destinations: Chicago, Memphis and Columbus, subject to completion of solver-ready network data.
 
-中国与美国多式联运体系的比较研究：基础设施、组织模式、政策环境、运输效率与低碳转型。
+## Current implementation
 
-## 初步工作结构
+The first model layer is now in place:
 
-1. 明确研究问题与比较框架
-2. 开展中英文文献综述
-3. 收集中国与美国的政策、运输网络及运营数据
-4. 设计研究方法与案例选择
-5. 完成论文提纲、初稿、修改稿与终稿
-6. 整理图表、参考文献和补充材料
+- typed nodes, arcs, recurring services, shipments and transfer rules;
+- strict schema and network validation;
+- China-to-US stage-sequence validation;
+- recurring timetable and cutoff handling;
+- service/voyage, daily arc and daily node capacity checks;
+- split-allocation and path-complexity constraints;
+- soft or hard due-date treatment;
+- one shared cost–makespan evaluator for every algorithm;
+- Martins candidate-path generation;
+- configurable Panama, ocean-rate, port-capacity and demand scenarios.
 
-## 建议目录
+No optimizer result should be generated until the CSV network tables pass validation. The supplied Excel workbook is a calibration/evidence workbook, not a complete node–arc–service instance.
 
-后续按需要建立：
+## Repository structure
 
-- `manuscript/`：论文正文
-- `literature/`：文献笔记
-- `data/`：数据与来源说明
-- `analysis/`：分析代码和结果
-- `figures/`：图表
-- `references/`：参考文献
-- `notes/`：研究日志与待办事项
+```text
+configs/                   model constraints and scenario values
+data/source/               original evidence workbook
+data/templates/            solver-ready CSV schemas
+src/china_us_multimodal/   shared model, validation and evaluation code
+tests/                     unit tests for timetable and evaluation logic
+```
 
-## 状态
+## Quantity and cost convention
 
-项目已于 2026-09-06 建立，准备开始选题细化与论文框架设计。
+The pilot uses FEU throughout: one FEU is one 40-foot-equivalent container. Source values expressed in TEU must be converted explicitly before loading. Ocean rates from the workbook are already USD per 40-foot container and therefore map directly to USD/FEU.
+
+## Install and validate
+
+```bash
+python -m pip install -e ".[dev]"
+china-us-model validate-evidence data/source/ChinaUS_Gateway_Data.xlsx
+china-us-model validate-network data/templates --config configs/baseline.toml
+pytest
+```
+
+The template network intentionally contains headers only. `validate-network` must fail until the missing network data is populated; this prevents missing costs, times or capacities from silently becoming zero.
+
+## Constraint policy
+
+The baseline enables timetable and capacity constraints and allows at most three paths per shipment. Due dates are soft by default, but tardiness remains explicitly reported. Each ablation must change exactly one model mechanism while keeping algorithms, operators, seeds and evaluation budgets fixed.
+
+The Panama multiplier is applied only to services on arcs marked `via_panama=true`. It represents effective service availability, not the physical TEU capacity of the canal. The 0.8 case is a hypothetical stress test.
+
+## Next implementation step
+
+Populate the five CSV tables with a complete pilot network, then verify hand-calculated routes before connecting improved NSGA-II, SPEA2 and MOEA/D to the shared evaluator.
