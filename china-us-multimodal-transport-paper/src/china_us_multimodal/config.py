@@ -24,6 +24,12 @@ class PenaltyConfig:
 
 
 @dataclass(frozen=True)
+class OperationalCostConfig:
+    holding_usd_per_feu_h: float = 0.0
+    processing_usd_per_feu_h: float = 0.0
+
+
+@dataclass(frozen=True)
 class ScenarioConfig:
     name: str
     panama_availability_multiplier: float = 1.0
@@ -40,6 +46,7 @@ class ModelConfig:
     constraints: ConstraintConfig
     penalties: PenaltyConfig
     scenario: ScenarioConfig
+    operational_costs: OperationalCostConfig = OperationalCostConfig()
 
 
 def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConfig:
@@ -56,6 +63,7 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
 
     constraints = ConstraintConfig(**raw.get("constraints", {}))
     penalties = PenaltyConfig(**raw.get("penalties", {}))
+    operational_costs = OperationalCostConfig(**raw.get("operational_costs", {}))
     scenarios = raw.get("scenarios", {})
     selected = scenario_name or model.get("active_scenario")
     if not selected or selected not in scenarios:
@@ -68,5 +76,16 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
         raise ValueError("Panama availability multiplier must be in (0, 1].")
     if constraints.max_paths_per_shipment < 1:
         raise ValueError("max_paths_per_shipment must be positive.")
+    if operational_costs.holding_usd_per_feu_h < 0:
+        raise ValueError("Holding cost must be non-negative.")
+    if operational_costs.processing_usd_per_feu_h < 0:
+        raise ValueError("Processing cost must be non-negative.")
 
-    return ModelConfig(quantity_unit, objectives, constraints, penalties, scenario)
+    return ModelConfig(
+        quantity_unit,
+        objectives,
+        constraints,
+        penalties,
+        scenario,
+        operational_costs,
+    )
