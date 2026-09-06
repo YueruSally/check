@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import replace
 from pathlib import Path
 
 from .domain import Arc, ModelData, Mode, Node, NodeKind, Service, Shipment, TransferRule
@@ -15,6 +16,10 @@ def _rows(path: Path) -> list[dict[str, str]]:
 
 def _optional_float(value: str | None) -> float | None:
     return None if value is None or not value.strip() else float(value)
+
+
+def _optional_text(value: str | None) -> str | None:
+    return None if value is None or not value.strip() else value.strip()
 
 
 def _boolean(value: str | None) -> bool:
@@ -72,6 +77,10 @@ def load_model_data(directory: str | Path) -> ModelData:
             quantity_feu=float(row["quantity_feu"]),
             release_h=float(row.get("release_h") or 0),
             due_h=_optional_float(row.get("due_h")),
+            tardiness_usd_per_feu_h=_optional_float(
+                row.get("tardiness_usd_per_feu_h")
+            ),
+            case_id=_optional_text(row.get("case_id")),
         )
         for row in _rows(directory / "shipments.csv")
     }
@@ -88,3 +97,15 @@ def load_model_data(directory: str | Path) -> ModelData:
         transfer_rules[(rule.node_id, rule.from_mode, rule.to_mode)] = rule
 
     return ModelData(nodes, arcs, services, shipments, transfer_rules)
+
+
+def select_case(data: ModelData, case_id: str) -> ModelData:
+    selected = {
+        shipment_id: shipment
+        for shipment_id, shipment in data.shipments.items()
+        if shipment.case_id == case_id
+    }
+    if not selected:
+        available = sorted({item.case_id for item in data.shipments.values() if item.case_id})
+        raise ValueError(f"Unknown shipment case {case_id!r}; available cases: {available}.")
+    return replace(data, shipments=selected)
