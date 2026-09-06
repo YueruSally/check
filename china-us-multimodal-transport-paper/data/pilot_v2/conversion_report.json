@@ -1,0 +1,57 @@
+{
+  "source_workbook": "ChinaUS_Gateway_Model_Ready_v2.xlsx",
+  "source_sha256": "45532957d7c63f5ef928468986d4d6de2f8bc5da340747281cbf3d44b188616a",
+  "output_quantity_unit": "FEU",
+  "conversion_rules": {
+    "quantity_and_capacity": "TEU / 2 = FEU",
+    "per_unit_cost_and_penalty": "USD/TEU * 2 = USD/FEU",
+    "service_capacity": "daily FEU capacity * headway hours / 24",
+    "calendar": "explicit 8-week departure hours; repeats every 1344 hours"
+  },
+  "counts": {
+    "nodes": 9,
+    "arcs": 28,
+    "services": 17,
+    "departures": 496,
+    "transfer_rules": 32,
+    "shipments": 120
+  },
+  "cases": {
+    "D1": {
+      "sheet": "Batches_Chicago",
+      "shipments": 40,
+      "total_teu": 4455.0,
+      "total_feu": 2227.5
+    },
+    "D2": {
+      "sheet": "Batches_Memphis",
+      "shipments": 40,
+      "total_teu": 4455.0,
+      "total_feu": 2227.5
+    },
+    "D3": {
+      "sheet": "Batches_Columbus",
+      "shipments": 40,
+      "total_teu": 4455.0,
+      "total_feu": 2227.5
+    }
+  },
+  "checks": {
+    "unique_ids": true,
+    "known_arc_endpoints": true,
+    "service_arc_matches": true,
+    "departure_counts_and_arrivals": true,
+    "batch_reachability": true,
+    "nonnegative_costs_times_capacities": true
+  },
+  "source_header_rows": {
+    "Nodes": 3,
+    "Arcs_All": 3,
+    "Timetable": 3,
+    "Service_Departures_8wk": 3,
+    "Transshipment_Model": 3,
+    "Batches_Chicago": 3,
+    "Batches_Memphis": 3,
+    "Batches_Columbus": 3
+  }
+}
