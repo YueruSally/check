@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, replace
 from datetime import datetime, timezone
 import csv
@@ -19,6 +19,15 @@ from .validation import validate_model_data
 
 
 @dataclass(frozen=True)
+class BatchSolution:
+    total_cost_usd: float
+    makespan_h: float
+    max_lead_time_h: float
+    total_tardiness_feu_h: float
+    allocations: tuple[tuple[str, float, tuple[str, ...]], ...]
+
+
+@dataclass(frozen=True)
 class BatchRun:
     case_id: str
     scenario: str
@@ -31,6 +40,7 @@ class BatchRun:
     min_cost_usd: float | None
     min_makespan_h: float | None
     points: tuple[tuple[float, float], ...]
+    solutions: tuple[BatchSolution, ...] = ()
 
 
 def _percentile(values: list[float], probability: float) -> float | None:
@@ -56,9 +66,31 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
     feasible = [
         item for item in result.population if item.evaluation and item.evaluation.feasible
     ]
-    points = nondominated_points(
-        item.objectives for item in result.pareto_front if item.evaluation
-    )
+    solution_by_point: dict[tuple[float, float], BatchSolution] = {}
+    for item in result.pareto_front:
+        evaluation = item.evaluation
+        if evaluation is None:
+            continue
+        point = item.objectives
+        solution_by_point.setdefault(
+            point,
+            BatchSolution(
+                total_cost_usd=evaluation.total_cost_usd,
+                makespan_h=evaluation.makespan_h,
+                max_lead_time_h=evaluation.max_lead_time_h,
+                total_tardiness_feu_h=evaluation.total_tardiness_feu_h,
+                allocations=tuple(
+                    (
+                        allocation.shipment_id,
+                        allocation.quantity_feu,
+                        tuple(allocation.arc_ids),
+                    )
+                    for allocation in item.allocations
+                ),
+            ),
+        )
+    points = nondominated_points(solution_by_point)
+    solutions = tuple(solution_by_point[point] for point in points)
     return BatchRun(
         case_id=case_id,
         scenario=scenario,
@@ -71,6 +103,7 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
         min_cost_usd=min((point[0] for point in points), default=None),
         min_makespan_h=min((point[1] for point in points), default=None),
         points=points,
+        solutions=solutions,
     )
 
 
@@ -108,6 +141,7 @@ def summarize_runs(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict], li
             spacings.append(space)
             row = asdict(run)
             row.pop("points")
+            row.pop("solutions")
             row["hypervolume_normalized"] = hv
             row["spacing_normalized"] = space
             run_rows.append(row)
@@ -168,6 +202,99 @@ def summarize_runs(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict], li
     return run_rows, aggregate_rows, union_rows
 
 
+def representative_rows(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict]]:
+    """Select union-front solutions and expose their complete route allocations."""
+    runs = list(runs)
+    solution_rows: list[dict] = []
+    allocation_rows: list[dict] = []
+    groups = sorted({(run.case_id, run.scenario) for run in runs})
+    role_order = ("min_cost", "min_makespan", "balanced")
+    for case_id, scenario in groups:
+        group = [
+            run for run in runs if run.case_id == case_id and run.scenario == scenario
+        ]
+        union_front = nondominated_points(
+            point for run in group for point in run.points
+        )
+        if not union_front:
+            continue
+        ideal = (min(p[0] for p in union_front), min(p[1] for p in union_front))
+        nadir = (max(p[0] for p in union_front), max(p[1] for p in union_front))
+        normalized = normalize_points(union_front, ideal, nadir)
+        min_cost = min(union_front, key=lambda point: (point[0], point[1]))
+        min_makespan = min(union_front, key=lambda point: (point[1], point[0]))
+        balanced = union_front[
+            min(
+                range(len(union_front)),
+                key=lambda index: normalized[index][0] ** 2
+                + normalized[index][1] ** 2,
+            )
+        ]
+        roles_by_point: dict[tuple[float, float], set[str]] = {
+            point: set() for point in union_front
+        }
+        roles_by_point[min_cost].add("min_cost")
+        roles_by_point[min_makespan].add("min_makespan")
+        roles_by_point[balanced].add("balanced")
+
+        candidates: dict[
+            tuple[float, float], list[tuple[int, BatchSolution]]
+        ] = {point: [] for point in union_front}
+        for run in group:
+            for solution in run.solutions:
+                point = (solution.total_cost_usd, solution.makespan_h)
+                if point in candidates:
+                    candidates[point].append((run.seed, solution))
+
+        for point_index, point in enumerate(union_front, start=1):
+            if not candidates[point]:
+                continue
+            seed, solution = min(candidates[point], key=lambda item: item[0])
+            solution_id = f"{case_id}_{scenario}_{point_index:03d}"
+            roles = "|".join(
+                role for role in role_order if role in roles_by_point[point]
+            )
+            solution_rows.append(
+                {
+                    "solution_id": solution_id,
+                    "case_id": case_id,
+                    "scenario": scenario,
+                    "roles": roles,
+                    "source_seed": seed,
+                    "total_cost_usd": solution.total_cost_usd,
+                    "makespan_h": solution.makespan_h,
+                    "max_lead_time_h": solution.max_lead_time_h,
+                    "total_tardiness_feu_h": solution.total_tardiness_feu_h,
+                    "route_allocations": len(solution.allocations),
+                }
+            )
+            for allocation_index, (
+                shipment_id,
+                quantity_feu,
+                arc_ids,
+            ) in enumerate(solution.allocations, start=1):
+                allocation_rows.append(
+                    {
+                        "solution_id": solution_id,
+                        "allocation_id": allocation_index,
+                        "shipment_id": shipment_id,
+                        "quantity_feu": quantity_feu,
+                        "arc_ids": "|".join(arc_ids),
+                    }
+                )
+    return solution_rows, allocation_rows
+
+
+def _report_progress(run: BatchRun, completed: int, total: int) -> None:
+    print(
+        f"[{completed}/{total}] {run.case_id} {run.scenario} "
+        f"seed={run.seed} feasible={run.feasible_population}/"
+        f"{run.population_size} front={run.pareto_size} "
+        f"elapsed={run.elapsed_seconds:.2f}s",
+        flush=True,
+    )
+
+
 def run_batch_experiment(
     data_directory: str | Path,
     config_path: str | Path,
@@ -214,11 +341,20 @@ def run_batch_experiment(
         for scenario in scenarios
         for seed in seeds
     ]
+    runs: list[BatchRun] = []
     if workers == 1:
-        runs = [_run_one(payload) for payload in payloads]
+        for completed, payload in enumerate(payloads, start=1):
+            run = _run_one(payload)
+            runs.append(run)
+            _report_progress(run, completed, len(payloads))
     else:
         with ProcessPoolExecutor(max_workers=workers) as executor:
-            runs = list(executor.map(_run_one, payloads))
+            futures = [executor.submit(_run_one, payload) for payload in payloads]
+            for completed, future in enumerate(as_completed(futures), start=1):
+                run = future.result()
+                runs.append(run)
+                _report_progress(run, completed, len(payloads))
+    runs.sort(key=lambda run: (run.case_id, run.scenario, run.seed))
 
     output_directory.mkdir(parents=True, exist_ok=True)
     run_rows, aggregate_rows, union_rows = summarize_runs(runs)
@@ -257,6 +393,24 @@ def run_batch_experiment(
         ],
         union_rows,
     )
+    solution_rows, allocation_rows = representative_rows(runs)
+    _write_csv(
+        output_directory / "representative_solutions.csv",
+        [
+            "solution_id", "case_id", "scenario", "roles", "source_seed",
+            "total_cost_usd", "makespan_h", "max_lead_time_h",
+            "total_tardiness_feu_h", "route_allocations",
+        ],
+        solution_rows,
+    )
+    _write_csv(
+        output_directory / "representative_allocations.csv",
+        [
+            "solution_id", "allocation_id", "shipment_id", "quantity_feu",
+            "arc_ids",
+        ],
+        allocation_rows,
+    )
 
     conversion_path = data_directory / "conversion_report.json"
     conversion = (
@@ -282,6 +436,12 @@ def run_batch_experiment(
             "fronts.csv": "all final feasible non-dominated objective points",
             "aggregate.csv": "cross-seed stability summary",
             "combined_pareto.csv": "non-dominated union over seeds",
+            "representative_solutions.csv": (
+                "objective values and roles for union-front solutions"
+            ),
+            "representative_allocations.csv": (
+                "shipment quantities and arc sequences for union-front solutions"
+            ),
         },
         "note": (
             "Calibration baseline, not a paper conclusion. Comparator algorithms "
