@@ -47,7 +47,7 @@ def test_cost_schedule_transfer_and_makespan_are_shared():
     validate_model_data(data)
     config = ModelConfig(
         "FEU",
-        ("total_cost_usd", "makespan_h"),
+        ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
         ConstraintConfig(),
         PenaltyConfig(),
         ScenarioConfig("test"),
@@ -61,6 +61,7 @@ def test_cost_schedule_transfer_and_makespan_are_shared():
     assert result.constraint_violation == 0
     assert result.total_cost_usd == 1800
     assert result.makespan_h == 280
+    assert result.quantity_weighted_mean_delivery_time_h == 280
 
 
 def test_shipment_specific_tardiness_penalty_overrides_fallback():
@@ -73,10 +74,39 @@ def test_shipment_specific_tardiness_penalty_overrides_fallback():
     data = ModelData(nodes, arcs, {}, {"s": shipment})
     config = ModelConfig(
         "FEU",
-        ("total_cost_usd", "makespan_h"),
+        ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
         ConstraintConfig(enforce_timetable=False, enforce_capacity=False),
         PenaltyConfig(tardiness_usd_per_feu_h=99),
         ScenarioConfig("test"),
     )
     result = evaluate_solution(data, [RouteAllocation("s", 2, ("road",))], config)
     assert result.total_cost_usd == 40
+
+
+def test_path_below_ten_percent_is_infeasible():
+    nodes = {
+        "a": Node("a", "A", NodeKind.CN_ORIGIN, "CN"),
+        "b": Node("b", "B", NodeKind.DESTINATION, "US"),
+    }
+    arcs = {
+        "cheap": Arc("cheap", "a", "b", Mode.ROAD, 10, 1),
+        "fast": Arc("fast", "a", "b", Mode.ROAD, 5, 2),
+    }
+    data = ModelData(nodes, arcs, {}, {"s": Shipment("s", "a", "b", 10)})
+    config = ModelConfig(
+        "FEU",
+        ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
+        ConstraintConfig(enforce_timetable=False, enforce_capacity=False),
+        PenaltyConfig(),
+        ScenarioConfig("test"),
+    )
+    result = evaluate_solution(
+        data,
+        [
+            RouteAllocation("s", 0.5, ("cheap",)),
+            RouteAllocation("s", 9.5, ("fast",)),
+        ],
+        config,
+    )
+    assert not result.feasible
+    assert any("10% minimum" in message for message in result.violations)
