@@ -50,9 +50,27 @@ compact artifacts:
 - `fronts.csv`: every final feasible non-dominated objective point;
 - `aggregate.csv`: median, quartiles and success rate across seeds;
 - `combined_pareto.csv`: the non-dominated union over all seeds;
+- `representative_solutions.csv`: roles and objective values for the
+  cross-seed union front;
+- `representative_allocations.csv`: shipment quantities and arc sequences for
+  those representative solutions;
 - `manifest.json`: source/config hashes, evaluation budget and seed list.
 
 Within each case/scenario group, all runs share pooled ideal and nadir values
 and the normalized hypervolume reference point (1.1, 1.1). For algorithm
 comparisons, recompute indicators using bounds pooled across every compared
 algorithm; do not compare separately normalized hypervolumes.
+
+
+## Convergence calibration
+
+Use a small fixed-seed calibration before scenario and algorithm comparisons.
+Compare population/generation shapes at the same evaluation budget:
+
+- 48 individuals × (99 + 1) populations = 4,800 evaluations;
+- 96 individuals × (49 + 1) populations = 4,800 evaluations.
+
+Run ten common seeds for D1-D3, select the shape using feasible rate,
+cross-seed union front, shared-bound hypervolume and objective stability, then
+rerun the selected configuration with 30 seeds. The calibration results are
+parameter-selection evidence, not scenario findings.
