@@ -46,6 +46,25 @@ def _scenario_arc_cost(arc: Arc, config: ModelConfig) -> float:
     return arc.cost_usd_per_feu * multiplier
 
 
+def _scenario_ocean_departure_delay_h(arc: Arc, config: ModelConfig) -> float:
+    if arc.mode.value != "ocean":
+        return 0.0
+    return (
+        config.scenario.usec_ocean_departure_delay_h
+        if arc.via_panama
+        else config.scenario.uswc_ocean_departure_delay_h
+    )
+
+
+def _scenario_port_capacity_multiplier(node_id: str, config: ModelConfig) -> float:
+    multiplier = config.scenario.port_capacity_multiplier
+    if node_id in {"la_lb", "seattle_tacoma"}:
+        multiplier *= config.scenario.uswc_port_capacity_multiplier
+    elif node_id == "ny_nj":
+        multiplier *= config.scenario.usec_port_capacity_multiplier
+    return multiplier
+
+
 def _path_arcs(data: ModelData, allocation: RouteAllocation) -> list[Arc]:
     shipment = data.shipments[allocation.shipment_id]
     arcs = [data.arcs[arc_id] for arc_id in allocation.arc_ids]
@@ -157,14 +176,20 @@ def evaluate_solution(
                 if config.constraints.enforce_timetable and arc.service_ids:
                     services = [data.services[item] for item in arc.service_ids]
                     scheduled = earliest_departure(services, current_h)
-                    departure_h = scheduled.departure_h
+                    scheduled_departure_h = scheduled.departure_h
+                    departure_h = (
+                        scheduled_departure_h
+                        + _scenario_ocean_departure_delay_h(arc, config)
+                    )
                     waiting_h = max(0.0, departure_h - current_h)
                     route_cost += (
                         config.operational_costs.holding_usd_per_feu_h
                         * waiting_h
                         * plan.quantity_feu
                     )
-                    service_usage[(scheduled.service_id, departure_h)] += plan.quantity_feu
+                    service_usage[
+                        (scheduled.service_id, scheduled_departure_h)
+                    ] += plan.quantity_feu
                 elif config.constraints.enforce_timetable and arc.mode.value in {"rail", "ocean"}:
                     add_violation(f"Scheduled arc {arc.id} has no service.")
 
@@ -223,7 +248,7 @@ def evaluate_solution(
                 continue
             limit = node.capacity_feu_per_day
             if node.kind.value in {"cn_port", "us_port"}:
-                limit *= config.scenario.port_capacity_multiplier
+                limit *= _scenario_port_capacity_multiplier(node_id, config)
             if used > limit + tolerance:
                 add_violation(
                     f"Node {node_id} day {day}: {used:g}>{limit:g} FEU.",
