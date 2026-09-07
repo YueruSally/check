@@ -21,6 +21,7 @@ class RouteOutcome:
 @dataclass(frozen=True)
 class EvaluationResult:
     total_cost_usd: float
+    quantity_weighted_mean_delivery_time_h: float
     makespan_h: float
     max_lead_time_h: float
     total_tardiness_feu_h: float
@@ -31,7 +32,7 @@ class EvaluationResult:
 
     @property
     def objectives(self) -> tuple[float, float]:
-        return self.total_cost_usd, self.makespan_h
+        return self.total_cost_usd, self.quantity_weighted_mean_delivery_time_h
 
 
 def _scenario_arc_cost(arc: Arc, config: ModelConfig) -> float:
@@ -97,6 +98,15 @@ def evaluate_solution(
                 f"Shipment {shipment.id} uses too many paths.",
                 len(plans) - config.constraints.max_paths_per_shipment,
             )
+        minimum_quantity = demand * config.constraints.min_path_share
+        for plan in plans:
+            if plan.quantity_feu < minimum_quantity - tolerance:
+                add_violation(
+                    f"Shipment {shipment.id}: path allocation {plan.quantity_feu:g} FEU "
+                    f"is below the {config.constraints.min_path_share:.0%} minimum "
+                    f"({minimum_quantity:g} FEU).",
+                    minimum_quantity - plan.quantity_feu,
+                )
 
     service_usage: Counter[tuple[str, float]] = Counter()
     daily_arc_usage: Counter[tuple[str, int]] = Counter()
@@ -225,18 +235,27 @@ def evaluate_solution(
     if outcomes:
         earliest_release = min(data.shipments[item.shipment_id].release_h for item in outcomes)
         makespan = max(item.arrival_h for item in outcomes) - earliest_release
+        lead_time_quantity = sum(
+            (item.arrival_h - data.shipments[item.shipment_id].release_h)
+            * item.quantity_feu
+            for item in outcomes
+        )
+        total_quantity = sum(item.quantity_feu for item in outcomes)
+        weighted_mean_delivery_time = lead_time_quantity / total_quantity
         max_lead = max(
             item.arrival_h - data.shipments[item.shipment_id].release_h for item in outcomes
         )
     else:
-        makespan = max_lead = 0.0
+        makespan = weighted_mean_delivery_time = max_lead = 0.0
 
     feasible = not violations
     if not feasible:
         floor = config.penalties.infeasible_objective
-        total_cost, makespan = max(total_cost, floor), max(makespan, floor)
+        total_cost = max(total_cost, floor)
+        weighted_mean_delivery_time = max(weighted_mean_delivery_time, floor)
     return EvaluationResult(
         total_cost_usd=total_cost,
+        quantity_weighted_mean_delivery_time_h=weighted_mean_delivery_time,
         makespan_h=makespan,
         max_lead_time_h=max_lead,
         total_tardiness_feu_h=total_tardiness,
