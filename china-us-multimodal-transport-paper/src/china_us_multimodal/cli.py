@@ -26,6 +26,9 @@ def _write_nsga2_result(result, output_directory: Path, metadata: dict) -> None:
             {
                 "solution_id": solution_id,
                 "total_cost_usd": evaluation.total_cost_usd,
+                "quantity_weighted_mean_delivery_time_h": (
+                    evaluation.quantity_weighted_mean_delivery_time_h
+                ),
                 "makespan_h": evaluation.makespan_h,
                 "max_lead_time_h": evaluation.max_lead_time_h,
                 "total_tardiness_feu_h": evaluation.total_tardiness_feu_h,
@@ -37,7 +40,9 @@ def _write_nsga2_result(result, output_directory: Path, metadata: dict) -> None:
                 "solution_id": solution_id,
                 "objectives": {
                     "total_cost_usd": evaluation.total_cost_usd,
-                    "makespan_h": evaluation.makespan_h,
+                    "quantity_weighted_mean_delivery_time_h": (
+                        evaluation.quantity_weighted_mean_delivery_time_h
+                    ),
                 },
                 "max_lead_time_h": evaluation.max_lead_time_h,
                 "total_tardiness_feu_h": evaluation.total_tardiness_feu_h,
@@ -57,6 +62,7 @@ def _write_nsga2_result(result, output_directory: Path, metadata: dict) -> None:
         fieldnames = [
             "solution_id",
             "total_cost_usd",
+            "quantity_weighted_mean_delivery_time_h",
             "makespan_h",
             "max_lead_time_h",
             "total_tardiness_feu_h",
