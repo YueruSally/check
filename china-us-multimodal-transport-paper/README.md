@@ -69,6 +69,22 @@ The committed smoke outputs only prove that the full pipeline runs. They are
 not paper findings. Follow `docs/experiment_protocol.md` for multi-seed paper
 experiments and equal evaluation budgets across NSGA-II, SPEA2 and MOEA/D.
 `run-experiment` writes per-run metrics, every final objective-space front,
-the cross-seed non-dominated union and an experiment manifest. Hypervolume and
+the cross-seed non-dominated union, representative route allocations and an
+experiment manifest. Each completed run is printed immediately so nohup logs
+show live progress. Hypervolume and
 spacing are calculated after normalizing every run in a case/scenario group
 against the same pooled ideal and nadir points.
+
+
+## Convergence calibration
+
+Before the full scenario matrix, compare two NSGA-II shapes under the same
+4,800-evaluation budget per run:
+
+```bash
+nohup nice -n 10 bash scripts/run_convergence_calibration.sh \
+  > logs/convergence_calibration.log 2>&1 &
+```
+
+The script runs D1-D3 for ten fixed seeds with 48×99 and 96×49. Set
+`WORKERS=2` (the default) or a lower value to control server load.
