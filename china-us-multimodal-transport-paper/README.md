@@ -25,7 +25,7 @@ integrity checks.
 2. Validate node, arc, service, transfer and shipment constraints.
 3. Run Martins separately through each US gateway and merge unique paths.
 4. Allocate each shipment across at most three paths with constrained NSGA-II.
-5. Evaluate every solution with the same timetable, capacity, cost and makespan
+5. Evaluate every solution with the same timetable, capacity, cost and delivery-time
    evaluator.
 
 Gateway-aware path generation is intentional: a static global dominance filter
@@ -59,11 +59,14 @@ Use D1 for Chicago, D2 for Memphis and D3 for Columbus. Scenario overrides use
 
 The shared evaluator includes arc and transfer cost, timetable waiting and
 processing cost, shipment-specific tardiness penalties, service capacity,
-daily arc capacity, daily node capacity, flow conservation, split limits, leg
-limits and mode-change limits. NSGA-II uses feasibility-first constrained
+daily arc capacity, daily node capacity, flow conservation, a 10% minimum share
+for every active path, split limits, leg limits and mode-change limits. NSGA-II uses feasibility-first constrained
 dominance and deterministic seeds.
 
 ## Reproducibility
+
+The two optimization objectives are total USD cost and quantity-weighted mean
+delivery time. Makespan remains a reported service-level indicator.
 
 The committed smoke outputs only prove that the full pipeline runs. They are
 not paper findings. Follow `docs/experiment_protocol.md` for multi-seed paper
@@ -88,3 +91,12 @@ nohup nice -n 10 bash scripts/run_convergence_calibration.sh \
 
 The script runs D1-D3 for ten fixed seeds with 48×99 and 96×49. Set
 `WORKERS=2` (the default) or a lower value to control server load.
+
+
+## v0.4 operational split rule
+
+Every active route for a shipment must carry at least 10% of that shipment's
+scenario-adjusted demand. NSGA-II prunes smaller genome shares and renormalizes
+the remaining paths; the shared evaluator independently enforces the same rule
+for future comparator algorithms. This prevents negligible flows from creating
+operationally meaningless Pareto points.
