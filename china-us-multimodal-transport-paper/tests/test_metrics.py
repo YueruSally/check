@@ -29,6 +29,7 @@ def test_cross_seed_summary_uses_common_bounds() -> None:
 def test_representative_rows_preserve_allocations() -> None:
     solution = BatchSolution(
         total_cost_usd=10.0,
+        quantity_weighted_mean_delivery_time_h=5.0,
         makespan_h=5.0,
         max_lead_time_h=4.0,
         total_tardiness_feu_h=0.0,
@@ -39,5 +40,5 @@ def test_representative_rows_preserve_allocations() -> None:
         ((10.0, 5.0),), (solution,),
     )
     solutions, allocations = representative_rows([run])
-    assert solutions[0]["roles"] == "min_cost|min_makespan|balanced"
+    assert solutions[0]["roles"] == "min_cost|min_delivery_time|balanced"
     assert allocations[0]["arc_ids"] == "A1|A2"
