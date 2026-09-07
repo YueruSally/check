@@ -1,0 +1,4 @@
+solution_id,case_id,scenario,roles,source_seed,total_cost_usd,makespan_h,max_lead_time_h,total_tardiness_feu_h,route_allocations
+D1_pilot_baseline_001,D1,pilot_baseline,min_cost|min_makespan|balanced,20260909,24443171.22286667,748.8,748.8,5476.275488128426,118
+D2_pilot_baseline_001,D2,pilot_baseline,min_cost|min_makespan|balanced,20260911,24869759.40710607,760.8,760.8,5874.582431853272,118
+D3_pilot_baseline_001,D3,pilot_baseline,min_cost|min_makespan|balanced,20260913,26481712.19154526,772.8,772.8,7388.7287430553115,120

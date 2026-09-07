@@ -1,0 +1,4 @@
+case_id,scenario,point_id,total_cost_usd,makespan_h,source_seeds
+D1,pilot_baseline,1,24443171.22286667,748.8,20260909
+D2,pilot_baseline,1,24869759.40710607,760.8,20260911
+D3,pilot_baseline,1,26481712.19154526,772.8,20260913

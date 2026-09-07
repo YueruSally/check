@@ -1,0 +1,46 @@
+{
+  "generated_at_utc": "2026-09-07T10:48:00.188144+00:00",
+  "experiment_type": "multi-seed NSGA-II calibration baseline",
+  "cases": [
+    "D1",
+    "D2",
+    "D3"
+  ],
+  "scenarios": [
+    "pilot_baseline"
+  ],
+  "seeds": [
+    20260906,
+    20260907,
+    20260908,
+    20260909,
+    20260910,
+    20260911,
+    20260912,
+    20260913,
+    20260914,
+    20260915
+  ],
+  "workers": 2,
+  "algorithm": {
+    "population_size": 48,
+    "generations": 99,
+    "crossover_rate": 0.9,
+    "mutation_rate": 0.12,
+    "max_paths_per_gateway": 4,
+    "seed": 20260906
+  },
+  "evaluations_per_run": 4800,
+  "source_workbook": "ChinaUS_Gateway_Model_Ready_v2.xlsx",
+  "source_sha256": "45532957d7c63f5ef928468986d4d6de2f8bc5da340747281cbf3d44b188616a",
+  "config_sha256": "8b8ecea3732895fc26c555e65d1421bee0097b53beb031c530570c0c3572cc24",
+  "files": {
+    "runs.csv": "one row per independent run",
+    "fronts.csv": "all final feasible non-dominated objective points",
+    "aggregate.csv": "cross-seed stability summary",
+    "combined_pareto.csv": "non-dominated union over seeds",
+    "representative_solutions.csv": "objective values and roles for union-front solutions",
+    "representative_allocations.csv": "shipment quantities and arc sequences for union-front solutions"
+  },
+  "note": "Calibration baseline, not a paper conclusion. Comparator algorithms and scenario experiments must use the same evaluation budget and shared normalization bounds."
+}
