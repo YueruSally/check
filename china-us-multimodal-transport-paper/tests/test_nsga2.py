@@ -23,7 +23,7 @@ def test_nsga2_returns_feasible_front_for_two_route_problem():
     )
     model = ModelConfig(
         "FEU",
-        ("total_cost_usd", "makespan_h"),
+        ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
         ConstraintConfig(enforce_timetable=False, enforce_capacity=False),
         PenaltyConfig(),
         ScenarioConfig("test"),
@@ -40,3 +40,5 @@ def test_nsga2_returns_feasible_front_for_two_route_problem():
     objectives = {item.objectives for item in result.pareto_front}
     assert (10, 10) in objectives
     assert (20, 5) in objectives
+    for individual in result.pareto_front:
+        assert all(allocation.quantity_feu >= 1.0 for allocation in individual.allocations)
