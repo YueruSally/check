@@ -13,11 +13,15 @@ shared timetable/capacity evaluator and evaluation budget.
 
 ## Objectives and constraints
 
-Minimize total USD cost and makespan in hours. Total cost includes arc cost,
+Minimize total USD cost and quantity-weighted mean delivery time in hours. Total cost includes arc cost,
 transfer cost, schedule-wait holding cost, transfer-processing time cost and
 shipment-specific tardiness penalties. Timetable, service capacity, daily arc
 capacity, daily node capacity, flow conservation, maximum path count, maximum
 leg count and maximum mode-change count are enforced.
+
+Quantity-weighted mean delivery time equals the sum of each route allocation's
+FEU quantity multiplied by its release-to-arrival lead time, divided by total
+allocated FEU.
 
 NSGA-II uses feasibility-first constrained dominance. Feasible individuals
 dominate infeasible individuals; among infeasible individuals, lower aggregate
