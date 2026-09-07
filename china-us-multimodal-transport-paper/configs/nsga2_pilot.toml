@@ -1,6 +1,6 @@
 [model]
 quantity_unit = "FEU"
-objectives = ["total_cost_usd", "makespan_h"]
+objectives = ["total_cost_usd", "quantity_weighted_mean_delivery_time_h"]
 active_scenario = "pilot_baseline"
 
 [constraints]
@@ -9,6 +9,7 @@ enforce_capacity = true
 hard_due_time = false
 allow_split = true
 max_paths_per_shipment = 3
+min_path_share = 0.10
 max_legs_per_path = 8
 max_mode_changes = 4
 allocation_tolerance_feu = 0.000001
