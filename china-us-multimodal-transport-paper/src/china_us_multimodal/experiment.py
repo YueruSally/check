@@ -21,6 +21,7 @@ from .validation import validate_model_data
 @dataclass(frozen=True)
 class BatchSolution:
     total_cost_usd: float
+    quantity_weighted_mean_delivery_time_h: float
     makespan_h: float
     max_lead_time_h: float
     total_tardiness_feu_h: float
@@ -38,7 +39,7 @@ class BatchRun:
     feasible_population: int
     pareto_size: int
     min_cost_usd: float | None
-    min_makespan_h: float | None
+    min_weighted_mean_delivery_time_h: float | None
     points: tuple[tuple[float, float], ...]
     solutions: tuple[BatchSolution, ...] = ()
 
@@ -76,6 +77,9 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
             point,
             BatchSolution(
                 total_cost_usd=evaluation.total_cost_usd,
+                quantity_weighted_mean_delivery_time_h=(
+                    evaluation.quantity_weighted_mean_delivery_time_h
+                ),
                 makespan_h=evaluation.makespan_h,
                 max_lead_time_h=evaluation.max_lead_time_h,
                 total_tardiness_feu_h=evaluation.total_tardiness_feu_h,
@@ -101,7 +105,9 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
         feasible_population=len(feasible),
         pareto_size=len(points),
         min_cost_usd=min((point[0] for point in points), default=None),
-        min_makespan_h=min((point[1] for point in points), default=None),
+        min_weighted_mean_delivery_time_h=min(
+            (point[1] for point in points), default=None
+        ),
         points=points,
         solutions=solutions,
     )
@@ -158,14 +164,16 @@ def summarize_runs(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict], li
                     "scenario": scenario,
                     "point_id": index,
                     "total_cost_usd": point[0],
-                    "makespan_h": point[1],
+                    "quantity_weighted_mean_delivery_time_h": point[1],
                     "source_seeds": "|".join(map(str, sorted(set(sources[point])))),
                 }
             )
 
         costs = [run.min_cost_usd for run in group if run.min_cost_usd is not None]
-        times = [
-            run.min_makespan_h for run in group if run.min_makespan_h is not None
+        delivery_times = [
+            run.min_weighted_mean_delivery_time_h
+            for run in group
+            if run.min_weighted_mean_delivery_time_h is not None
         ]
         elapsed = [run.elapsed_seconds for run in group]
         successful = sum(bool(run.points) for run in group)
@@ -182,10 +190,18 @@ def summarize_runs(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict], li
                 "cost_median_usd": statistics.median(costs) if costs else None,
                 "cost_q1_usd": _percentile(costs, 0.25),
                 "cost_q3_usd": _percentile(costs, 0.75),
-                "best_makespan_h": min(times) if times else None,
-                "makespan_median_h": statistics.median(times) if times else None,
-                "makespan_q1_h": _percentile(times, 0.25),
-                "makespan_q3_h": _percentile(times, 0.75),
+                "best_weighted_mean_delivery_time_h": (
+                    min(delivery_times) if delivery_times else None
+                ),
+                "weighted_mean_delivery_time_median_h": (
+                    statistics.median(delivery_times) if delivery_times else None
+                ),
+                "weighted_mean_delivery_time_q1_h": _percentile(
+                    delivery_times, 0.25
+                ),
+                "weighted_mean_delivery_time_q3_h": _percentile(
+                    delivery_times, 0.75
+                ),
                 "hypervolume_median": statistics.median(hypervolumes),
                 "hypervolume_q1": _percentile(hypervolumes, 0.25),
                 "hypervolume_q3": _percentile(hypervolumes, 0.75),
@@ -193,9 +209,9 @@ def summarize_runs(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict], li
                 "elapsed_median_seconds": statistics.median(elapsed),
                 "elapsed_total_seconds": sum(elapsed),
                 "ideal_cost_usd": ideal[0],
-                "ideal_makespan_h": ideal[1],
+                "ideal_weighted_mean_delivery_time_h": ideal[1],
                 "nadir_cost_usd": nadir[0],
-                "nadir_makespan_h": nadir[1],
+                "nadir_weighted_mean_delivery_time_h": nadir[1],
                 "hypervolume_reference_normalized": "1.1|1.1",
             }
         )
@@ -208,7 +224,7 @@ def representative_rows(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict
     solution_rows: list[dict] = []
     allocation_rows: list[dict] = []
     groups = sorted({(run.case_id, run.scenario) for run in runs})
-    role_order = ("min_cost", "min_makespan", "balanced")
+    role_order = ("min_cost", "min_delivery_time", "balanced")
     for case_id, scenario in groups:
         group = [
             run for run in runs if run.case_id == case_id and run.scenario == scenario
@@ -222,7 +238,9 @@ def representative_rows(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict
         nadir = (max(p[0] for p in union_front), max(p[1] for p in union_front))
         normalized = normalize_points(union_front, ideal, nadir)
         min_cost = min(union_front, key=lambda point: (point[0], point[1]))
-        min_makespan = min(union_front, key=lambda point: (point[1], point[0]))
+        min_delivery_time = min(
+            union_front, key=lambda point: (point[1], point[0])
+        )
         balanced = union_front[
             min(
                 range(len(union_front)),
@@ -234,7 +252,7 @@ def representative_rows(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict
             point: set() for point in union_front
         }
         roles_by_point[min_cost].add("min_cost")
-        roles_by_point[min_makespan].add("min_makespan")
+        roles_by_point[min_delivery_time].add("min_delivery_time")
         roles_by_point[balanced].add("balanced")
 
         candidates: dict[
@@ -242,7 +260,10 @@ def representative_rows(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict
         ] = {point: [] for point in union_front}
         for run in group:
             for solution in run.solutions:
-                point = (solution.total_cost_usd, solution.makespan_h)
+                point = (
+                    solution.total_cost_usd,
+                    solution.quantity_weighted_mean_delivery_time_h,
+                )
                 if point in candidates:
                     candidates[point].append((run.seed, solution))
 
@@ -262,6 +283,9 @@ def representative_rows(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict
                     "roles": roles,
                     "source_seed": seed,
                     "total_cost_usd": solution.total_cost_usd,
+                    "quantity_weighted_mean_delivery_time_h": (
+                        solution.quantity_weighted_mean_delivery_time_h
+                    ),
                     "makespan_h": solution.makespan_h,
                     "max_lead_time_h": solution.max_lead_time_h,
                     "total_tardiness_feu_h": solution.total_tardiness_feu_h,
@@ -363,7 +387,8 @@ def run_batch_experiment(
         [
             "case_id", "scenario", "seed", "elapsed_seconds", "population_size",
             "generations", "feasible_population", "pareto_size", "min_cost_usd",
-            "min_makespan_h", "hypervolume_normalized", "spacing_normalized",
+            "min_weighted_mean_delivery_time_h", "hypervolume_normalized",
+            "spacing_normalized",
         ],
         run_rows,
     )
@@ -374,22 +399,25 @@ def run_batch_experiment(
             "seed": run.seed,
             "point_id": index,
             "total_cost_usd": point[0],
-            "makespan_h": point[1],
+            "quantity_weighted_mean_delivery_time_h": point[1],
         }
         for run in runs
         for index, point in enumerate(run.points, start=1)
     ]
     _write_csv(
         output_directory / "fronts.csv",
-        ["case_id", "scenario", "seed", "point_id", "total_cost_usd", "makespan_h"],
+        [
+            "case_id", "scenario", "seed", "point_id", "total_cost_usd",
+            "quantity_weighted_mean_delivery_time_h",
+        ],
         front_rows,
     )
     _write_csv(output_directory / "aggregate.csv", list(aggregate_rows[0]), aggregate_rows)
     _write_csv(
         output_directory / "combined_pareto.csv",
         [
-            "case_id", "scenario", "point_id", "total_cost_usd", "makespan_h",
-            "source_seeds",
+            "case_id", "scenario", "point_id", "total_cost_usd",
+            "quantity_weighted_mean_delivery_time_h", "source_seeds",
         ],
         union_rows,
     )
@@ -398,8 +426,9 @@ def run_batch_experiment(
         output_directory / "representative_solutions.csv",
         [
             "solution_id", "case_id", "scenario", "roles", "source_seed",
-            "total_cost_usd", "makespan_h", "max_lead_time_h",
-            "total_tardiness_feu_h", "route_allocations",
+            "total_cost_usd", "quantity_weighted_mean_delivery_time_h",
+            "makespan_h", "max_lead_time_h", "total_tardiness_feu_h",
+            "route_allocations",
         ],
         solution_rows,
     )
@@ -420,7 +449,9 @@ def run_batch_experiment(
     )
     manifest = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-        "experiment_type": "multi-seed NSGA-II calibration baseline",
+        "experiment_type": (
+            "multi-seed NSGA-II with cost and quantity-weighted delivery time"
+        ),
         "cases": list(cases),
         "scenarios": list(scenarios),
         "seeds": list(seeds),
@@ -431,6 +462,13 @@ def run_batch_experiment(
         "source_workbook": conversion.get("source_workbook"),
         "source_sha256": conversion.get("source_sha256"),
         "config_sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
+        "minimum_path_share": load_config(
+            config_path, scenarios[0]
+        ).constraints.min_path_share,
+        "objectives": [
+            "total_cost_usd",
+            "quantity_weighted_mean_delivery_time_h",
+        ],
         "files": {
             "runs.csv": "one row per independent run",
             "fronts.csv": "all final feasible non-dominated objective points",
