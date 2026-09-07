@@ -12,6 +12,7 @@ class ConstraintConfig:
     hard_due_time: bool = False
     allow_split: bool = True
     max_paths_per_shipment: int = 3
+    min_path_share: float = 0.10
     max_legs_per_path: int = 8
     max_mode_changes: int = 4
     allocation_tolerance_feu: float = 1e-6
@@ -56,9 +57,13 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
     model = raw.get("model", {})
     quantity_unit = model.get("quantity_unit", "FEU")
     objectives = tuple(model.get("objectives", []))
-    if objectives != ("total_cost_usd", "makespan_h"):
+    if objectives != (
+        "total_cost_usd",
+        "quantity_weighted_mean_delivery_time_h",
+    ):
         raise ValueError(
-            "The pilot must use exactly two objectives: total_cost_usd and makespan_h."
+            "The pilot must use exactly two objectives: total_cost_usd and "
+            "quantity_weighted_mean_delivery_time_h."
         )
 
     constraints = ConstraintConfig(**raw.get("constraints", {}))
@@ -76,6 +81,8 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
         raise ValueError("Panama availability multiplier must be in (0, 1].")
     if constraints.max_paths_per_shipment < 1:
         raise ValueError("max_paths_per_shipment must be positive.")
+    if not 0 < constraints.min_path_share <= 1:
+        raise ValueError("min_path_share must be in (0, 1].")
     if operational_costs.holding_usd_per_feu_h < 0:
         raise ValueError("Holding cost must be non-negative.")
     if operational_costs.processing_usd_per_feu_h < 0:
