@@ -37,46 +37,58 @@ panama_availability_multiplier = 1.0
 uswc_ocean_cost_multiplier = 1.0
 usec_ocean_cost_multiplier = 1.0
 port_capacity_multiplier = 1.0
+uswc_port_capacity_multiplier = 1.0
+usec_port_capacity_multiplier = 1.0
+uswc_ocean_departure_delay_h = 0.0
+usec_ocean_departure_delay_h = 0.0
 demand_multiplier = 1.0
 
+# Historical one-factor scenarios retained for reproducibility.
 [scenarios.panama_restricted]
 panama_availability_multiplier = 0.9
-uswc_ocean_cost_multiplier = 1.0
-usec_ocean_cost_multiplier = 1.0
-port_capacity_multiplier = 1.0
-demand_multiplier = 1.0
 
 [scenarios.panama_stress]
 panama_availability_multiplier = 0.8
-uswc_ocean_cost_multiplier = 1.0
-usec_ocean_cost_multiplier = 1.0
-port_capacity_multiplier = 1.0
-demand_multiplier = 1.0
 
 [scenarios.freight_gap_low]
-panama_availability_multiplier = 1.0
-uswc_ocean_cost_multiplier = 1.0
 usec_ocean_cost_multiplier = 0.9090817963
-port_capacity_multiplier = 1.0
-demand_multiplier = 1.0
 
 [scenarios.freight_gap_high]
-panama_availability_multiplier = 1.0
-uswc_ocean_cost_multiplier = 1.0
 usec_ocean_cost_multiplier = 1.1195870088
-port_capacity_multiplier = 1.0
-demand_multiplier = 1.0
 
 [scenarios.port_capacity_80pct]
-panama_availability_multiplier = 1.0
-uswc_ocean_cost_multiplier = 1.0
-usec_ocean_cost_multiplier = 1.0
 port_capacity_multiplier = 0.8
-demand_multiplier = 1.0
 
 [scenarios.demand_125pct]
-panama_availability_multiplier = 1.0
-uswc_ocean_cost_multiplier = 1.0
-usec_ocean_cost_multiplier = 1.0
-port_capacity_multiplier = 1.0
 demand_multiplier = 1.25
+
+# v0.5 non-carbon port-capacity scenarios.
+[scenarios.uswc_port_capacity_125pct]
+uswc_port_capacity_multiplier = 1.25
+
+[scenarios.uswc_port_capacity_75pct]
+uswc_port_capacity_multiplier = 0.75
+
+[scenarios.uswc_port_capacity_50pct]
+uswc_port_capacity_multiplier = 0.50
+
+# v0.5 fixed departure-delay scenarios. Delay is added after the published
+# sailing departure and therefore increases both port waiting cost and arrival time.
+[scenarios.uswc_departure_delay_24h]
+uswc_ocean_departure_delay_h = 24.0
+
+[scenarios.uswc_departure_delay_72h]
+uswc_ocean_departure_delay_h = 72.0
+
+[scenarios.all_departure_delay_48h]
+uswc_ocean_departure_delay_h = 48.0
+usec_ocean_departure_delay_h = 48.0
+
+# v0.5 compound West Coast disruption scenarios.
+[scenarios.uswc_compound_moderate]
+uswc_port_capacity_multiplier = 0.75
+uswc_ocean_departure_delay_h = 24.0
+
+[scenarios.uswc_compound_severe]
+uswc_port_capacity_multiplier = 0.50
+uswc_ocean_departure_delay_h = 72.0
