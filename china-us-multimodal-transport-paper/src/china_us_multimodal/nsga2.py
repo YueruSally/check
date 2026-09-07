@@ -65,7 +65,7 @@ class GenerationRecord:
     feasible_count: int
     first_front_size: int
     min_cost_usd: float | None
-    min_makespan_h: float | None
+    min_weighted_mean_delivery_time_h: float | None
     min_constraint_violation: float
 
 
@@ -78,30 +78,53 @@ class NSGA2Result:
     history: tuple[GenerationRecord, ...]
 
 
-def _normalize_sparse(values: Iterable[float], max_nonzero: int) -> tuple[float, ...]:
+def _normalize_sparse(
+    values: Iterable[float],
+    max_nonzero: int,
+    min_share: float = 0.0,
+) -> tuple[float, ...]:
+    """Keep at most max_nonzero paths and prune shares below min_share."""
     cleaned = [max(0.0, float(value)) for value in values]
     if not cleaned:
         raise ValueError("A shipment must have at least one candidate path.")
     keep = sorted(range(len(cleaned)), key=lambda index: cleaned[index], reverse=True)[
         :max_nonzero
     ]
+    active = [index for index in keep if cleaned[index] > 1e-15]
+    if not active:
+        active = [keep[0]]
+        cleaned[keep[0]] = 1.0
+
+    while len(active) > 1:
+        total = sum(cleaned[index] for index in active)
+        below = [
+            index
+            for index in active
+            if cleaned[index] / total < min_share - 1e-12
+        ]
+        if not below:
+            break
+        active = [index for index in active if index not in below]
+
     sparse = [0.0] * len(cleaned)
-    for index in keep:
-        sparse[index] = cleaned[index]
-    total = sum(sparse)
-    if total <= 1e-15:
-        sparse[0] = 1.0
-        total = 1.0
-    return tuple(value / total for value in sparse)
+    total = sum(cleaned[index] for index in active)
+    for index in active:
+        sparse[index] = cleaned[index] / total
+    return tuple(sparse)
 
 
-def _random_gene(path_count: int, max_nonzero: int, rng: random.Random) -> tuple[float, ...]:
+def _random_gene(
+    path_count: int,
+    max_nonzero: int,
+    rng: random.Random,
+    min_share: float = 0.0,
+) -> tuple[float, ...]:
     active_count = rng.randint(1, min(path_count, max_nonzero))
     active = rng.sample(range(path_count), active_count)
     raw = [0.0] * path_count
     for index in active:
         raw[index] = rng.expovariate(1.0)
-    return _normalize_sparse(raw, max_nonzero)
+    return _normalize_sparse(raw, max_nonzero, min_share)
 
 
 def _decode(
@@ -236,6 +259,7 @@ def _crossover(
     right: Individual,
     rate: float,
     max_nonzero: int,
+    min_share: float,
     rng: random.Random,
 ) -> tuple[tuple[float, ...], ...]:
     if rng.random() > rate:
@@ -244,7 +268,7 @@ def _crossover(
     for left_gene, right_gene in zip(left.genome, right.genome):
         alpha = rng.random()
         mixed = [alpha * a + (1 - alpha) * b for a, b in zip(left_gene, right_gene)]
-        child.append(_normalize_sparse(mixed, max_nonzero))
+        child.append(_normalize_sparse(mixed, max_nonzero, min_share))
     return tuple(child)
 
 
@@ -252,6 +276,7 @@ def _mutate(
     genome: tuple[tuple[float, ...], ...],
     rate: float,
     max_nonzero: int,
+    min_share: float,
     rng: random.Random,
 ) -> tuple[tuple[float, ...], ...]:
     mutated = []
@@ -261,7 +286,7 @@ def _mutate(
             if len(values) == 1:
                 values[0] = 1.0
             elif rng.random() < 0.25:
-                values = list(_random_gene(len(values), max_nonzero, rng))
+                values = list(_random_gene(len(values), max_nonzero, rng, min_share))
             else:
                 source = rng.randrange(len(values))
                 target = rng.randrange(len(values) - 1)
@@ -270,7 +295,7 @@ def _mutate(
                 amount = rng.random() * values[source]
                 values[source] -= amount
                 values[target] += amount
-        mutated.append(_normalize_sparse(values, max_nonzero))
+        mutated.append(_normalize_sparse(values, max_nonzero, min_share))
     return tuple(mutated)
 
 
@@ -298,7 +323,9 @@ def _history_record(generation: int, population: list[Individual]) -> Generation
         feasible_count=len(feasible),
         first_front_size=len(fronts[0]),
         min_cost_usd=min((item.objectives[0] for item in feasible), default=None),
-        min_makespan_h=min((item.objectives[1] for item in feasible), default=None),
+        min_weighted_mean_delivery_time_h=min(
+            (item.objectives[1] for item in feasible), default=None
+        ),
         min_constraint_violation=min(
             item.evaluation.constraint_violation  # type: ignore[union-attr]
             for item in population
@@ -326,6 +353,7 @@ def run_nsga2(
             raise ValueError(f"Shipment {shipment_id} has no candidate paths.")
 
     max_nonzero = model_config.constraints.max_paths_per_shipment
+    min_share = model_config.constraints.min_path_share
     population: list[Individual] = []
     for seed_kind in ("cost", "time"):
         genome = []
@@ -347,7 +375,7 @@ def run_nsga2(
         population.append(Individual(tuple(genome)))
     while len(population) < algorithm_config.population_size:
         genome = tuple(
-            _random_gene(len(library[shipment_id]), max_nonzero, rng)
+            _random_gene(len(library[shipment_id]), max_nonzero, rng, min_share)
             for shipment_id in shipment_ids
         )
         population.append(Individual(genome))
@@ -366,12 +394,14 @@ def run_nsga2(
                 parent_b,
                 algorithm_config.crossover_rate,
                 max_nonzero,
+                min_share,
                 rng,
             )
             genome = _mutate(
                 genome,
                 algorithm_config.mutation_rate,
                 max_nonzero,
+                min_share,
                 rng,
             )
             child = Individual(genome)
