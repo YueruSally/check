@@ -16,7 +16,11 @@ from china_us_multimodal.domain import (
     Shipment,
     TransferRule,
 )
-from china_us_multimodal.evaluator import evaluate_solution
+from china_us_multimodal.evaluator import (
+    _scenario_ocean_departure_delay_h,
+    _scenario_port_capacity_multiplier,
+    evaluate_solution,
+)
 from china_us_multimodal.validation import validate_model_data
 
 
@@ -193,3 +197,31 @@ def test_la_lb_port_capacity_multiplier_is_enforced():
     )
     assert not result.feasible
     assert any("Node la_lb day 0: 60>50 FEU" in item for item in result.violations)
+
+
+def test_gateway_specific_controls_are_distinct_and_additive():
+    scenario = ScenarioConfig(
+        "gateway",
+        uswc_port_capacity_multiplier=0.8,
+        la_lb_port_capacity_multiplier=0.5,
+        seattle_tacoma_port_capacity_multiplier=0.25,
+        uswc_ocean_departure_delay_h=10,
+        la_lb_ocean_departure_delay_h=5,
+        seattle_tacoma_ocean_departure_delay_h=7,
+    )
+    config = ModelConfig(
+        "FEU",
+        ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
+        ConstraintConfig(),
+        PenaltyConfig(),
+        scenario,
+    )
+    la_arc = Arc("la", "shanghai", "la_lb", Mode.OCEAN, 1, 1)
+    seattle_arc = Arc(
+        "seattle", "shanghai", "seattle_tacoma", Mode.OCEAN, 1, 1
+    )
+
+    assert _scenario_ocean_departure_delay_h(la_arc, config) == 15
+    assert _scenario_ocean_departure_delay_h(seattle_arc, config) == 17
+    assert _scenario_port_capacity_multiplier("la_lb", config) == 0.4
+    assert _scenario_port_capacity_multiplier("seattle_tacoma", config) == 0.2
