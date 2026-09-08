@@ -49,17 +49,25 @@ def _scenario_arc_cost(arc: Arc, config: ModelConfig) -> float:
 def _scenario_ocean_departure_delay_h(arc: Arc, config: ModelConfig) -> float:
     if arc.mode.value != "ocean":
         return 0.0
-    return (
-        config.scenario.usec_ocean_departure_delay_h
-        if arc.via_panama
-        else config.scenario.uswc_ocean_departure_delay_h
-    )
+    if arc.via_panama:
+        return config.scenario.usec_ocean_departure_delay_h
+
+    delay_h = config.scenario.uswc_ocean_departure_delay_h
+    if arc.destination == "la_lb":
+        delay_h += config.scenario.la_lb_ocean_departure_delay_h
+    elif arc.destination == "seattle_tacoma":
+        delay_h += config.scenario.seattle_tacoma_ocean_departure_delay_h
+    return delay_h
 
 
 def _scenario_port_capacity_multiplier(node_id: str, config: ModelConfig) -> float:
     multiplier = config.scenario.port_capacity_multiplier
     if node_id in {"la_lb", "seattle_tacoma"}:
         multiplier *= config.scenario.uswc_port_capacity_multiplier
+        if node_id == "la_lb":
+            multiplier *= config.scenario.la_lb_port_capacity_multiplier
+        else:
+            multiplier *= config.scenario.seattle_tacoma_port_capacity_multiplier
     elif node_id == "ny_nj":
         multiplier *= config.scenario.usec_port_capacity_multiplier
     return multiplier
