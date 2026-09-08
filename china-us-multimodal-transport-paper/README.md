@@ -120,3 +120,33 @@ The default is two workers, 48 individuals, 99 generations and 30 seeds. The
 previous baseline runtime suggests approximately 1.5–2 hours on two workers,
 but shared-server load may change this estimate. Use
 `tail -f logs/v05_noncarbon_scenarios.log` to monitor progress.
+
+## v0.6 threshold and gateway-specific suite
+
+v0.6 refines the West Coast capacity threshold at 70%, 65% and 60%,
+separates LA/LB from Seattle/Tacoma capacity and 72-hour delay shocks, extends
+regional delays to 96, 120 and 168 hours, and tests a 50%-capacity plus
+120-hour compound disruption. It contains no carbon mechanism. The baseline
+is included in the same run with the same seed sequence.
+
+Run 1,080 experiments (12 scenarios × three cases × 30 seeds):
+
+```bash
+mkdir -p logs
+nohup nice -n 10 bash scripts/run_threshold_scenarios.sh \
+  > logs/v06_threshold_scenarios.log 2>&1 &
+echo $! > logs/v06_threshold_scenarios.pid
+```
+
+With two workers, allow roughly 2–3 hours depending on shared-server load.
+After completion, create the comparison tables and paper-ready SVG figures:
+
+```bash
+python scripts/analyze_scenarios.py \
+  results/v06_threshold_scenarios_30seeds \
+  --output analysis/v06_threshold_scenarios
+```
+
+The analysis reports raw median changes relative to the version-matched
+baseline. Hypervolume values normalized within different case/scenario groups
+should not be interpreted as directly comparable effect sizes.
