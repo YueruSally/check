@@ -1,0 +1,76 @@
+{
+  "generated_at_utc": "2026-09-08T15:16:46.443289+00:00",
+  "experiment_type": "multi-seed NSGA-II with cost and quantity-weighted delivery time",
+  "cases": [
+    "D1",
+    "D2",
+    "D3"
+  ],
+  "scenarios": [
+    "pilot_baseline",
+    "uswc_port_capacity_675pct",
+    "uswc_departure_delay_240h",
+    "uswc_departure_delay_336h",
+    "uswc_compound_30pct_delay_168h",
+    "uswc_compound_40pct_delay_168h"
+  ],
+  "seeds": [
+    20260906,
+    20260907,
+    20260908,
+    20260909,
+    20260910,
+    20260911,
+    20260912,
+    20260913,
+    20260914,
+    20260915,
+    20260916,
+    20260917,
+    20260918,
+    20260919,
+    20260920,
+    20260921,
+    20260922,
+    20260923,
+    20260924,
+    20260925,
+    20260926,
+    20260927,
+    20260928,
+    20260929,
+    20260930,
+    20260931,
+    20260932,
+    20260933,
+    20260934,
+    20260935
+  ],
+  "workers": 2,
+  "algorithm": {
+    "population_size": 48,
+    "generations": 99,
+    "crossover_rate": 0.9,
+    "mutation_rate": 0.12,
+    "max_paths_per_gateway": 4,
+    "seed": 20260906
+  },
+  "evaluations_per_run": 4800,
+  "source_workbook": "ChinaUS_Gateway_Model_Ready_v2.xlsx",
+  "source_sha256": "45532957d7c63f5ef928468986d4d6de2f8bc5da340747281cbf3d44b188616a",
+  "config_sha256": "8f5b7f50b1d1f3744a9d0527dd17083eb81496d68c73526ef6c66c07c192638b",
+  "minimum_path_share": 0.1,
+  "objectives": [
+    "total_cost_usd",
+    "quantity_weighted_mean_delivery_time_h"
+  ],
+  "files": {
+    "runs.csv": "one row per independent run",
+    "fronts.csv": "all final feasible non-dominated objective points",
+    "aggregate.csv": "cross-seed stability summary",
+    "combined_pareto.csv": "non-dominated union over seeds",
+    "representative_solutions.csv": "objective values and roles for union-front solutions",
+    "representative_allocations.csv": "shipment quantities and arc sequences for union-front solutions"
+  },
+  "note": "Calibration baseline, not a paper conclusion. Comparator algorithms and scenario experiments must use the same evaluation budget and shared normalization bounds."
+}
