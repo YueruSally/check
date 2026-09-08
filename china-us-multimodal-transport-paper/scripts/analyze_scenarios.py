@@ -200,7 +200,11 @@ def allocation_summary(
     return gateway_rows, ny_rows
 
 
-def plot_effects(rows: list[dict[str, object]], output_dir: Path) -> None:
+def plot_effects(
+    rows: list[dict[str, object]],
+    gateway_rows: list[dict[str, object]],
+    output_dir: Path,
+) -> None:
     try:
         import matplotlib.pyplot as plt
     except ImportError:
@@ -232,14 +236,16 @@ def plot_effects(rows: list[dict[str, object]], output_dir: Path) -> None:
         plt.close(figure)
 
     preferred: dict[tuple[str, str], dict[str, object]] = {}
-    for row in rows_for_gateway_plot:
+    for row in gateway_rows:
         key = (str(row["case_id"]), str(row["scenario"]))
         role = str(row["roles"]).lower()
         if key not in preferred or "balanced" in role or "knee" in role:
             preferred[key] = row
     plot_rows = [preferred[key] for key in sorted(preferred)]
-    xlabels = [f"{row['case_id']}
-{str(row['scenario']).replace('uswc_', '')}" for row in plot_rows]
+    xlabels = [
+        str(row["case_id"]) + " / " + str(row["scenario"]).replace("uswc_", "")
+        for row in plot_rows
+    ]
     left = [float(row["la_lb_share_pct"]) for row in plot_rows]
     middle = [float(row["seattle_tacoma_share_pct"]) for row in plot_rows]
     right = [float(row["ny_nj_share_pct"]) for row in plot_rows]
@@ -339,9 +345,7 @@ def main() -> None:
         ],
     )
 
-    global rows_for_gateway_plot
-    rows_for_gateway_plot = gateway_rows
-    plot_effects(effects, args.output)
+    plot_effects(effects, gateway_rows, args.output)
     print(f"Analysis written to {args.output}.")
 
 
