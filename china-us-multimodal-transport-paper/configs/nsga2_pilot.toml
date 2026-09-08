@@ -76,20 +76,6 @@ uswc_port_capacity_multiplier = 0.75
 [scenarios.uswc_port_capacity_50pct]
 uswc_port_capacity_multiplier = 0.50
 
-# v0.8 focused NY/NJ activation thresholds; no carbon variables.
-[scenarios.uswc_departure_delay_264h]
-uswc_ocean_departure_delay_h = 264.0
-
-[scenarios.uswc_departure_delay_288h]
-uswc_ocean_departure_delay_h = 288.0
-
-[scenarios.uswc_departure_delay_312h]
-uswc_ocean_departure_delay_h = 312.0
-
-[scenarios.uswc_compound_35pct_delay_168h]
-uswc_port_capacity_multiplier = 0.35
-uswc_ocean_departure_delay_h = 168.0
-
 # v0.5 fixed departure-delay scenarios. Delay is added after the published
 # sailing departure and therefore increases both port waiting cost and arrival time.
 [scenarios.uswc_departure_delay_24h]
@@ -166,3 +152,18 @@ uswc_ocean_departure_delay_h = 168.0
 [scenarios.uswc_compound_40pct_delay_168h]
 uswc_port_capacity_multiplier = 0.40
 uswc_ocean_departure_delay_h = 168.0
+
+# v0.8 focused NY/NJ activation thresholds; no carbon variables.
+[scenarios.uswc_departure_delay_264h]
+uswc_ocean_departure_delay_h = 264.0
+
+[scenarios.uswc_departure_delay_288h]
+uswc_ocean_departure_delay_h = 288.0
+
+[scenarios.uswc_departure_delay_312h]
+uswc_ocean_departure_delay_h = 312.0
+
+[scenarios.uswc_compound_35pct_delay_168h]
+uswc_port_capacity_multiplier = 0.35
+uswc_ocean_departure_delay_h = 168.0
+
