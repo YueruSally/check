@@ -1,0 +1,17 @@
+{
+  "baseline": "pilot_baseline",
+  "pairing_keys": [
+    "case_id",
+    "seed"
+  ],
+  "metrics": [
+    "total_cost_usd",
+    "weighted_mean_delivery_time_h"
+  ],
+  "bootstrap_repetitions": 10000,
+  "confidence_interval": "95% percentile bootstrap",
+  "test": "two-sided exact sign test; zero differences omitted",
+  "effect_size": "paired Cohen's dz",
+  "multiplicity": "Holm adjustment across every case/scenario/metric comparison",
+  "randomness": "deterministic SHA-256-derived bootstrap seeds"
+}
