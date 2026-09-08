@@ -170,3 +170,24 @@ commands in `docs/v07_activation_protocol.md`. The paired analysis matches
 each scenario to the baseline by case and seed and reports exact sign tests,
 Holm-adjusted p-values, paired Cohen's dz and deterministic 95% bootstrap
 confidence intervals.
+
+
+## v0.8 focused activation thresholds
+
+v0.8 narrows the NY/NJ activation boundary for D1 and D2. It tests West
+Coast departure delays of 264, 288 and 312 hours plus a 35%-capacity,
+168-hour compound disruption. The same-seed baseline is included, giving 300
+runs in total: 240 new scenario runs and 60 baseline controls. The experiment
+contains no carbon mechanism.
+
+```bash
+mkdir -p logs
+nohup nice -n 10 bash scripts/run_focused_activation_thresholds.sh \
+  > logs/v08_focused_activation_thresholds.log 2>&1 &
+echo $! > logs/v08_focused_activation_thresholds.pid
+```
+
+After completion, use the scenario and paired-statistics analysis commands in
+`docs/v08_focused_threshold_protocol.md`. The decision rule treats NY/NJ as a
+meaningful alternative gateway when its cross-seed non-dominated-union share
+reaches at least 10%.
