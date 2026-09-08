@@ -113,7 +113,7 @@ def test_path_below_ten_percent_is_infeasible():
     assert any("10% minimum" in message for message in result.violations)
 
 
-def test_west_coast_departure_delay_changes_wait_cost_and_arrival():
+def test_la_lb_departure_delay_changes_wait_cost_and_arrival():
     nodes = {
         "xian": Node("xian", "Xi'an", NodeKind.CN_ORIGIN, "CN"),
         "shanghai": Node("shanghai", "Shanghai", NodeKind.CN_PORT, "CN"),
@@ -148,7 +148,7 @@ def test_west_coast_departure_delay_changes_wait_cost_and_arrival():
         ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
         ConstraintConfig(),
         PenaltyConfig(),
-        ScenarioConfig("delay", uswc_ocean_departure_delay_h=24),
+        ScenarioConfig("delay", la_lb_ocean_departure_delay_h=24),
         OperationalCostConfig(holding_usd_per_feu_h=2),
     )
     result = evaluate_solution(
@@ -162,7 +162,7 @@ def test_west_coast_departure_delay_changes_wait_cost_and_arrival():
     assert result.total_cost_usd == 1868
 
 
-def test_west_coast_port_capacity_multiplier_is_enforced():
+def test_la_lb_port_capacity_multiplier_is_enforced():
     nodes = {
         "a": Node("a", "A", NodeKind.CN_ORIGIN, "CN"),
         "la_lb": Node(
@@ -184,7 +184,7 @@ def test_west_coast_port_capacity_multiplier_is_enforced():
         ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
         ConstraintConfig(enforce_timetable=False, enforce_capacity=True),
         PenaltyConfig(),
-        ScenarioConfig("capacity", uswc_port_capacity_multiplier=0.5),
+        ScenarioConfig("capacity", la_lb_port_capacity_multiplier=0.5),
     )
     result = evaluate_solution(
         data,
