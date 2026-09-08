@@ -39,8 +39,12 @@ usec_ocean_cost_multiplier = 1.0
 port_capacity_multiplier = 1.0
 uswc_port_capacity_multiplier = 1.0
 usec_port_capacity_multiplier = 1.0
+la_lb_port_capacity_multiplier = 1.0
+seattle_tacoma_port_capacity_multiplier = 1.0
 uswc_ocean_departure_delay_h = 0.0
 usec_ocean_departure_delay_h = 0.0
+la_lb_ocean_departure_delay_h = 0.0
+seattle_tacoma_ocean_departure_delay_h = 0.0
 demand_multiplier = 1.0
 
 # Historical one-factor scenarios retained for reproducibility.
@@ -92,3 +96,41 @@ uswc_ocean_departure_delay_h = 24.0
 [scenarios.uswc_compound_severe]
 uswc_port_capacity_multiplier = 0.50
 uswc_ocean_departure_delay_h = 72.0
+
+# v0.6 capacity-threshold refinement.
+[scenarios.uswc_port_capacity_70pct]
+uswc_port_capacity_multiplier = 0.70
+
+[scenarios.uswc_port_capacity_65pct]
+uswc_port_capacity_multiplier = 0.65
+
+[scenarios.uswc_port_capacity_60pct]
+uswc_port_capacity_multiplier = 0.60
+
+# v0.6 gateway-specific capacity scenarios.
+[scenarios.la_lb_port_capacity_50pct]
+la_lb_port_capacity_multiplier = 0.50
+
+[scenarios.seattle_tacoma_port_capacity_50pct]
+seattle_tacoma_port_capacity_multiplier = 0.50
+
+# v0.6 gateway-specific and extended West Coast delay scenarios.
+[scenarios.la_lb_departure_delay_72h]
+la_lb_ocean_departure_delay_h = 72.0
+
+[scenarios.seattle_tacoma_departure_delay_72h]
+seattle_tacoma_ocean_departure_delay_h = 72.0
+
+[scenarios.uswc_departure_delay_96h]
+uswc_ocean_departure_delay_h = 96.0
+
+[scenarios.uswc_departure_delay_120h]
+uswc_ocean_departure_delay_h = 120.0
+
+[scenarios.uswc_departure_delay_168h]
+uswc_ocean_departure_delay_h = 168.0
+
+# v0.6 severe compound disruption.
+[scenarios.uswc_compound_50pct_delay_120h]
+uswc_port_capacity_multiplier = 0.50
+uswc_ocean_departure_delay_h = 120.0
