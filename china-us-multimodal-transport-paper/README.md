@@ -150,3 +150,23 @@ python scripts/analyze_scenarios.py \
 The analysis reports raw median changes relative to the version-matched
 baseline. Hypervolume values normalized within different case/scenario groups
 should not be interpreted as directly comparable effect sizes.
+
+## v0.7 NY/NJ activation experiment
+
+v0.7 adds a 67.5% West Coast capacity threshold, 240-hour and 336-hour
+West Coast departure delays, and 30%/40% capacity plus 168-hour compound
+disruptions. The six-scenario design includes a same-seed baseline and contains
+no carbon mechanism. It runs 540 experiments.
+
+```bash
+mkdir -p logs
+nohup nice -n 10 bash scripts/run_activation_scenarios.sh \
+  > logs/v07_activation_scenarios.log 2>&1 &
+echo $! > logs/v07_activation_scenarios.pid
+```
+
+After the run, generate the route and paired statistical analyses using the
+commands in `docs/v07_activation_protocol.md`. The paired analysis matches
+each scenario to the baseline by case and seed and reports exact sign tests,
+Holm-adjusted p-values, paired Cohen's dz and deterministic 95% bootstrap
+confidence intervals.
