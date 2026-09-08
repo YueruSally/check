@@ -327,8 +327,7 @@ def main() -> None:
         "randomness": "deterministic SHA-256-derived bootstrap seeds",
     }
     (args.output / "paired_statistics_manifest.json").write_text(
-        json.dumps(manifest, indent=2) + "
-",
+        json.dumps(manifest, indent=2) + chr(10),
         encoding="utf-8",
     )
     print(
