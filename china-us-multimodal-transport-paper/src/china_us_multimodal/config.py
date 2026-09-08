@@ -39,8 +39,12 @@ class ScenarioConfig:
     port_capacity_multiplier: float = 1.0
     uswc_port_capacity_multiplier: float = 1.0
     usec_port_capacity_multiplier: float = 1.0
+    la_lb_port_capacity_multiplier: float = 1.0
+    seattle_tacoma_port_capacity_multiplier: float = 1.0
     uswc_ocean_departure_delay_h: float = 0.0
     usec_ocean_departure_delay_h: float = 0.0
+    la_lb_ocean_departure_delay_h: float = 0.0
+    seattle_tacoma_ocean_departure_delay_h: float = 0.0
     demand_multiplier: float = 1.0
 
 
@@ -87,6 +91,11 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
         ("port_capacity_multiplier", scenario.port_capacity_multiplier),
         ("uswc_port_capacity_multiplier", scenario.uswc_port_capacity_multiplier),
         ("usec_port_capacity_multiplier", scenario.usec_port_capacity_multiplier),
+        ("la_lb_port_capacity_multiplier", scenario.la_lb_port_capacity_multiplier),
+        (
+            "seattle_tacoma_port_capacity_multiplier",
+            scenario.seattle_tacoma_port_capacity_multiplier,
+        ),
         ("demand_multiplier", scenario.demand_multiplier),
     ):
         if multiplier <= 0:
@@ -94,6 +103,14 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
     for field_name, delay_h in (
         ("uswc_ocean_departure_delay_h", scenario.uswc_ocean_departure_delay_h),
         ("usec_ocean_departure_delay_h", scenario.usec_ocean_departure_delay_h),
+        (
+            "la_lb_ocean_departure_delay_h",
+            scenario.la_lb_ocean_departure_delay_h,
+        ),
+        (
+            "seattle_tacoma_ocean_departure_delay_h",
+            scenario.seattle_tacoma_ocean_departure_delay_h,
+        ),
     ):
         if delay_h < 0:
             raise ValueError(f"{field_name} must be non-negative.")
