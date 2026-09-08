@@ -19,6 +19,11 @@ SCENARIO_ORDER = [
     "uswc_departure_delay_120h",
     "uswc_departure_delay_168h",
     "uswc_compound_50pct_delay_120h",
+    "uswc_port_capacity_675pct",
+    "uswc_departure_delay_240h",
+    "uswc_departure_delay_336h",
+    "uswc_compound_30pct_delay_168h",
+    "uswc_compound_40pct_delay_168h",
 ]
 GATEWAY_ARCS = {
     "la_lb": {"sea-01", "sea-02"},
@@ -211,7 +216,11 @@ def plot_effects(
         print("matplotlib is not installed; CSV tables were written and SVG plots were skipped.")
         return
 
-    labels = [name.replace("uswc_", "").replace("_", " ") for name in SCENARIO_ORDER]
+    present_scenarios = {str(row["scenario"]) for row in rows}
+    scenario_order = [
+        name for name in SCENARIO_ORDER if name in present_scenarios
+    ] + sorted(present_scenarios - set(SCENARIO_ORDER))
+    labels = [name.replace("uswc_", "").replace("_", " ") for name in scenario_order]
     cases = sorted({str(row["case_id"]) for row in rows})
     by_key = {(str(row["case_id"]), str(row["scenario"])): row for row in rows}
 
@@ -223,7 +232,7 @@ def plot_effects(
         for case_id in cases:
             values = [
                 float(by_key[(case_id, scenario)][field])
-                for scenario in SCENARIO_ORDER
+                for scenario in scenario_order
             ]
             axis.plot(range(len(labels)), values, marker="o", linewidth=1.8, label=case_id)
         axis.axhline(0.0, color="black", linewidth=0.8)
@@ -241,7 +250,14 @@ def plot_effects(
         role = str(row["roles"]).lower()
         if key not in preferred or "balanced" in role or "knee" in role:
             preferred[key] = row
-    plot_rows = [preferred[key] for key in sorted(preferred)]
+    scenario_rank = {name: index for index, name in enumerate(scenario_order)}
+    plot_rows = [
+        preferred[key]
+        for key in sorted(
+            preferred,
+            key=lambda item: (item[0], scenario_rank.get(item[1], 999), item[1]),
+        )
+    ]
     xlabels = [
         str(row["case_id"]) + " / " + str(row["scenario"]).replace("uswc_", "")
         for row in plot_rows
