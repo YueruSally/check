@@ -40,3 +40,23 @@ on all ocean services, and moderate/severe West Coast compound disruptions.
 
 Historical Panama, freight-gap and demand scenarios remain in the configuration
 for reproducibility but are not part of `scripts/run_noncarbon_scenarios.sh`.
+
+## v0.6 threshold and gateway-specific mechanisms
+
+The v0.6 experiment retains the 10% minimum active-path share and contains no
+carbon variable, objective, price or emissions constraint.
+
+`la_lb_port_capacity_multiplier` and
+`seattle_tacoma_port_capacity_multiplier` scale the two West Coast gateway
+capacities separately. They multiply the common
+`port_capacity_multiplier` and `uswc_port_capacity_multiplier`, so regional
+and gateway-specific disruptions can be combined without changing the base
+data. The capacity-threshold runs refine the interval between the non-binding
+75% scenario and the binding 50% scenario at 70%, 65% and 60%.
+
+`la_lb_ocean_departure_delay_h` and
+`seattle_tacoma_ocean_departure_delay_h` add gateway-specific delays on top
+of any common West Coast delay. The matrix separates the two gateways at 72
+hours, extends the regional delay to 96, 120 and 168 hours, and includes one
+50%-capacity plus 120-hour compound scenario. The baseline is rerun with the
+same seeds to provide a paired control for this version.
