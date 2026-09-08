@@ -134,3 +134,21 @@ uswc_ocean_departure_delay_h = 168.0
 [scenarios.uswc_compound_50pct_delay_120h]
 uswc_port_capacity_multiplier = 0.50
 uswc_ocean_departure_delay_h = 120.0
+
+# v0.7 non-carbon activation and threshold scenarios.
+[scenarios.uswc_port_capacity_675pct]
+uswc_port_capacity_multiplier = 0.675
+
+[scenarios.uswc_departure_delay_240h]
+uswc_ocean_departure_delay_h = 240.0
+
+[scenarios.uswc_departure_delay_336h]
+uswc_ocean_departure_delay_h = 336.0
+
+[scenarios.uswc_compound_30pct_delay_168h]
+uswc_port_capacity_multiplier = 0.30
+uswc_ocean_departure_delay_h = 168.0
+
+[scenarios.uswc_compound_40pct_delay_168h]
+uswc_port_capacity_multiplier = 0.40
+uswc_ocean_departure_delay_h = 168.0
