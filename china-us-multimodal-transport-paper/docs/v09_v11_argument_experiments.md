@@ -13,8 +13,8 @@ The first suite tests a 3 × 3 grid:
 - common West Coast ocean departure delay: 0, 168, 288 h.
 
 It also compares two scenarios with the same nominal demand/capacity pressure:
-40% capacity with baseline demand versus 60% capacity with demand multiplied by
-1.5. This checks whether load pressure, rather than the capacity percentage in
+40% capacity with baseline demand versus 50% capacity with demand multiplied by
+1.25. This checks whether load pressure, rather than the capacity percentage in
 isolation, explains activation. The analysis reconstructs actual daily node,
 arc and service utilization for representative solutions.
 
@@ -69,6 +69,19 @@ echo $! > logs/v09_v11_argument_experiments.pid
 
 The default configuration is two workers, 48 individuals, 99 generations and
 30 paired seeds. Do not launch a second copy while this process is running.
+
+If the earlier v0.9 run completed all 990 optimizations but stopped because the
+obsolete `demand_150pct_uswc_capacity_60pct` case was infeasible, do not rerun
+v0.9. Pull the current branch and use the recovery entry point:
+
+```bash
+nohup nice -n 10 bash scripts/resume_argument_experiments_after_v09.sh \
+  > logs/v09_v11_recovery.log 2>&1 &
+echo $! > logs/v09_v11_recovery.pid
+```
+
+This runs only 90 replacement load-pressure experiments, rebuilds the v0.9
+analysis without the structurally infeasible case, and continues v1.0–v1.1.
 
 ## Expected runtime
 

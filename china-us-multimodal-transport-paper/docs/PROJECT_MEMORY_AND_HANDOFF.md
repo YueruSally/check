@@ -344,7 +344,7 @@ argument:
 1. v0.9 maps NY/NJ activation over a 3 × 3 grid of remaining West Coast
    capacity (60%, 40%, 35%) and departure delay (0, 168, 288 h). It adds an
    equal nominal load-pressure comparison between 40% capacity with baseline
-   demand and 60% capacity with 1.5 × demand, plus actual capacity-utilization
+   demand and 50% capacity with 1.25 × demand, plus actual capacity-utilization
    reconstruction.
 2. v1.0 compares NY/NJ allowed with NY/NJ disabled under identical disruptions
    and the same seeds. The allowed cases reuse existing v0.7/v0.8 runs; only

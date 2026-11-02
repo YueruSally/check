@@ -195,6 +195,13 @@ uswc_ocean_departure_delay_h = 288.0
 demand_multiplier = 1.50
 uswc_port_capacity_multiplier = 0.60
 
+# Feasible load-pressure equivalent for the v0.9 mechanism comparison:
+# 1.25 / 0.50 = 1.00 / 0.40. Unlike the 1.50-demand case, this remains below
+# the 3,000 FEU/day Xi'an origin-node capacity.
+[scenarios.demand_125pct_uswc_capacity_50pct]
+demand_multiplier = 1.25
+uswc_port_capacity_multiplier = 0.50
+
 # v1.0 NY/NJ counterfactuals. Each scenario is identical to its corresponding
 # disruption scenario except that the alternative East Coast gateway is unavailable.
 [scenarios.uswc_departure_delay_240h_no_ny_nj]

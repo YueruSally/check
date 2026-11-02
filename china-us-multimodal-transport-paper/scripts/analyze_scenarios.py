@@ -31,7 +31,7 @@ SCENARIO_ORDER = [
     "uswc_capacity_60pct_delay_288h",
     "uswc_capacity_40pct_delay_288h",
     "uswc_capacity_35pct_delay_288h",
-    "demand_150pct_uswc_capacity_60pct",
+    "demand_125pct_uswc_capacity_50pct",
 ]
 GATEWAY_ARCS = {
     "la_lb": {"sea-01", "sea-02"},
@@ -298,6 +298,7 @@ def main() -> None:
     )
     parser.add_argument("results", type=Path)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--exclude-scenarios", nargs="*", default=())
     args = parser.parse_args()
 
     required = [
@@ -313,6 +314,20 @@ def main() -> None:
     aggregate_rows = read_csv(args.results / "aggregate.csv")
     solution_rows = read_csv(args.results / "representative_solutions.csv")
     allocation_rows = read_csv(args.results / "representative_allocations.csv")
+    excluded = set(args.exclude_scenarios)
+    if excluded:
+        aggregate_rows = [
+            row for row in aggregate_rows if row["scenario"] not in excluded
+        ]
+        solution_rows = [
+            row for row in solution_rows if row["scenario"] not in excluded
+        ]
+        retained_solution_ids = {row["solution_id"] for row in solution_rows}
+        allocation_rows = [
+            row
+            for row in allocation_rows
+            if row["solution_id"] in retained_solution_ids
+        ]
 
     effects = build_scenario_effects(aggregate_rows)
     gateway_rows, ny_rows = allocation_summary(solution_rows, allocation_rows)

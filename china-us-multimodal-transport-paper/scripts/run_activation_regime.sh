@@ -20,7 +20,7 @@ scenarios=(
   uswc_capacity_60pct_delay_288h
   uswc_capacity_40pct_delay_288h
   uswc_capacity_35pct_delay_288h
-  demand_150pct_uswc_capacity_60pct
+  demand_125pct_uswc_capacity_50pct
 )
 
 mkdir -p "${output}" "${analysis_output}"

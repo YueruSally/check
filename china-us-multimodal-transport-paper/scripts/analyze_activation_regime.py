@@ -50,10 +50,18 @@ def main() -> None:
     parser.add_argument("data", type=Path)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--equivalence-results", type=Path)
     args = parser.parse_args()
 
     solution_rows = read_csv(args.results / "representative_solutions.csv")
     allocation_rows = read_csv(args.results / "representative_allocations.csv")
+    if args.equivalence_results:
+        solution_rows.extend(
+            read_csv(args.equivalence_results / "representative_solutions.csv")
+        )
+        allocation_rows.extend(
+            read_csv(args.equivalence_results / "representative_allocations.csv")
+        )
     gateway_rows, ny_rows = allocation_summary(solution_rows, allocation_rows)
     preferred = preferred_gateway_rows(gateway_rows)
     ny_by_key = {
@@ -106,6 +114,10 @@ def main() -> None:
                     "base_combined_uswc_capacity_feu_per_day": base_uswc_capacity,
                     "available_combined_uswc_capacity_feu_per_day": available_capacity,
                     "nominal_load_pressure": demand / available_capacity,
+                    "balanced_total_cost_usd": gateway["total_cost_usd"],
+                    "balanced_weighted_mean_delivery_time_h": gateway[
+                        "quantity_weighted_mean_delivery_time_h"
+                    ],
                     "balanced_la_lb_share_pct": gateway["la_lb_share_pct"],
                     "balanced_seattle_tacoma_share_pct": gateway[
                         "seattle_tacoma_share_pct"
@@ -138,6 +150,8 @@ def main() -> None:
         "base_combined_uswc_capacity_feu_per_day",
         "available_combined_uswc_capacity_feu_per_day",
         "nominal_load_pressure",
+        "balanced_total_cost_usd",
+        "balanced_weighted_mean_delivery_time_h",
         "balanced_la_lb_share_pct",
         "balanced_seattle_tacoma_share_pct",
         "balanced_ny_nj_share_pct",
@@ -163,7 +177,7 @@ def main() -> None:
         row
         for row in rows
         if row["scenario"]
-        in {"uswc_port_capacity_40pct", "demand_150pct_uswc_capacity_60pct"}
+        in {"uswc_port_capacity_40pct", "demand_125pct_uswc_capacity_50pct"}
     ]
     write_csv(args.output / "load_pressure_equivalence.csv", equivalent, fields)
     plot_heatmap(rows, args.output)

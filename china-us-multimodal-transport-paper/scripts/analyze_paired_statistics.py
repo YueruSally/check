@@ -258,6 +258,7 @@ def main() -> None:
     parser.add_argument("results", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--baseline", default=BASELINE)
+    parser.add_argument("--exclude-scenarios", nargs="*", default=())
     parser.add_argument("--bootstrap-repetitions", type=int, default=10000)
     args = parser.parse_args()
 
@@ -267,8 +268,12 @@ def main() -> None:
     if not runs_path.is_file():
         parser.error(f"missing result file: {runs_path}")
 
+    excluded = set(args.exclude_scenarios)
+    rows = [
+        row for row in read_csv(runs_path) if row["scenario"] not in excluded
+    ]
     summary_rows, difference_rows = analyze(
-        read_csv(runs_path),
+        rows,
         args.baseline,
         args.bootstrap_repetitions,
     )
@@ -317,6 +322,7 @@ def main() -> None:
     )
     manifest = {
         "baseline": args.baseline,
+        "excluded_scenarios": sorted(excluded),
         "pairing_keys": ["case_id", "seed"],
         "metrics": [metric for _, metric, _ in METRICS],
         "bootstrap_repetitions": args.bootstrap_repetitions,
