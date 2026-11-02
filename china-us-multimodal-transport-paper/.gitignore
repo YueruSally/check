@@ -1,5 +1,7 @@
 __pycache__/
 .pytest_cache/
 .venv/
+logs/
+*.egg-info/
 *.py[cod]
 results/
