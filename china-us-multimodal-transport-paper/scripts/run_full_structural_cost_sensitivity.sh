@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+bash scripts/analyze_full_structural_core.sh
+
 python -u scripts/run_full_structural_cost_sensitivity.py \
   data/pilot_v2 \
   --config configs/nsga2_pilot.toml \
