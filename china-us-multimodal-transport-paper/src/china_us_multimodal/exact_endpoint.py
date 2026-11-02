@@ -55,6 +55,29 @@ class ExactEndpointResult:
 
 
 @dataclass(frozen=True)
+class BoundedMilpResult:
+    """One exact MILP call under optional linear upper bounds.
+
+    This result type is used for endpoint-equivalent NY/NJ share bounds and
+    feasibility checks.  ``proven_optimal`` and ``proven_infeasible`` are kept
+    separate so that a time-limit result is never reported as infeasible.
+    """
+
+    objective: str
+    maximize: bool
+    solver_call: SolverCall
+    allocations: tuple[RouteAllocation, ...]
+    evaluation: EvaluationResult | None
+    objective_value: float | None
+    proven_optimal: bool
+    proven_infeasible: bool
+    evaluator_consistent: bool
+    evaluator_cost_abs_error: float | None
+    evaluator_time_abs_error: float | None
+    resource_max_abs_error_feu: float | None
+
+
+@dataclass(frozen=True)
 class ExactEndpointModel:
     data: ModelData
     config: ModelConfig
@@ -85,12 +108,36 @@ class ExactEndpointModel:
             raise ValueError(f"Unknown exact endpoint objective: {objective!r}.")
         return continuous + [0.0] * len(self.profiles)
 
+    def gateway_share_coefficients(self, gateway: str) -> list[float]:
+        """Return coefficients for the fraction of demand using ``gateway``."""
+        continuous = [
+            (1.0 / self.total_demand)
+            if _profile_gateway(self, profile) == gateway
+            else 0.0
+            for profile in self.profiles
+        ]
+        return continuous + [0.0] * len(self.profiles)
+
+
+def _profile_gateway(model: ExactEndpointModel, profile: PathProfile) -> str:
+    return _gateway_for_arc_ids(model.data, profile.arc_ids)
+
+
+def _gateway_for_arc_ids(data: ModelData, arc_ids: Iterable[str]) -> str:
+    for arc_id in arc_ids:
+        arc = data.arcs[arc_id]
+        for node_id in (arc.origin, arc.destination):
+            if data.nodes[node_id].kind.value == "us_port":
+                return node_id
+    return "unclassified"
+
 
 def build_exact_endpoint_model(
     data: ModelData,
     config: ModelConfig,
     *,
     max_paths_per_gateway: int = 4,
+    required_paths_by_shipment: dict[str, tuple[tuple[str, ...], ...]] | None = None,
 ) -> ExactEndpointModel:
     """Build the path-allocation MILP using the evaluator's route accounting."""
     library = build_gateway_aware_library(
@@ -100,6 +147,24 @@ def build_exact_endpoint_model(
         max_paths_per_gateway=max_paths_per_gateway,
         disabled_gateways=set(config.scenario.disabled_gateways),
     )
+    if required_paths_by_shipment:
+        nested_library: dict[str, tuple[tuple[str, ...], ...]] = {}
+        for shipment_id, generated_paths in library.items():
+            merged: list[tuple[str, ...]] = []
+            counts: dict[str, int] = {}
+            for path in (
+                *required_paths_by_shipment.get(shipment_id, ()),
+                *generated_paths,
+            ):
+                if path in merged:
+                    continue
+                gateway = _gateway_for_arc_ids(data, path)
+                if counts.get(gateway, 0) >= max_paths_per_gateway:
+                    continue
+                merged.append(path)
+                counts[gateway] = counts.get(gateway, 0) + 1
+            nested_library[shipment_id] = tuple(merged)
+        library = nested_library
     profiles: list[PathProfile] = []
     resource_capacities: dict[tuple[str, str, str], float] = {}
     for shipment_id in sorted(library):
@@ -197,6 +262,7 @@ def _linear_system(
     *,
     primary_coefficients: list[float] | None = None,
     primary_upper_bound: float | None = None,
+    additional_upper_bounds: Iterable[tuple[list[float], float]] = (),
 ) -> tuple[object, object, object, object]:
     try:
         import numpy as np
@@ -266,6 +332,19 @@ def _linear_system(
             },
             -math.inf,
             primary_upper_bound,
+        )
+
+    for coefficients, upper_bound in additional_upper_bounds:
+        if len(coefficients) != variable_count:
+            raise ValueError("A bounded MILP coefficient vector has the wrong length.")
+        add_row(
+            {
+                index: coefficient
+                for index, coefficient in enumerate(coefficients)
+                if coefficient
+            },
+            -math.inf,
+            upper_bound,
         )
 
     row_indices: list[int] = []
@@ -366,6 +445,155 @@ def _resource_consistency_error(
     )
 
 
+def _evaluate_vector_solution(
+    model: ExactEndpointModel,
+    values: Iterable[float],
+) -> tuple[
+    tuple[RouteAllocation, ...],
+    EvaluationResult,
+    float,
+    float,
+    float,
+    bool,
+]:
+    values = tuple(float(value) for value in values)
+    allocations = _decode_allocations(model, values)
+    evaluation = evaluate_solution(model.data, list(allocations), model.config)
+    cost_from_vector = sum(
+        coefficient * value
+        for coefficient, value in zip(model.objective_coefficients("cost"), values)
+    )
+    time_from_vector = sum(
+        coefficient * value
+        for coefficient, value in zip(model.objective_coefficients("time"), values)
+    )
+    cost_error = abs(cost_from_vector - evaluation.total_cost_usd)
+    time_error = abs(
+        time_from_vector - evaluation.quantity_weighted_mean_delivery_time_h
+    )
+    resource_error = _resource_consistency_error(model, allocations, values)
+    objective_consistent = (
+        cost_error <= max(1e-4, 1e-9 * abs(evaluation.total_cost_usd))
+        and time_error <= 1e-7
+        and resource_error <= model.config.constraints.allocation_tolerance_feu
+    )
+    return (
+        allocations,
+        evaluation,
+        cost_error,
+        time_error,
+        resource_error,
+        evaluation.feasible and objective_consistent,
+    )
+
+
+def solve_bounded_milp(
+    model: ExactEndpointModel,
+    *,
+    objective_coefficients: list[float],
+    objective_name: str,
+    upper_bounds: Iterable[tuple[list[float], float]] = (),
+    maximize: bool = False,
+    time_limit_seconds: float = 900.0,
+    mip_relative_gap: float = 1e-8,
+) -> BoundedMilpResult:
+    """Solve one linear MILP without conflating timeout and infeasibility."""
+    try:
+        from scipy.optimize import milp
+    except ImportError as exc:  # pragma: no cover - exercised on the server
+        raise RuntimeError(
+            "Exact endpoint validation requires: pip install -e '.[exact]'."
+        ) from exc
+
+    if len(objective_coefficients) != model.variable_count:
+        raise ValueError("The bounded MILP objective vector has the wrong length.")
+    signed = [
+        -coefficient if maximize else coefficient
+        for coefficient in objective_coefficients
+    ]
+    integrality, bounds, constraints, np = _linear_system(
+        model,
+        additional_upper_bounds=tuple(upper_bounds),
+    )
+    started = time.perf_counter()
+    result = milp(
+        c=np.asarray(signed),
+        integrality=integrality,
+        bounds=bounds,
+        constraints=constraints,
+        options={
+            "time_limit": float(time_limit_seconds),
+            "mip_rel_gap": float(mip_relative_gap),
+            "presolve": True,
+        },
+    )
+    call = _solver_call(
+        result,
+        1,
+        ("max_" if maximize else "min_") + objective_name,
+        time.perf_counter() - started,
+    )
+    status_code = int(getattr(result, "status", 4))
+    values = getattr(result, "x", None)
+    if values is None:
+        return BoundedMilpResult(
+            objective=objective_name,
+            maximize=maximize,
+            solver_call=call,
+            allocations=(),
+            evaluation=None,
+            objective_value=None,
+            proven_optimal=False,
+            proven_infeasible=status_code == 2,
+            evaluator_consistent=False,
+            evaluator_cost_abs_error=None,
+            evaluator_time_abs_error=None,
+            resource_max_abs_error_feu=None,
+        )
+    (
+        allocations,
+        evaluation,
+        cost_error,
+        time_error,
+        resource_error,
+        evaluator_consistent,
+    ) = _evaluate_vector_solution(model, values)
+    objective_value = sum(
+        coefficient * float(value)
+        for coefficient, value in zip(objective_coefficients, values)
+    )
+    return BoundedMilpResult(
+        objective=objective_name,
+        maximize=maximize,
+        solver_call=call,
+        allocations=allocations,
+        evaluation=evaluation,
+        objective_value=objective_value,
+        proven_optimal=status_code == 0 and evaluator_consistent,
+        proven_infeasible=False,
+        evaluator_consistent=evaluator_consistent,
+        evaluator_cost_abs_error=cost_error,
+        evaluator_time_abs_error=time_error,
+        resource_max_abs_error_feu=resource_error,
+    )
+
+
+def solve_feasibility(
+    model: ExactEndpointModel,
+    *,
+    time_limit_seconds: float = 900.0,
+    mip_relative_gap: float = 1e-8,
+) -> BoundedMilpResult:
+    """Find a feasible allocation or prove that none exists in the MILP."""
+    return solve_bounded_milp(
+        model,
+        objective_coefficients=[0.0] * model.variable_count,
+        objective_name="feasibility",
+        time_limit_seconds=time_limit_seconds,
+        mip_relative_gap=mip_relative_gap,
+    )
+
+
 def solve_lexicographic_endpoint(
     model: ExactEndpointModel,
     *,
@@ -459,27 +687,14 @@ def solve_lexicographic_endpoint(
             resource_max_abs_error_feu=None,
         )
 
-    allocations = _decode_allocations(model, values)
-    evaluation = evaluate_solution(model.data, list(allocations), model.config)
-    cost_from_vector = sum(
-        coefficient * value
-        for coefficient, value in zip(model.objective_coefficients("cost"), values)
-    )
-    time_from_vector = sum(
-        coefficient * value
-        for coefficient, value in zip(model.objective_coefficients("time"), values)
-    )
-    cost_error = abs(cost_from_vector - evaluation.total_cost_usd)
-    time_error = abs(
-        time_from_vector - evaluation.quantity_weighted_mean_delivery_time_h
-    )
-    resource_error = _resource_consistency_error(model, allocations, values)
-    objective_consistent = (
-        cost_error <= max(1e-4, 1e-9 * abs(evaluation.total_cost_usd))
-        and time_error <= 1e-7
-        and resource_error <= model.config.constraints.allocation_tolerance_feu
-    )
-    evaluator_consistent = evaluation.feasible and objective_consistent
+    (
+        allocations,
+        evaluation,
+        cost_error,
+        time_error,
+        resource_error,
+        evaluator_consistent,
+    ) = _evaluate_vector_solution(model, values)
     stage_two_proven = len(calls) == 2 and calls[1].status_code == 0
     return ExactEndpointResult(
         primary_objective=primary_objective,
