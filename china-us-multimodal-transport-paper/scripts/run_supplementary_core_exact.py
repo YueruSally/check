@@ -476,7 +476,11 @@ def endpoint_summary_row(payload: dict[str, object]) -> dict[str, object]:
 
 
 def run_endpoints(args, data, base_config, conditions, checkpoints):
-    reused = load_reuse_payloads(args.reuse_exact_root)
+    reused = (
+        load_reuse_payloads(args.reuse_exact_root)
+        if args.max_paths_per_gateway == 4
+        else {}
+    )
     total = len(conditions) * 2 * len(ENDPOINTS)
     completed = 0
     for condition in conditions:
@@ -509,7 +513,9 @@ def run_endpoints(args, data, base_config, conditions, checkpoints):
                 continue
             config = condition_config(base_config, condition, gateway_access=access)
             model = build_exact_endpoint_model(
-                case_data, config, max_paths_per_gateway=4
+                case_data,
+                config,
+                max_paths_per_gateway=args.max_paths_per_gateway,
             )
             for endpoint, primary, checkpoint in pending:
                 result = solve_lexicographic_endpoint(
@@ -526,6 +532,7 @@ def run_endpoints(args, data, base_config, conditions, checkpoints):
                     endpoint=endpoint,
                     model=model,
                     result=result,
+                    max_paths_per_gateway=args.max_paths_per_gateway,
                 )
                 write_json_atomic(checkpoint, payload)
                 completed += 1
@@ -596,7 +603,9 @@ def run_share_bounds(args, data, base_config, conditions, checkpoints):
                 continue
             if model is None:
                 model = build_exact_endpoint_model(
-                    case_data, config, max_paths_per_gateway=4
+                    case_data,
+                    config,
+                    max_paths_per_gateway=args.max_paths_per_gateway,
                 )
             result = solve_bounded_milp(
                 model,
@@ -649,7 +658,11 @@ def run_feasibility_checks(args, data, base_config, checkpoints):
             gateway_access="allowed",
             demand_multiplier=1.50,
         )
-        model = build_exact_endpoint_model(case_data, config, max_paths_per_gateway=4)
+        model = build_exact_endpoint_model(
+            case_data,
+            config,
+            max_paths_per_gateway=args.max_paths_per_gateway,
+        )
         result = solve_feasibility(
             model,
             time_limit_seconds=args.time_limit_seconds,
@@ -1194,6 +1207,7 @@ def finalize_outputs(args, data, base_config, conditions, checkpoints):
         "mip_relative_gap": args.mip_relative_gap,
         "endpoint_absolute_tolerance": args.absolute_tolerance,
         "endpoint_relative_tolerance": args.relative_tolerance,
+        "max_paths_per_gateway": args.max_paths_per_gateway,
         "activation_threshold": 0.10,
         "interpretation": {
             "value_curves": (
@@ -1231,11 +1245,14 @@ def main() -> None:
     parser.add_argument("--mip-relative-gap", type=float, default=1e-8)
     parser.add_argument("--relative-tolerance", type=float, default=1e-9)
     parser.add_argument("--absolute-tolerance", type=float, default=1e-6)
+    parser.add_argument("--max-paths-per-gateway", type=int, default=4)
     args = parser.parse_args()
     if args.time_limit_seconds <= 0:
         parser.error("--time-limit-seconds must be positive")
     if args.mip_relative_gap < 0:
         parser.error("--mip-relative-gap must be non-negative")
+    if args.max_paths_per_gateway <= 0:
+        parser.error("--max-paths-per-gateway must be positive")
     data = load_model_data(args.data)
     base_config = load_config(args.config, "pilot_baseline")
     conditions = core_conditions()

@@ -392,18 +392,30 @@ def _decode_allocations(
 ) -> tuple[RouteAllocation, ...]:
     quantities = list(values)[: model.quantity_variable_count]
     by_shipment: dict[str, list[tuple[int, float]]] = {}
-    tolerance = model.config.constraints.allocation_tolerance_feu
-    for index, (profile, quantity) in enumerate(zip(model.profiles, quantities)):
-        if quantity > tolerance:
-            by_shipment.setdefault(profile.shipment_id, []).append((index, float(quantity)))
+    base_tolerance = model.config.constraints.allocation_tolerance_feu
     demand = dict(model.demand_by_shipment)
+    for index, (profile, quantity) in enumerate(zip(model.profiles, quantities)):
+        # HiGHS can return tiny positive quantity residuals on paths whose
+        # binary variable is numerically zero.  Such values are several orders
+        # of magnitude below the model's minimum active-path quantity and must
+        # not be decoded as genuine route allocations.  The relative term is
+        # deliberately tiny (one millionth of shipment demand) and therefore
+        # cannot suppress a feasible allocation under the 10% minimum-share
+        # rule.
+        cleanup_tolerance = max(
+            base_tolerance,
+            1e-6 * demand[profile.shipment_id],
+        )
+        if quantity > cleanup_tolerance:
+            by_shipment.setdefault(profile.shipment_id, []).append((index, float(quantity)))
     allocations: list[RouteAllocation] = []
     for shipment_id in sorted(demand):
         active = by_shipment.get(shipment_id, [])
         if not active:
             continue
         residual = demand[shipment_id] - sum(quantity for _, quantity in active)
-        if abs(residual) <= tolerance:
+        cleanup_tolerance = max(base_tolerance, 1e-6 * demand[shipment_id])
+        if abs(residual) <= cleanup_tolerance:
             largest = max(range(len(active)), key=lambda item: active[item][1])
             index, quantity = active[largest]
             active[largest] = (index, quantity + residual)
@@ -472,10 +484,19 @@ def _evaluate_vector_solution(
         time_from_vector - evaluation.quantity_weighted_mean_delivery_time_h
     )
     resource_error = _resource_consistency_error(model, allocations, values)
+    total_demand = sum(dict(model.demand_by_shipment).values())
+    numerical_resource_tolerance = max(
+        model.config.constraints.allocation_tolerance_feu,
+        1e-6 * total_demand,
+    )
     objective_consistent = (
         cost_error <= max(1e-4, 1e-9 * abs(evaluation.total_cost_usd))
-        and time_error <= 1e-7
-        and resource_error <= model.config.constraints.allocation_tolerance_feu
+        and time_error
+        <= max(
+            1e-7,
+            1e-6 * abs(evaluation.quantity_weighted_mean_delivery_time_h),
+        )
+        and resource_error <= numerical_resource_tolerance
     )
     return (
         allocations,

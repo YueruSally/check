@@ -221,7 +221,10 @@ def main() -> None:
     parser.add_argument("--mip-relative-gap", type=float, default=1e-8)
     parser.add_argument("--relative-tolerance", type=float, default=1e-9)
     parser.add_argument("--absolute-tolerance", type=float, default=1e-6)
+    parser.add_argument("--max-paths-per-gateway", type=int, default=4)
     args = parser.parse_args()
+    if args.max_paths_per_gateway <= 0:
+        parser.error("--max-paths-per-gateway must be positive")
 
     data = load_model_data(args.data)
     base_config = load_config(args.config, "pilot_baseline")
@@ -275,7 +278,9 @@ def main() -> None:
                             continue
                         if model is None:
                             model = build_exact_endpoint_model(
-                                case_data, config, max_paths_per_gateway=4
+                                case_data,
+                                config,
+                                max_paths_per_gateway=args.max_paths_per_gateway,
                             )
                         result = solve_lexicographic_endpoint(
                             model,
@@ -291,6 +296,7 @@ def main() -> None:
                             endpoint=endpoint,
                             model=model,
                             result=result,
+                            max_paths_per_gateway=args.max_paths_per_gateway,
                         )
                         payload["validation_id"] = task_id
                         payload["demand_instance_id"] = instance_id
@@ -567,6 +573,7 @@ def main() -> None:
         },
         "conditions": [asdict(condition) for condition in conditions],
         "endpoint_tasks": total,
+        "max_paths_per_gateway": args.max_paths_per_gateway,
         "interpretation_limit": (
             "Counts describe robustness across constructed instances and must not "
             "be interpreted as real-world probabilities."

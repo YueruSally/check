@@ -104,3 +104,40 @@ command safe to rerun. The targeted driver sensitivity is intentionally not in
 the combined script: it is selected only after the v1.4 diagnostic identifies
 capacity, timetable connection, or due-date/penalty structure as the dominant
 driver.
+
+## Evidence-triggered eight-path revalidation
+
+The completed Stage-2 check added four Seattle/Tacoma paths per shipment and
+changed gateway use at several core endpoints. The four-path library therefore
+cannot be treated as the final evidentiary model. This is a failed robustness
+check, not a reason to add a broader scenario grid. The corrective action is to
+repeat the already frozen exact core conditions and the same ten demand
+instances with eight paths per gateway:
+
+```bash
+mkdir -p logs
+nohup nice -n 10 bash scripts/run_eight_path_revalidation.sh \
+  > logs/eight_path_revalidation.log 2>&1 &
+echo $! > logs/eight_path_revalidation.pid
+```
+
+Monitor with:
+
+```bash
+ps -p "$(cat logs/eight_path_revalidation.pid)" \
+  -o pid,etime,%cpu,%mem,cmd
+tail -n 40 logs/eight_path_revalidation.log
+```
+
+The observed solver times in v1.4--v1.6 imply an expected duration of roughly
+5--15 minutes on the Linux server; allow up to 30 minutes for path construction,
+analysis, and figure rendering. The job writes the corrected core evidence to
+`results/v17_core_exact_paths8`, the matched analysis to
+`analysis/v17_core_exact_paths8`, and the ten-instance results to
+`results/v18_demand_robustness_paths8`.
+
+The repeated 727.5 and 427.5 FEU quantities in the four-path run coincide with
+binding West Coast resources, not binding NY/NJ resources. A separate capacity
+sensitivity is deferred until the eight-path revalidation establishes which
+repeated quantities remain in the corrected candidate library. No timetable,
+due-date, penalty, or NY/NJ-capacity scan should be run in parallel.
