@@ -2,22 +2,23 @@
 
 The figures in this directory are generated from stored experimental outputs. The rendering workflow does not execute the routing model or NSGA-II.
 
-Run from the project directory:
+After pulling the final validation results, run from the project directory:
 
 ```bash
-bash scripts/build_revised_paper_outputs.sh
+python paper/render_figures.py
 ```
 
-The command first builds manuscript-facing CSV tables in `analysis/paper_revised/` and then writes 300 dpi PNG, SVG, and PDF versions of each figure.
+The renderer does not run an optimization model. It writes 300 dpi PNG, SVG,
+and PDF versions from the stored result and analysis CSV files.
 
 | Figure | Main source files | Interpretation |
 | --- | --- | --- |
-| 1 | v0.7/v0.8 `combined_pareto.csv` | Discrete cost–time alternatives under baseline and severe disruption |
-| 2 | v0.6–v0.8 `ny_activation.csv` and `gateway_shares.csv` | Balanced solution plus full pooled-front NY/NJ share range; ranges are not confidence intervals |
-| 3 | `analysis/paper_revised/activation_classification.csv` | Categorical capacity–delay regime based on the full pooled-front range |
-| 4 | `analysis/paper_revised/counterfactual_front_points.csv` | Common comparison of archive-closed allowed and restricted fronts |
-| 5 | `analysis/paper_revised/counterfactual_value_summary.csv` | Paired archive-closed endpoint benefits and bootstrap intervals |
-| 6 | `analysis/paper_revised/destination_mechanism_summary.csv` | Descriptive gateway-component differences in balanced solutions |
-| S1 | v0.7/v0.8 activation and gateway-share tables | Full pooled-front ranges under 168-hour compound disruption |
+| 1 | baseline/compound archives plus v1.2 targeted `combined_pareto.csv` | Discrete cost–time alternatives under baseline and severe disruption |
+| 2 | historical activation tables plus `analysis/v12_final_validation/closed_front_classification.csv` | Full retained-configuration NY/NJ share ranges; ranges are not confidence intervals |
+| 3 | `analysis/paper_revised/activation_classification.csv` | Exploratory allowed-search capacity–delay regime map |
+| 4 | `analysis/v12_final_validation/closed_front_points.csv` and v1.2 restricted fronts | Configuration-preserving closed approximate fronts |
+| 5 | `results/v12_exact_endpoint_validation/exact_counterfactual_value.csv` | Proven lexicographic endpoint differences |
+| 6 | `analysis/v12_final_validation/batch_matched_time_decomposition_summary.csv` | Seed-paired shipment-matched time contributions |
+| S1 | historical activation tables plus the v1.2 Chicago correction | Compound-scenario ranges, with unclosed cells treated as exploratory |
 
 The figure captions and inferential limits are stated in `paper/07_results.md` and `paper/07_results_CN.md`.

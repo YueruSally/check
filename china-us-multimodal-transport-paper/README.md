@@ -233,7 +233,7 @@ Chinese working versions in the corresponding `_CN.md` files.
 
 ## v1.2 final evidence-consistency validation
 
-The final validation stage does not expand the broad scenario grid. It reruns
+The final validation stage is complete. It does not expand the broad scenario grid. It reruns
 four targeted allowed/restricted delay comparisons (240 runs), retains all
 distinct configurations found at equal non-dominated objective coordinates,
 performs a seed-paired shipment-matched time decomposition with an identity
@@ -253,3 +253,11 @@ echo $! > logs/v12_final_validation.pid
 
 Definitions, scope limits, output files, runtime bounds, and completion rules
 are documented in `docs/v12_final_validation_protocol.md`.
+
+The authoritative final interpretation is in `paper/07_results.md` and
+`paper/RESULTS_SUMMARY_CN.md`. After pulling v1.2 outputs or figure-code
+changes, regenerate figures without rerunning any experiment:
+
+```bash
+python paper/render_figures.py
+```

@@ -27,6 +27,9 @@ RESULTS = {
     8: "v08_focused_activation_thresholds_30seeds",
 }
 REVISED = ROOT / "analysis" / "paper_revised"
+FINAL_VALIDATION = ROOT / "analysis" / "v12_final_validation"
+EXACT_VALIDATION = ROOT / "results" / "v12_exact_endpoint_validation"
+V12_RESULTS = ROOT / "results" / "v12_final_closed_fronts_30seeds"
 CASES = (("D1", "Chicago"), ("D2", "Memphis"), ("D3", "Columbus"))
 COLORS = {"D1": "#0072B2", "D2": "#D55E00", "D3": "#009E73"}
 
@@ -114,19 +117,23 @@ fronts = {
     version: read(ROOT / "results" / directory / "combined_pareto.csv")
     for version, directory in RESULTS.items()
 }
+v12_fronts = {
+    case_id: read(V12_RESULTS / case_id / "combined_pareto.csv")
+    for case_id, _ in CASES
+}
 figure, axes = plt.subplots(1, 3, figsize=(11.5, 3.8), sharex=True, sharey=True)
 scenario_colors = ("#4D4D4D", "#0072B2", "#D55E00")
 for index, (case_id, city) in enumerate(CASES):
-    delay = {"D1": 288, "D2": 264, "D3": 240}[case_id]
+    delay = {"D1": 288, "D2": 288, "D3": 240}[case_id]
     settings = (
-        (7, "pilot_baseline", "Baseline"),
-        (8 if case_id != "D3" else 7, f"uswc_departure_delay_{delay}h", f"Delay: {delay} h"),
-        (7, "uswc_compound_30pct_delay_168h", "30% capacity + 168 h delay"),
+        (fronts[7], "pilot_baseline", "Baseline"),
+        (v12_fronts[case_id], f"uswc_departure_delay_{delay}h", f"Delay: {delay} h"),
+        (fronts[7], "uswc_compound_30pct_delay_168h", "30% capacity + 168 h delay"),
     )
-    for setting_index, (version, scenario, label) in enumerate(settings):
+    for setting_index, (source, scenario, label) in enumerate(settings):
         points = [
             row
-            for row in fronts[version]
+            for row in source
             if row["case_id"] == case_id and row["scenario"] == scenario
         ]
         axes[index].scatter(
@@ -165,10 +172,14 @@ save(figure, "fig01_cost_time_fronts")
 
 # Figure 2: balanced solution and full archive range under delay-only scenarios.
 activation = {version: analysis_rows(version, "ny_activation.csv") for version in SUITES}
+closed_activation = {
+    (row["case_id"], row["allowed_scenario"]): row
+    for row in read(FINAL_VALIDATION / "closed_front_classification.csv")
+}
 figure, axes = plt.subplots(1, 3, figsize=(11.5, 4.0), sharex=True, sharey=True)
 for index, (case_id, city) in enumerate(CASES):
     axis = axes[index]
-    lower, upper = {"D1": (264, 288), "D2": (240, 264), "D3": (168, 240)}[case_id]
+    lower, upper = {"D1": (264, 288), "D2": (264, 288), "D3": (168, 240)}[case_id]
     axis.axvspan(lower, upper, facecolor=COLORS[case_id], alpha=0.10)
     axis.axhline(10.0, color="#555555", linestyle="--", linewidth=0.8)
     tested = [(6, 0), (6, 96), (6, 120), (6, 168), (7, 240)]
@@ -181,16 +192,21 @@ for index, (case_id, city) in enumerate(CASES):
             if delay_value == 0
             else f"uswc_departure_delay_{delay_value}h"
         )
-        row = select(activation[version], case_id, scenario)
-        minimum, maximum = all_solution_range(row)
-        point = balanced_share(version, case_id, scenario)
+        final_row = closed_activation.get((case_id, scenario))
+        if final_row is None:
+            row = select(activation[version], case_id, scenario)
+            minimum, maximum = all_solution_range(row)
+        else:
+            minimum = 100.0 * float(final_row["ny_nj_share_min"])
+            maximum = 100.0 * float(final_row["ny_nj_share_max"])
+        point = (minimum + maximum) / 2.0
         axis.vlines(delay_value, minimum, maximum, color=COLORS[case_id], linewidth=1.4)
         axis.plot(delay_value, point, "o", color=COLORS[case_id], markersize=5)
         axis.plot((delay_value, delay_value), (minimum, maximum), "_", color=COLORS[case_id], markersize=8)
     axis.text(
         (lower + upper) / 2,
         92,
-        f"Tested interval: ({lower}, {upper}] h",
+        f"Front-wide interval: ({lower}, {upper}] h",
         ha="center",
         fontsize=8,
         color=COLORS[case_id],
@@ -203,8 +219,8 @@ for index, (case_id, city) in enumerate(CASES):
 axes[0].set_ylabel("New York/New Jersey freight share (%)")
 figure.legend(
     handles=(
-        Line2D([0], [0], marker="o", color="#333333", linestyle="none", label="Balanced solution"),
-        Line2D([0], [0], color="#333333", linewidth=1.4, label="Full pooled-front range"),
+        Line2D([0], [0], marker="o", color="#333333", linestyle="none", label="Range midpoint"),
+        Line2D([0], [0], color="#333333", linewidth=1.4, label="Retained-configuration range"),
         Line2D([0], [0], color="#555555", linestyle="--", label="10% criterion"),
     ),
     loc="lower center",
@@ -257,9 +273,9 @@ for index, (case_id, city) in enumerate(CASES):
 axes[0].set_ylabel("Additional sailing delay (hours)")
 figure.legend(
     handles=(
-        Patch(facecolor="#D9D9D9", label="No meaningful activation"),
-        Patch(facecolor="#E69F00", label="Transition regime"),
-        Patch(facecolor="#0072B2", label="Front-wide activation"),
+        Patch(facecolor="#D9D9D9", label="No allowed configuration ≥10%"),
+        Patch(facecolor="#E69F00", label="Allowed range crosses 10%"),
+        Patch(facecolor="#0072B2", label="All allowed configurations ≥10%"),
     ),
     loc="lower center",
     bbox_to_anchor=(0.5, -0.02),
@@ -271,29 +287,41 @@ figure.tight_layout(rect=(0, 0.10, 1, 1))
 save(figure, "fig03_activation_regime")
 
 
-# Figure 4: archive-closed allowed and restricted Pareto sets.
-counterfactual_points = read(REVISED / "counterfactual_front_points.csv")
+# Figure 4: configuration-preserving closed fronts from the targeted rerun.
+counterfactual_points = read(FINAL_VALIDATION / "closed_front_points.csv")
 figure, axes = plt.subplots(1, 3, figsize=(11.5, 3.9))
 normalizer = Normalize(vmin=0.0, vmax=60.0)
 for index, (case_id, city) in enumerate(CASES):
+    comparison = {"D1": "delay_288h", "D2": "delay_264h", "D3": "delay_240h"}[case_id]
+    restricted_scenario = {
+        "D1": "uswc_departure_delay_288h_no_ny_nj",
+        "D2": "uswc_departure_delay_264h_no_ny_nj",
+        "D3": "uswc_departure_delay_240h_no_ny_nj",
+    }[case_id]
     rows = [
         row
         for row in counterfactual_points
-        if row["case_id"] == case_id and row["comparison"] == "delay_activation"
+        if row["case_id"] == case_id and row["comparison"] == comparison
     ]
-    restricted = [row for row in rows if row["condition"] == "restricted"]
-    allowed = [row for row in rows if row["condition"] == "archive_closed_allowed"]
+    restricted = [
+        row
+        for row in v12_fronts[case_id]
+        if row["case_id"] == case_id and row["scenario"] == restricted_scenario
+    ]
     image = axes[index].scatter(
-        [float(row["quantity_weighted_mean_delivery_time_h"]) for row in allowed],
-        [float(row["total_cost_usd"]) / 1e6 for row in allowed],
-        c=[float(row["ny_nj_share_pct"]) for row in allowed],
+        [float(row["quantity_weighted_mean_delivery_time_h"]) for row in rows],
+        [float(row["total_cost_usd"]) / 1e6 for row in rows],
+        c=[
+            50.0 * (float(row["ny_nj_share_min"]) + float(row["ny_nj_share_max"]))
+            for row in rows
+        ],
         cmap="viridis",
         norm=normalizer,
         marker="o",
         s=24,
         edgecolors="black",
         linewidths=0.2,
-        label="NY/NJ allowed, archive closed",
+        label="Closed non-dominated union",
     )
     axes[index].scatter(
         [float(row["quantity_weighted_mean_delivery_time_h"]) for row in restricted],
@@ -316,60 +344,48 @@ figure.subplots_adjust(left=0.07, right=0.88, bottom=0.16, top=0.90, wspace=0.28
 # leave the scale overlapping the Columbus panel in the exported figure.
 colorbar_axis = figure.add_axes((0.91, 0.20, 0.015, 0.64))
 colorbar = figure.colorbar(image, cax=colorbar_axis)
-colorbar.set_label("NY/NJ freight share (%)")
+colorbar.set_label("NY/NJ share range midpoint (%)")
 save(figure, "fig04_counterfactual_fronts")
 
 
-# Figure 5: paired archive-closed endpoint benefits.
-benefits = read(REVISED / "counterfactual_value_summary.csv")
+# Figure 5: proven lexicographic endpoint effects.
+benefits = read(EXACT_VALIDATION / "exact_counterfactual_value.csv")
 order = [
-    (case_id, comparison)
-    for case_id, _ in CASES
-    for comparison in ("delay_activation", "extreme_compound")
+    ("D1", "delay_288h", "Chicago: 288 h delay"),
+    ("D1", "compound_30pct_delay_168h", "Chicago: 30% + 168 h"),
+    ("D2", "delay_264h", "Memphis: 264 h delay"),
+    ("D2", "delay_288h", "Memphis: 288 h delay"),
+    ("D3", "delay_240h", "Columbus: 240 h delay"),
 ]
-labels = [
-    f"{dict(CASES)[case_id]}: "
-    + ("delay activation" if comparison == "delay_activation" else "30% capacity + 168 h")
-    for case_id, comparison in order
-]
+labels = [label for _, _, label in order]
 figure, axes = plt.subplots(1, 2, figsize=(11.5, 4.6), sharey=True)
-for axis, metric, percent_scale, title, xlabel in (
-    (axes[0], "cost_avoided_by_ny_nj", True, "(a) Cost endpoint", "Cost avoided relative to restricted case (%)"),
-    (axes[1], "delivery_time_avoided_by_ny_nj", False, "(b) Delivery-time endpoint", "Delivery time avoided (hours)"),
+endpoint_styles = (
+    ("min_cost_then_time", "o", "Minimum cost, then time"),
+    ("min_time_then_cost", "D", "Minimum time, then cost"),
+)
+for axis, field, scale, title, xlabel in (
+    (axes[0], "cost_avoided_by_allowing_ny_nj_usd", 1e-6, "(a) Cost difference", "Restricted minus allowed cost (USD million)"),
+    (axes[1], "time_avoided_by_allowing_ny_nj_h", 1.0, "(b) Delivery-time difference", "Restricted minus allowed time (hours)"),
 ):
-    for position, (case_id, comparison) in enumerate(order):
-        row = next(
-            item
-            for item in benefits
-            if item["case_id"] == case_id
-            and item["comparison"] == comparison
-            and item["metric"] == metric
-        )
-        if percent_scale:
-            estimate = float(row["mean_benefit_pct"])
-            low = float(row["bootstrap_mean_pct_ci_low"])
-            high = float(row["bootstrap_mean_pct_ci_high"])
-        else:
-            estimate = float(row["mean_benefit_from_allowing_ny_nj"])
-            low = float(row["bootstrap_mean_ci_low"])
-            high = float(row["bootstrap_mean_ci_high"])
-        axis.errorbar(
-            estimate,
-            position,
-            xerr=[[estimate - low], [high - estimate]],
-            fmt="o",
-            capsize=4,
-            markersize=5,
-            color=COLORS[case_id],
-        )
-        axis.text(
-            high,
-            position - 0.18,
-            f"{row['positive_benefit_runs']}/30",
-            fontsize=7,
-            ha="left",
-            color=COLORS[case_id],
-        )
+    for position, (case_id, comparison, _) in enumerate(order):
+        for endpoint, marker, endpoint_label in endpoint_styles:
+            row = next(
+                item
+                for item in benefits
+                if item["case_id"] == case_id
+                and item["comparison"] == comparison
+                and item["endpoint"] == endpoint
+            )
+            axis.plot(
+                float(row[field]) * scale,
+                position,
+                marker=marker,
+                color=COLORS[case_id],
+                markerfacecolor=("white" if marker == "D" else COLORS[case_id]),
+                linestyle="none",
+                markersize=6,
+                label=endpoint_label if position == 0 else None,
+            )
     axis.axvline(0.0, color="#555555", linewidth=0.8, linestyle="--")
     axis.set_xlabel(xlabel)
     axis.set_title(title)
@@ -377,66 +393,91 @@ for axis, metric, percent_scale, title, xlabel in (
     clean(axis, "x")
 axes[0].set_yticks(range(len(labels)), labels, fontsize=8)
 axes[0].invert_yaxis()
+axes[1].legend(frameon=False, fontsize=8, loc="lower right")
 figure.tight_layout()
 save(figure, "fig05_counterfactual_benefits")
 
 
-# Figure 6: destination-specific mechanism differences (NY/NJ minus LA/LB).
-mechanism = read(REVISED / "destination_mechanism_summary.csv")
-positions = range(len(CASES))
-figure, axes = plt.subplots(1, 2, figsize=(11.5, 4.2))
-width = 0.22
-time_fields = (
-    ("ny_minus_la_ocean_transit_h", "Ocean transit", "#0072B2"),
-    ("ny_minus_la_waiting_h", "Waiting", "#D55E00"),
-    ("ny_minus_la_us_inland_transit_h", "US inland", "#009E73"),
-)
-for offset, (field, label, color) in zip((-width, 0.0, width), time_fields):
-    axes[0].bar(
-        [position + offset for position in positions],
-        [float(next(row for row in mechanism if row["case_id"] == case_id)[field]) for case_id, _ in CASES],
-        width=width,
-        label=label,
-        color=color,
-    )
-axes[0].plot(
-    list(positions),
-    [
-        float(next(row for row in mechanism if row["case_id"] == case_id)["ny_minus_la_total_lead_time_h"])
-        for case_id, _ in CASES
-    ],
-    marker="D",
-    color="#222222",
-    linestyle="none",
-    label="Total lead time",
-)
-axes[0].axhline(0.0, color="#555555", linewidth=0.8)
-axes[0].set_title("(a) Time components")
-axes[0].set_ylabel("NY/NJ minus LA/LB (hours)")
-axes[0].legend(frameon=False, fontsize=8, ncol=2)
-clean(axes[0])
-
-cost_values = [
-    float(next(row for row in mechanism if row["case_id"] == case_id)["ny_minus_la_total_cost_usd_per_feu"])
-    for case_id, _ in CASES
+# Figure 6: seed-paired shipment-matched time decomposition.
+mechanism = read(FINAL_VALIDATION / "batch_matched_time_decomposition_summary.csv")
+mechanism_order = [
+    ("D1", "delay_288h", "Chicago\n288 h"),
+    ("D2", "delay_264h", "Memphis\n264 h"),
+    ("D2", "delay_288h", "Memphis\n288 h"),
+    ("D3", "delay_240h", "Columbus\n240 h"),
 ]
-axes[1].bar(
-    list(positions),
-    cost_values,
-    color=["#009E73" if value < 0 else "#D55E00" for value in cost_values],
-    width=0.55,
+positions = list(range(len(mechanism_order)))
+figure, axis = plt.subplots(figsize=(9.6, 4.6))
+width = 0.30
+for offset, component, label, color in (
+    (-width / 2, "ny_nj_contribution_h", "NY/NJ-assigned component", "#D55E00"),
+    (width / 2, "west_coast_contribution_h", "West Coast-assigned component", "#0072B2"),
+):
+    estimates = []
+    lower = []
+    upper = []
+    for case_id, comparison, _ in mechanism_order:
+        row = next(
+            item
+            for item in mechanism
+            if item["case_id"] == case_id
+            and item["comparison"] == comparison
+            and item["component"] == component
+        )
+        estimate = float(row["mean_h"])
+        estimates.append(estimate)
+        lower.append(estimate - float(row["mean_bootstrap_95_low_h"]))
+        upper.append(float(row["mean_bootstrap_95_high_h"]) - estimate)
+    axis.bar(
+        [position + offset for position in positions],
+        estimates,
+        width=width,
+        color=color,
+        label=label,
+        yerr=[lower, upper],
+        capsize=3,
+        error_kw={"linewidth": 0.8},
+    )
+totals = []
+total_low = []
+total_high = []
+for case_id, comparison, _ in mechanism_order:
+    row = next(
+        item
+        for item in mechanism
+        if item["case_id"] == case_id
+        and item["comparison"] == comparison
+        and item["component"] == "allowed_minus_restricted_time_h"
+    )
+    estimate = float(row["mean_h"])
+    totals.append(estimate)
+    total_low.append(estimate - float(row["mean_bootstrap_95_low_h"]))
+    total_high.append(float(row["mean_bootstrap_95_high_h"]) - estimate)
+axis.errorbar(
+    positions,
+    totals,
+    yerr=[total_low, total_high],
+    fmt="D",
+    color="#222222",
+    markerfacecolor="white",
+    capsize=3,
+    markersize=5,
+    label="System total",
 )
-axes[1].axhline(0.0, color="#555555", linewidth=0.8)
-axes[1].set_title("(b) Unit cost")
-axes[1].set_ylabel("NY/NJ minus LA/LB (USD/FEU)")
-clean(axes[1])
-for axis in axes:
-    axis.set_xticks(list(positions), [city for _, city in CASES])
+axis.axhline(0.0, color="#555555", linewidth=0.8)
+axis.set_ylabel("Allowed minus restricted mean time (hours)")
+axis.set_xticks(positions, [label for _, _, label in mechanism_order])
+axis.legend(frameon=False, fontsize=8, ncol=3)
+clean(axis)
 figure.tight_layout()
 save(figure, "fig06_destination_mechanism")
 
 
 # Supplementary Figure S1: 168-hour compound disruption.
+historical_corrections = {
+    (row["case_id"], row["comparison"]): row
+    for row in read(FINAL_VALIDATION / "historical_closed_front_corrections.csv")
+}
 figure, axes = plt.subplots(1, 3, figsize=(11.5, 3.8), sharex=True, sharey=True)
 for index, (case_id, city) in enumerate(CASES):
     axis = axes[index]
@@ -449,7 +490,13 @@ for index, (case_id, city) in enumerate(CASES):
         scenario = f"uswc_compound_{capacity}pct_delay_168h"
         row = select(activation[version], case_id, scenario)
         minimum, maximum = all_solution_range(row)
-        point = balanced_share(version, case_id, scenario)
+        correction = historical_corrections.get(
+            (case_id, f"compound_{capacity}pct_delay_168h")
+        )
+        if correction is not None:
+            minimum = 100.0 * float(correction["ny_nj_share_min"])
+            maximum = 100.0 * float(correction["ny_nj_share_max"])
+        point = (minimum + maximum) / 2.0
         axis.vlines(capacity, minimum, maximum, color=COLORS[case_id], linewidth=1.4)
         axis.plot(capacity, point, "o", color=COLORS[case_id], markersize=5)
     axis.set_title(f"({chr(97 + index)}) {city}")

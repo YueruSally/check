@@ -2,108 +2,89 @@
 
 ## 6.1 Research logic and computational settings
 
-The experiments were designed to identify when an East Coast gateway becomes operationally relevant in a scheduled China–US multimodal freight network and to distinguish this question from the separate question of whether disruption worsens network performance. Three cases represented the inland destinations Chicago (D1), Memphis (D2), and Columbus (D3). Freight could enter the United States through Los Angeles/Long Beach, Seattle/Tacoma, or New York/New Jersey (NY/NJ). No carbon price, emission constraint, or emission objective was included.
+The experiments identify when New York/New Jersey (NY/NJ) becomes an operationally material alternative in a scheduled China--US multimodal freight network. Three cases represent the inland destinations Chicago (D1), Memphis (D2), and Columbus (D3). Freight can enter the United States through Los Angeles/Long Beach, Seattle/Tacoma, or NY/NJ. The model contains no carbon price, emission constraint, or emission objective.
 
-The model minimized total operational cost and quantity-weighted mean delivery time. Total cost comprised transport, transfer, waiting, processing, and shipment-specific tardiness costs. Demand conservation, fixed service schedules, service and node capacities, and transfer requirements applied in every scenario. Each shipment could use at most three paths, and an active path had to carry at least 10% of that shipment's demand. This path-level execution constraint is distinct from the network-level NY/NJ activation criterion defined in Section 6.3.
+The two objectives minimize total operational cost and quantity-weighted mean delivery time. Cost includes transport, transfer, waiting, processing, and shipment-specific tardiness. Every scenario enforces demand conservation, fixed timetables, transfer compatibility, service-departure capacity, daily arc capacity, and node-day capacity. A shipment may use at most three paths, and every active path must carry at least 10% of that shipment's demand. This path-level execution constraint is distinct from the network-level gateway criterion in Section 6.3.
 
-Each case–scenario combination was solved by 30 independent NSGA-II runs using the common seed sequence 20260906–20260935. The population size was 48 and the algorithm ran for 99 generations after the initial population, giving 4,800 objective evaluations per run. Crossover and mutation probabilities were 0.90 and 0.12. The same evaluation budget and seed sequence were retained across paired scenario comparisons. The reported fronts are best-found approximations under this computational budget; they are not claimed to be exact Pareto fronts.
+Each case--scenario combination is solved by 30 independent NSGA-II runs with the common seed sequence 20260906--20260935. A run uses 48 individuals and 99 generations after initialization, hence (48(99+1)=4{,}800) objective evaluations. Crossover and mutation probabilities are 0.90 and 0.12. Paired comparisons use the same seeds and evaluation budget. These searches provide best-found approximate fronts; they are not labelled exact Pareto fronts.
 
 ## 6.2 Experiment architecture
 
-The experiments were organized by inferential purpose rather than by software version. Table 1 summarizes the resulting architecture.
+The experiments are organized by inferential purpose rather than software version (Table 1).
 
-Table 1. Experimental architecture and analytical role.
+Table 1. Experimental architecture and evidential role.
 
 | Stage | Conditions | Purpose | Primary evidence |
 | --- | --- | --- | --- |
-| Baseline structure | Original capacities and schedules | Establish normal gateway allocation and cost–time trade-offs | Cross-seed non-dominated archive |
-| Capacity mechanism | Regional West Coast capacity at 70%, 67.5%, 65%, 60%, 40%, and 35%; individual West Coast gateway at 50% | Determine whether capacity scarcity is absorbed within the West Coast system | Gateway shares and reconstructed node-day utilization |
-| Delay activation | Regional delays of 96, 120, 168, 240, 264, 288, 312, and 336 h | Identify destination-specific activation intervals | Full pooled-front NY/NJ share ranges |
-| Capacity–delay interaction | Remaining West Coast capacity of 60%, 40%, or 35% crossed with delays of 0, 168, or 288 h; additional 30% compound case | Distinguish no activation, transition, and front-wide activation regimes | Categorical two-dimensional regime map |
-| Capacity-days comparison | Baseline demand at 40% capacity versus 1.25 times demand at 50% capacity | Examine whether comparable demand relative to daily capacity reproduces gateway allocation | Balanced allocations and utilization diagnostics |
-| NY/NJ counterfactual | NY/NJ allowed versus prohibited under the first delay activation point and the 30% + 168 h compound disruption | Quantify feasibility and performance value attributable to access to NY/NJ | Archive-closed paired endpoints and common-scale hypervolume |
-| Destination mechanism | Balanced solutions immediately below and above each delay activation interval | Explain destination asymmetry | Gateway-level cost and time decomposition |
+| Baseline | Original capacities and schedules | Establish normal gateway allocation and cost--time trade-offs | Cross-seed non-dominated archive |
+| Capacity mechanism | Regional West Coast capacity at 70%, 67.5%, 65%, 60%, 40%, and 35%; either West Coast gateway at 50% | Test whether capacity reductions are accommodated through West Coast reallocation | Gateway shares and reconstructed utilization |
+| Delay activation | Regional delays of 96, 120, 168, 240, 264, 288, 312, and 336 h | Locate destination-specific gateway-use regimes | Configuration-preserving closed archives at the critical conditions |
+| Capacity--delay interaction | Remaining capacity of 60%, 40%, or 35% crossed with delays of 0, 168, or 288 h; additional 30% compound condition | Screen how capacity modifies delay-driven substitution | Allowed-search regime map plus a closed Chicago compound comparison |
+| NY/NJ counterfactual | NY/NJ allowed versus prohibited under four critical delays and one compound disruption | Separate gateway value from disruption loss | Closed fronts and exact lexicographic endpoints |
+| Mechanism audit | Seed-paired minimum-time solutions at four critical delays | Attribute system time changes to shipment-matched NY/NJ and West Coast components | Paired decomposition and service-departure flow changes |
 
-Capacity percentages denote capacity remaining relative to the baseline. A 30% value therefore represents a 70% reduction. Delays were added to affected West Coast ocean departures and propagated through subsequent arrival and inland-connection times.
+Capacity percentages denote capacity remaining relative to baseline. Delays are added to affected West Coast ocean departures and propagated to arrivals and inland connections. The quantity obtained by dividing demand (FEU) by combined daily West Coast capacity (FEU/day) is reported only as *nominal capacity-days required*. Because it has units of days, it is not treated as a utilization ratio; binding is assessed from the reconstructed resource accounts.
 
-The quantity obtained by dividing scenario demand (FEU) by combined daily West Coast capacity (FEU/day) is reported as *nominal capacity-days required*. It has units of days and is not interpreted as a dimensionless utilization ratio. Capacity binding is assessed instead from reconstructed node-day, arc-day, and service-departure utilization.
+## 6.3 Configuration-preserving archives and activation definitions
 
-## 6.3 Pareto archive and gateway activation
+For each run, objective-point records used for hypervolume and plots are separated from route-allocation configurations used for gateway shares. All distinct configurations *found* at retained objective coordinates are preserved; exact duplicates may be removed. A separate observational archive records feasible non-dominated configurations during the search but does not enter tournament selection or environmental replacement. It therefore does not change the 4,800-evaluation search budget.
 
-For each case and scenario, the feasible non-dominated solutions from the 30 runs were pooled and filtered again for dominance. The resulting cross-seed archive describes the cost–time alternatives found under the common search budget. The number of points in an archive is not treated as a statistical sample size, and solutions are not assigned probabilities.
+At the four critical delay conditions, the allowed and matching NY/NJ-restricted configurations are pooled and screened again for non-dominance. The restricted set is nested in the allowed feasible set, (X^R\subseteq X^A); adding restricted solutions before filtering closes an omission that can arise from independent heuristic searches. All distinct found configurations attached to retained objective coordinates remain in the share calculation. This is a configuration-preserving closure of the solutions found, not a claim to enumerate every feasible configuration or the unknown exact Pareto set.
 
-For solution \(x\), the network share routed through NY/NJ is
+For a retained configuration (x), the network share routed through NY/NJ is
 
 \[
 g(x)=\frac{Q_{\mathrm{NY/NJ}}(x)}{Q_{\mathrm{total}}}.
 \]
 
-A share of 10% was used as the primary operational-materiality criterion, \(\tau=0.10\). The archive was classified as follows:
+The primary operational-materiality criterion is (	au=0.10). Two events are distinguished:
 
 \[
-\text{No meaningful activation if }
-\max_{x\in F_{d,s}}g(x)<\tau,
+\text{first-solution activation if }\max_{x\in F_{d,s}}g(x)\geq\tau,
 \]
 
 \[
-\text{Transition regime if }
-\min_{x\in F_{d,s}}g(x)<\tau\leq
-\max_{x\in F_{d,s}}g(x),
+\text{front-wide activation if }\min_{x\in F_{d,s}}g(x)\geq\tau.
 \]
+
+If the first condition holds but the second does not, the condition is a *transition*. Thus first-solution activation shows that NY/NJ is competitive for at least one found cost--time preference, whereas front-wide activation means that every retained found configuration uses it materially. “Front-wide” always refers to the retained best-found approximate archive. Because disruption levels are discrete, boundaries are interval-censored and no interpolation is made between tested conditions. The stored archives are also reclassified at 5% and 20% without rerunning the optimizer.
+
+## 6.4 Counterfactual comparison and exact endpoint validation
+
+Comparing a disrupted case with the undisrupted baseline cannot isolate NY/NJ value. The counterfactual instead compares the same disruption with NY/NJ allowed and prohibited. Closed heuristic fronts describe the shape of the found trade-off set, but primary endpoint values are obtained from a path-allocation mixed-integer linear program using the same candidate-path library and all original allocation constraints.
+
+For each access condition, two lexicographic endpoints are solved:
+
+1. minimize cost, then minimize time while retaining the proven cost optimum within an explicit absolute-plus-relative tolerance; and
+2. minimize time, then minimize cost under the analogous time-optimality tolerance.
+
+The validation covers ten case--condition--access models at two endpoints, giving 20 endpoint tasks and at most 40 solver calls. The MILP contains shipment conservation, at most three active paths, the 10% active-path minimum, timetable and transfer accounting, service-departure capacity, daily arc capacity, node-day capacity, and scenario-specific gateway restrictions. An endpoint is called *proven* only when both solver stages terminate optimally within the recorded tolerance. Decoded allocations are independently re-evaluated for feasibility, both objectives, and all three capacity accounts. Exactness therefore applies to the candidate-path MILP, not to routes outside the generated candidate library.
+
+For an endpoint (e), the value of access is reported as
 
 \[
-\text{Front-wide activation if }
-\min_{x\in F_{d,s}}g(x)\geq\tau.
+\Delta C_e=C^R_e-C^A_e,
+\qquad
+\Delta T_e=T^R_e-T^A_e.
 \]
 
-All archive solutions, including zero-share solutions, enter the minimum and maximum. The balanced solution is shown as an interpretable reference point but does not determine the activation classification. The earlier term *stable activation* is therefore replaced by *front-wide operational activation*. This term refers to the best-found pooled front, not to a real-world activation probability.
+Positive values favour allowing NY/NJ. Because the cost-optimal and time-optimal rows represent different decision preferences, their cost and time differences are not combined into a single benefit score.
 
-Because disruption levels were tested on a discrete grid, the analysis identifies interval-censored activation boundaries. If \(h^-\) is the last tested delay below front-wide activation and \(h^+\) is the first tested delay with front-wide activation, the result is reported as \((h^-,h^+]\). No response is interpolated between tested conditions.
+## 6.5 Seed-paired mechanism audit
 
-As a supplementary classification check, the same stored archives are reclassified at 5%, 10%, and 20%. This does not rerun the optimization. Its purpose is to determine whether the ordering of destination responses depends on the reporting threshold.
-
-## 6.4 Counterfactual value of NY/NJ access
-
-The value of NY/NJ cannot be inferred by comparing a disrupted scenario with the undisrupted baseline because that comparison combines the disruption loss and the gateway response. The counterfactual analysis instead compares the same disruption with NY/NJ allowed and prohibited.
-
-The restricted feasible set is nested within the allowed feasible set:
+Mechanism evidence uses the minimum-time configuration from each allowed--restricted seed pair. If the independently found restricted endpoint dominates the allowed endpoint, closure selects the restricted configuration because it is also feasible in the allowed problem. Each shipment's mean lead time in the restricted configuration becomes its matching benchmark. The quantity-weighted system change is decomposed as
 
 \[
-X^{R}\subseteq X^{A}.
+\Delta T_{\mathrm{NY/NJ}}+
+\Delta T_{\mathrm{West}}+
+\Delta T_{\mathrm{other}}
+=T^A-T^R.
 \]
 
-Independent heuristic searches may nevertheless return an allowed archive that misses a point found by the restricted search. Before comparing objectives, the allowed archive is therefore completed with the restricted archive:
+The sign convention is allowed minus restricted, so negative values denote improvement. The identity is checked for every seed. This is a shipment-matched decomposition, not unique tracing of each unit of split freight. Service-departure quantity changes are reported separately; a capacity-release interpretation is made only where both the component accounting and service changes support it.
 
-\[
-\widetilde F^{A}_{r}=ND\left(F^{A}_{r}\cup F^{R}_{r}\right),
-\]
+For each component, the analysis reports the mean, median, a 95% percentile bootstrap interval from 10,000 paired resamples, and the numbers of negative, positive, and tied seeds. These intervals measure stochastic-search variation under fixed inputs, not real-world uncertainty in demand, prices, schedules, or disruption duration.
 
-for each paired seed \(r\). Endpoint benefits are then
+## 6.6 Scope of the capacity--delay map
 
-\[
-\Delta C_r=min_{x\in F^R_r}C(x)-
-\min_{x\in \widetilde F^A_r}C(x)\geq0,
-\]
-
-\[
-\Delta T_r=min_{x\in F^R_r}T(x)-
-\min_{x\in \widetilde F^A_r}T(x)\geq0.
-\]
-
-This archive-closure step enforces the known feasible-set relationship; it is not an ex-post deletion of unfavorable observations. The raw differences are retained in the analysis file for auditability.
-
-The comparison also reports normalized hypervolume. Allowed and restricted fronts are normalized using a common ideal and nadir obtained from their pooled objective points, with reference point \((1.1,1.1)\). Hypervolumes stored by the original independent experiment batches are not compared because their normalization bounds differ.
-
-## 6.5 Statistical summaries and scope of inference
-
-Scenario–baseline comparisons and allowed–restricted comparisons use the same random seed on both sides of each pair. For an unconstrained paired difference, the analysis reports the mean, median, a 95% percentile bootstrap interval based on 10,000 paired resamples, and the number of positive and negative pairs. Exact sign tests with Holm correction are retained for scenario–baseline comparisons.
-
-Archive-closed counterfactual benefits are structurally non-negative. Sign tests are not used for these benefits because archive closure converts missed allowed points into ties by construction. Instead, the analysis reports the mean and median benefit, bootstrap intervals, and the number of runs with a strict improvement. Cost benefits are additionally expressed as a percentage of the corresponding restricted value.
-
-These intervals quantify variation across stochastic optimization runs under fixed model inputs. They do not represent uncertainty in actual freight demand, prices, service schedules, or disruption duration. Gateway shares are descriptive properties of the pooled approximate front and are not subjected to inferential tests.
-
-## 6.6 Destination-mechanism decomposition
-
-For each destination, a balanced pooled-front solution was selected immediately below and above the delay activation interval. Gateway-specific cost was decomposed into China inland transport, ocean transport, US inland transport, holding, transfer, processing, and tardiness components. Lead time was decomposed into China inland transit, ocean transit, US inland transit, waiting, and transfer time.
-
-The decomposition is used to assess whether the longer all-water service to NY/NJ is offset by reduced West Coast waiting and a different US inland connection. It is descriptive evidence from representative solutions, not an average causal effect over all solutions.
+The broad capacity--delay grid was generated by the NY/NJ-allowed search and is retained as a screening map. Only the four targeted delay conditions were rerun with configuration-preserving allowed/restricted closure. The historical Chicago condition with 30% remaining capacity and a 168 h delay has an existing closed objective archive sufficient to reject front-wide activation, but it was not rerun as a configuration-complete condition. Cells without a matching restricted closure are therefore labelled exploratory rather than final front-wide evidence.

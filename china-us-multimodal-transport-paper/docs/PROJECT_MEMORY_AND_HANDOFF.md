@@ -14,6 +14,17 @@ Important rules:
 - Do not add carbon prices, emissions constraints, carbon objectives or any other carbon variables.
 - New tasks must recover context from this document and the repository rather than relying on chat memory.
 
+### v1.2 authoritative-result notice
+
+The final evidence-consistency validation is complete. For manuscript claims,
+`paper/07_results.md`, `paper/07_results_CN.md`, and
+`paper/RESULTS_SUMMARY_CN.md` override older threshold narratives later in this
+handoff document. The authoritative raw tables are under
+`analysis/v12_final_validation/` and
+`results/v12_exact_endpoint_validation/`. In particular, Memphis at 264 h and
+Chicago at 30% remaining capacity plus 168 h delay are **transition**
+conditions, not front-wide activation conditions.
+
 ## 2. Repository and environment
 
 - Repository: YueruSally/check
@@ -33,7 +44,7 @@ The research problem is:
 
 NY/NJ share is not an optimization objective. It is an emergent network-reconfiguration outcome produced by the two-objective optimization model and its operational constraints.
 
-For result interpretation, a meaningful alternative gateway is defined as an NY/NJ share of at least 10% of total network freight in the cross-seed non-dominated union. This differs from the model constraint requiring every active path for an individual shipment batch to carry at least 10% of that shipment's demand.
+For result interpretation, a meaningful alternative gateway is defined as an NY/NJ share of at least 10% of total network freight. *First-solution activation* means at least one retained found configuration reaches 10%; *front-wide activation* means every retained found configuration reaches 10%. A condition between these definitions is a transition. This differs from the model constraint requiring every active path for an individual shipment batch to carry at least 10% of that shipment's demand.
 
 ## 4. Research questions
 
@@ -47,12 +58,13 @@ RQ3 — Activation thresholds: At what tested disruption intervals does NY/NJ re
 
 RQ4 — Consequences and stability: What cost and delivery-time penalties accompany activation, how do they differ by inland destination, and are the effects stable across 30 NSGA-II seeds?
 
-Current threshold findings:
+Current closure-validated findings:
 
-- D1, Chicago: isolated-delay threshold 264–288 hours.
-- D2, Memphis: isolated-delay threshold 240–264 hours.
-- D3, Columbus: isolated-delay threshold 168–240 hours.
-- D1 with a 168-hour delay: compound capacity threshold between 30% and 35% remaining West Coast capacity.
+- D1, Chicago: 288 h is front-wide, with 32.75%--50.56% NY/NJ share.
+- D2, Memphis: 264 h is a transition (0%--26.04%; 8 of 27 retained configurations use zero NY/NJ); 288 h is front-wide (31.72%--32.79%).
+- D3, Columbus: 240 h is front-wide (24.17%--28.13%).
+- D1 at 30% remaining capacity plus 168 h delay is a transition in the existing closed archive (0%--18.17%), although both exact lexicographic endpoints use 19.19% NY/NJ.
+- All 20 candidate-path MILP endpoints were proven and evaluator-consistent. The key preference result is D2 at 264 h: the minimum-cost endpoint uses zero NY/NJ, while the minimum-time endpoint uses 32.66%, saves 2.939 h, and costs USD 0.797 million more.
 
 ## 5. Objective functions
 
@@ -238,16 +250,16 @@ Isolated sailing delays:
 - 96 and 120 hours: no NY/NJ use.
 - 168 hours: absent in D1 and below 1.2% in D2/D3.
 - 240 hours: D1 mean share 0.75%; D2 1.24%; D3 26.14%.
-- 264 hours: D1 mean 6.59%, range 4.22%–8.06%; D2 mean 19.28%, range 12.47%–26.04%.
+- 264 hours: D1 allowed-search mean 6.59%, range 4.22%–8.06%; the final closed D2 range is 0%–26.04%, with 8 zero-share configurations among 27 retained configurations.
 - 288 hours: D1 mean 39.00%, range 32.75%–50.56%; D2 mean 32.36%, range 31.72%–32.79%.
 - 312 hours: D1 mean 67.14%; D2 mean 43.64%.
 - 336 hours: D1 mean 71.39%; D2 mean 67.75%; D3 mean 83.62%.
 
-Meaningful isolated-delay intervals:
+Closure-validated isolated-delay states:
 
-- D1: 264–288 hours.
-- D2: 240–264 hours.
-- D3: 168–240 hours.
+- D1: first-solution and front-wide activation at 288 hours.
+- D2: first-solution activation and transition at 264 hours; front-wide activation at 288 hours.
+- D3: first-solution and front-wide activation at 240 hours.
 
 Compound disruption with 168-hour delay:
 
@@ -257,15 +269,15 @@ Compound disruption with 168-hour delay:
 | 35% | 5.61% | 10.83% | not rerun |
 | 30% | 17.90% | 17.32% | 45.11% |
 
-D1 crosses the criterion between 30% and 35% remaining capacity. D2 at 35% ranges from 6.88% to 16.97%; the 30%/35%/40% means are not strictly monotonic. Describe D2 as a transition region, not an exact deterministic threshold.
+The means in this table came from the historical allowed searches. After closure, D1 at 30% capacity plus 168 hours has a 0%--18.17% range and is a transition, so it must not be described as crossing into front-wide activation between 30% and 35%. D2 at 35% ranges from 6.88% to 16.97%; unclosed compound-grid cells remain exploratory rather than exact deterministic thresholds.
 
-Cost and delivery consequences at the first stable isolated-delay point:
+Historical disruption-versus-baseline consequences at selected severe delays (not estimates of NY/NJ's causal value):
 
 - D1 at 288 hours: median cost +210.69%; median weighted delivery time +264.58 hours.
 - D2 at 264 hours: median cost +186.80%; median weighted delivery time +248.26 hours.
 - D3 at 240 hours: median cost +156.94%; median weighted delivery time +222.32 hours.
 
-The NY/NJ-allowed and NY/NJ-restricted counterfactuals both retained 30/30 feasible runs. NY/NJ should therefore be described as a performance-diversification gateway that improves the attainable cost-time frontier under selected severe disruptions, not as a gateway required to preserve feasibility. It does not restore baseline cost or service performance.
+The NY/NJ-allowed and NY/NJ-restricted counterfactuals are feasible. Exact candidate-path MILP endpoints show that NY/NJ can improve both objectives in selected severe conditions, but D2 at 264 hours is preference dependent: its cost endpoint uses zero NY/NJ, while its time endpoint uses 32.66%, saves 2.939 hours and costs USD 0.797 million more. NY/NJ should therefore be described as a performance-diversification gateway, not as a gateway required to preserve feasibility or a universally cost-saving route.
 
 For v0.8 severe scenarios, all 30 paired cost and time differences are positive. Holm-adjusted p-values are approximately 2.98 x 10^-8 and deterministic 95% bootstrap intervals exclude zero.
 
