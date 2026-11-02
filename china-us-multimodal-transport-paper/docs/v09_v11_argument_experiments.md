@@ -5,7 +5,7 @@ to analyses that advance the paper's causal and managerial argument.
 
 ## Research logic
 
-### v0.9: load pressure × sailing delay
+### v0.9: nominal capacity-days × sailing delay
 
 The first suite tests a 3 × 3 grid:
 
@@ -14,13 +14,16 @@ The first suite tests a 3 × 3 grid:
 
 It also compares two scenarios with the same nominal demand/capacity pressure:
 40% capacity with baseline demand versus 50% capacity with demand multiplied by
-1.25. This checks whether load pressure, rather than the capacity percentage in
-isolation, explains activation. The analysis reconstructs actual daily node,
+1.25. This checks whether comparable demand relative to daily capacity, rather
+than the capacity percentage in isolation, reproduces gateway allocation. The
+ratio has units of capacity-days and is not a dimensionless utilization rate.
+The analysis reconstructs actual daily node,
 arc and service utilization for representative solutions.
 
-The primary output is `activation_regime.csv`. `stable_ny_nj_10pct` has one
-definition throughout: every solution on the cross-seed non-dominated union
-uses NY/NJ and the minimum NY/NJ share among those solutions is at least 10%.
+The historical primary output is `activation_regime.csv`. The revised paper
+analysis uses `analysis/paper_revised/activation_classification.csv`, where
+archives are classified as no meaningful activation, transition, or front-wide
+activation using all pooled-front solutions, including zero-share solutions.
 
 ### v1.0: value of access to NY/NJ
 
@@ -37,6 +40,11 @@ Positive paired differences mean that disabling NY/NJ worsens the objective,
 so the difference is the loss avoided by retaining access to the alternative
 gateway. The analysis also reports whether NY/NJ access changes the number of
 feasible runs.
+
+The manuscript-facing post-processing closes each allowed archive with its
+matching restricted archive before objective comparison. This enforces the
+known feasible-set inclusion relation and prevents independent heuristic
+search error from being misinterpreted as a negative value of gateway access.
 
 ### v1.1: destination asymmetry mechanism
 
@@ -131,6 +139,16 @@ The most important new paper tables are:
 - `analysis/v10_ny_nj_counterfactual/ny_nj_value_summary.csv`;
 - `analysis/v11_destination_asymmetry/gateway_mechanism_components.csv`.
 
+After the v0.9–v1.1 outputs have been uploaded, regenerate the corrected paper
+tables and figures with:
+
+```bash
+bash scripts/build_revised_paper_outputs.sh
+```
+
+This is post-processing only and normally completes in under one minute. It
+writes `analysis/paper_revised/` and refreshes `paper/figures/`.
+
 ## Uploading completed results
 
 The repository ignores generated result folders by default, so add only these
@@ -159,7 +177,10 @@ would be defensive rather than advancing the paper's argument:
 
 - exact MILP versus NSGA-II benchmarking;
 - candidate-path count sensitivity;
-- 5%/10%/20% activation-definition sensitivity;
 - broad one-at-a-time price, penalty and headway sweeps;
 - additional random-seed counts;
 - dynamic recovery and rollover modelling.
+
+The 5%/10%/20% classification is now included as post-processing of the
+existing pooled archives. It does not add optimization runs and is used only
+to check whether the destination ordering depends on the reporting criterion.

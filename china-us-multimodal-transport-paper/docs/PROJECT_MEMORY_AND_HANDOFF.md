@@ -265,7 +265,7 @@ Cost and delivery consequences at the first stable isolated-delay point:
 - D2 at 264 hours: median cost +186.80%; median weighted delivery time +248.26 hours.
 - D3 at 240 hours: median cost +156.94%; median weighted delivery time +222.32 hours.
 
-NY/NJ is a resilience pathway that preserves feasible routing choices under severe disruption. It does not restore baseline cost or service performance.
+The NY/NJ-allowed and NY/NJ-restricted counterfactuals both retained 30/30 feasible runs. NY/NJ should therefore be described as a performance-diversification gateway that improves the attainable cost-time frontier under selected severe disruptions, not as a gateway required to preserve feasibility. It does not restore baseline cost or service performance.
 
 For v0.8 severe scenarios, all 30 paired cost and time differences are positive. Holm-adjusted p-values are approximately 2.98 x 10^-8 and deterministic 95% bootstrap intervals exclude zero.
 

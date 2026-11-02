@@ -198,7 +198,7 @@ The next supplementary stage is limited to three analyses that strengthen the
 paper's mechanism and managerial claims:
 
 1. a 3 × 3 remaining-capacity by sailing-delay activation regime, including
-   actual utilization diagnostics and a load-pressure-equivalent comparison;
+   actual utilization diagnostics and a nominal capacity-days comparison;
 2. same-seed, same-disruption counterfactuals with NY/NJ allowed versus
    disabled, which quantify the value of retaining the alternative gateway;
 3. a destination-level cost and time decomposition immediately below and
@@ -215,3 +215,16 @@ echo $! > logs/v09_v11_argument_experiments.pid
 
 The full protocol, runtime estimate, monitoring commands, output paths and
 result-upload commands are in `docs/v09_v11_argument_experiments.md`.
+
+After the completed v0.9–v1.1 result folders have been pulled, build the
+archive-closed counterfactual tables and all publication figures with:
+
+```bash
+bash scripts/build_revised_paper_outputs.sh
+```
+
+This command performs post-processing only; it does not run NSGA-II. It writes
+the manuscript tables to `analysis/paper_revised/` and refreshes PNG, SVG and
+PDF files in `paper/figures/`. The canonical experimental-design and results
+texts are `paper/06_experimental_design.md` and `paper/07_results.md`, with
+Chinese working versions in the corresponding `_CN.md` files.
