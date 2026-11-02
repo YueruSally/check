@@ -310,9 +310,13 @@ for index, (case_id, city) in enumerate(CASES):
     clean(axes[index])
     axes[index].legend(frameon=False, fontsize=7)
 axes[0].set_ylabel("Total operational cost (USD million)")
-colorbar = figure.colorbar(image, ax=axes.ravel().tolist(), pad=0.02)
+figure.subplots_adjust(left=0.07, right=0.88, bottom=0.16, top=0.90, wspace=0.28)
+# Reserve a dedicated axis outside the three panels.  Calling subplots_adjust
+# after figure.colorbar moves the panels without moving the colorbar and can
+# leave the scale overlapping the Columbus panel in the exported figure.
+colorbar_axis = figure.add_axes((0.91, 0.20, 0.015, 0.64))
+colorbar = figure.colorbar(image, cax=colorbar_axis)
 colorbar.set_label("NY/NJ freight share (%)")
-figure.subplots_adjust(left=0.07, right=0.90, bottom=0.16, top=0.90, wspace=0.28)
 save(figure, "fig04_counterfactual_fronts")
 
 
