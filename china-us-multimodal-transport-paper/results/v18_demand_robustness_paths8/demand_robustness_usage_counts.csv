@@ -1,0 +1,9 @@
+case_id,condition_id,min_cost_endpoint_usage_state,min_time_endpoint_usage_state,instance_count,total_instances
+D1,compound_30pct_delay_168h,not_used,not_used,10,10
+D1,delay_264h,not_used,not_used,10,10
+D1,delay_288h,used_at_least_10pct,used_at_least_10pct,10,10
+D2,delay_240h,not_used,not_used,10,10
+D2,delay_264h,not_used,not_used,10,10
+D2,delay_288h,used_at_least_10pct,used_at_least_10pct,10,10
+D3,delay_168h,not_used,not_used,10,10
+D3,delay_240h,used_at_least_10pct,not_used,10,10

@@ -1,0 +1,10 @@
+gateway_access,shipment_id,min_cost_endpoint_services,min_time_endpoint_services,same_service_set
+allowed,D1-01,tt-cn-01@8.0|tt-sea-01@192.0,tt-sea-01@192.0,0
+allowed,D1-09,tt-sea-03@192.0,tt-cn-01@8.0|tt-sea-03@192.0,0
+allowed,D1-14,tt-sea-03@192.0,tt-cn-01@8.0|tt-sea-03@192.0,0
+allowed,D1-33,tt-cn-01@8.0|tt-sea-01@192.0,tt-sea-01@192.0,0
+allowed,D1-35,tt-sea-03@192.0,tt-cn-01@8.0|tt-sea-03@192.0,0
+restricted,D1-03,tt-sea-01@192.0,tt-cn-01@8.0|tt-sea-01@192.0,0
+restricted,D1-13,tt-cn-01@8.0|tt-sea-01@192.0,tt-sea-01@192.0,0
+restricted,D1-17,tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0,tt-cn-01@8.0|tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0,0
+restricted,D1-22,tt-sea-01@192.0,tt-cn-01@8.0|tt-sea-01@192.0,0

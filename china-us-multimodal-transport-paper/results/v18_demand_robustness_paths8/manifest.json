@@ -1,0 +1,126 @@
+{
+  "generated_at_utc": "2026-11-02T21:38:33.615404+00:00",
+  "generator": {
+    "instance_seeds": [
+      20261101,
+      20261102,
+      20261103,
+      20261104,
+      20261105,
+      20261106,
+      20261107,
+      20261108,
+      20261109,
+      20261110
+    ],
+    "case_seed_offsets": {
+      "D1": 101,
+      "D2": 202,
+      "D3": 303
+    },
+    "quantity_log_sd": 0.18,
+    "initial_quantity_factor_clip": [
+      0.875,
+      1.125
+    ],
+    "final_quantity_ratio_check": [
+      0.75,
+      1.3
+    ],
+    "due_jitter_choices_h": [
+      -48,
+      -36,
+      -24,
+      -12,
+      0,
+      12,
+      24,
+      36,
+      48
+    ],
+    "jitter_centering": "subtract within-case instance mean",
+    "minimum_due_allowance_h": 24.0,
+    "total_quantity_held_fixed": true,
+    "batch_count_held_fixed": true,
+    "release_times_held_fixed": true,
+    "tardiness_rates_held_fixed": true
+  },
+  "classification_fixed_before_results": {
+    "material_cost_usd": 10000.0,
+    "material_cost_relative": 0.0001,
+    "material_time_h": 0.25,
+    "numerical_cost_usd": 1.0,
+    "numerical_time_h": 1e-05,
+    "activation_share": 0.1,
+    "performance_types": [
+      "simultaneously_lower_cost_and_faster",
+      "paid_speed",
+      "separate_endpoint_benefits",
+      "cost_only",
+      "time_only",
+      "no_material_improvement",
+      "unclassified_unproven_endpoint"
+    ]
+  },
+  "conditions": [
+    {
+      "case_id": "D1",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "compound_30pct_delay_168h",
+      "family": "compound_disruption",
+      "uswc_capacity_multiplier": 0.3,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_168h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    }
+  ],
+  "endpoint_tasks": 320,
+  "max_paths_per_gateway": 8,
+  "interpretation_limit": "Counts describe robustness across constructed instances and must not be interpreted as real-world probabilities."
+}

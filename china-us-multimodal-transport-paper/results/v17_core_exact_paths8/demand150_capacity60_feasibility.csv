@@ -1,0 +1,4 @@
+case_id,condition_id,classification,feasible_solution_found,proven_infeasible,status_code,status,relative_gap,elapsed_seconds,message
+D1,demand_150pct_capacity_60pct,proven_infeasible,0,1,2,infeasible,,0.005486994981765747,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None)
+D2,demand_150pct_capacity_60pct,proven_infeasible,0,1,2,infeasible,,0.005256724078208208,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None)
+D3,demand_150pct_capacity_60pct,proven_infeasible,0,1,2,infeasible,,0.005246356129646301,The problem is infeasible. (HiGHS Status 8: model_status is Infeasible; primal_status is None)
