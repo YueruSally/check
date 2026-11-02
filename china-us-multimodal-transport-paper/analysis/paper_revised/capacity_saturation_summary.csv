@@ -1,0 +1,13 @@
+case_id,scenario,uswc_maximum_node_day_utilization_pct,ny_nj_share_pct
+D1,pilot_baseline,57.67892531845196,0.0
+D1,uswc_port_capacity_35pct,99.3057421526283,0.0
+D1,uswc_port_capacity_40pct,99.85505869447667,0.0
+D1,uswc_port_capacity_60pct,97.88746939934221,0.0
+D2,pilot_baseline,70.21001887995737,0.0
+D2,uswc_port_capacity_35pct,99.79079108272364,0.0
+D2,uswc_port_capacity_40pct,99.40323193807262,0.0
+D2,uswc_port_capacity_60pct,99.98619131527565,0.0
+D3,pilot_baseline,66.8630178389588,0.0
+D3,uswc_port_capacity_35pct,99.91430903471233,0.0
+D3,uswc_port_capacity_40pct,99.90480083337134,0.0
+D3,uswc_port_capacity_60pct,99.78865723761895,0.0

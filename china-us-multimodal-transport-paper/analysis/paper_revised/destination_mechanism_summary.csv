@@ -1,0 +1,4 @@
+case_id,scenario,ny_nj_share_pct,ny_minus_la_ocean_transit_h,ny_minus_la_waiting_h,ny_minus_la_us_inland_transit_h,ny_minus_la_total_lead_time_h,ny_minus_la_total_cost_usd_per_feu,interpretation_scope
+D1,uswc_departure_delay_288h,36.113678289627366,336.00000000000034,-288.05636197088194,-32.59999999999997,15.400000000000432,-5028.137599292026,balanced union-front solution; descriptive mechanism decomposition
+D2,uswc_departure_delay_264h,22.050021204482654,335.99999999999983,-265.8240820755317,-25.238755749449084,44.79552227159331,1802.5887099759784,balanced union-front solution; descriptive mechanism decomposition
+D3,uswc_departure_delay_240h,25.29060572436104,336.0000000000003,-241.9655325319877,-51.068535397738664,44.454210603913566,-4772.11073779927,balanced union-front solution; descriptive mechanism decomposition
