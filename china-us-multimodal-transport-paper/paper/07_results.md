@@ -88,7 +88,7 @@ Table 4. Exact value of NY/NJ access at lexicographic endpoints of the candidate
 
 ![Exact endpoint effects of NY/NJ access](figures/fig05_counterfactual_benefits.png)
 
-Figure 5. Exact endpoint differences, restricted minus allowed. Circles denote minimum-cost endpoints and diamonds minimum-time endpoints. Positive values favour NY/NJ access. The Memphis 264 h minimum-time endpoint saves 2.939 h but increases cost by USD 0.797 million, while its minimum-cost endpoint does not use NY/NJ.
+Figure 5. Exact endpoint differences, restricted minus allowed. Circles denote minimum-cost endpoints and diamonds minimum-time endpoints; coincident endpoint markers overlap. Positive values favour NY/NJ access. The Memphis 264 h minimum-time endpoint saves 2.939 h but increases cost by USD 0.797 million, while its minimum-cost endpoint does not use NY/NJ.
 
 The endpoint evidence separates gateway share from economic value. At 264 h, Memphis is a genuine transition: cost minimization selects zero NY/NJ, whereas time minimization selects 32.66% and accepts a higher cost. At 288 h, access improves both endpoints by USD 1.407 million and 13.913 h. Chicago at 288 h shows the largest exact cost benefit (USD 1.732 million at the cost endpoint), while Columbus at 240 h gains USD 0.832 million and 3.070 h. High NY/NJ share therefore does not by itself imply cost saving; value depends on destination, disruption, and decision preference.
 
