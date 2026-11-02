@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-02T21:36:51.283577+00:00",
+  "generated_at_utc": "2026-11-02T22:02:30.284213+00:00",
   "design": "pre-registered final non-carbon exact endpoint and share-bound suite",
   "conditions": [
     {
@@ -320,7 +320,7 @@
   ],
   "endpoint_tasks": 180,
   "reused_endpoint_tasks": 0,
-  "share_bound_tasks": 168,
+  "share_bound_tasks": 176,
   "feasibility_tasks": 3,
   "time_limit_seconds_per_solver_call": 900.0,
   "mip_relative_gap": 1e-08,

@@ -1,0 +1,17 @@
+case_id,condition_id,endpoint,binding_arc_id,binding_arc_capacity_multiplier,original_binding_arc_capacity_feu_per_day,binding_arc_capacity_feu_per_day,ny_nj_min_share,ny_nj_max_share,min_proven,max_proven,crosses_10pct
+D2,delay_288h_la_inland_capacity_50pct,min_cost_then_time,us-d-02,0.5,1500.0,750.0,0.6632996632996633,0.6632996725262322,1,1,0
+D2,delay_288h_la_inland_capacity_50pct,min_time_then_cost,us-d-02,0.5,1500.0,750.0,0.6632996632996633,0.663299672526231,1,1,0
+D2,delay_288h_la_inland_capacity_100pct,min_cost_then_time,us-d-02,1.0,1500.0,1500.0,0.3265993265993266,0.3265993400143672,1,1,0
+D2,delay_288h_la_inland_capacity_100pct,min_time_then_cost,us-d-02,1.0,1500.0,1500.0,0.3265993265993266,0.32659934001437235,1,1,0
+D2,delay_288h_la_inland_capacity_150pct,min_cost_then_time,us-d-02,1.5,1500.0,2250.0,0.0,0.0,1,1,0
+D2,delay_288h_la_inland_capacity_150pct,min_time_then_cost,us-d-02,1.5,1500.0,2250.0,0.0,0.0,1,1,0
+D2,delay_288h_la_inland_capacity_200pct,min_cost_then_time,us-d-02,2.0,1500.0,3000.0,0.0,0.0,1,1,0
+D2,delay_288h_la_inland_capacity_200pct,min_time_then_cost,us-d-02,2.0,1500.0,3000.0,0.0,0.0,1,1,0
+D3,delay_240h_la_inland_capacity_50pct,min_cost_then_time,us-d-03,0.5,1500.0,750.0,0.6632996632996633,0.6632996704523264,1,1,0
+D3,delay_240h_la_inland_capacity_50pct,min_time_then_cost,us-d-03,0.5,1500.0,750.0,0.0,0.0,1,1,0
+D3,delay_240h_la_inland_capacity_100pct,min_cost_then_time,us-d-03,1.0,1500.0,1500.0,0.3265993265993266,0.3265993265993266,1,1,0
+D3,delay_240h_la_inland_capacity_100pct,min_time_then_cost,us-d-03,1.0,1500.0,1500.0,0.0,0.0,1,1,0
+D3,delay_240h_la_inland_capacity_150pct,min_cost_then_time,us-d-03,1.5,1500.0,2250.0,0.07250280583613918,0.07250280583613918,1,1,0
+D3,delay_240h_la_inland_capacity_150pct,min_time_then_cost,us-d-03,1.5,1500.0,2250.0,0.0,0.0,1,1,0
+D3,delay_240h_la_inland_capacity_200pct,min_cost_then_time,us-d-03,2.0,1500.0,3000.0,0.07250280583613918,0.07250280583613918,1,1,0
+D3,delay_240h_la_inland_capacity_200pct,min_time_then_cost,us-d-03,2.0,1500.0,3000.0,0.0,0.0,1,1,0

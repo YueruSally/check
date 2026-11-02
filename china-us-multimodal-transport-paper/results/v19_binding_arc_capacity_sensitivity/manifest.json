@@ -1,0 +1,30 @@
+{
+  "generated_at_utc": "2026-11-02T22:02:41.957359+00:00",
+  "design": "targeted binding LA/LB inland daily-arc capacity sensitivity",
+  "capacity_multipliers": [
+    0.5,
+    1.0,
+    1.5,
+    2.0
+  ],
+  "targets": [
+    {
+      "case_id": "D2",
+      "base_condition_id": "delay_288h",
+      "delay_h": 288.0,
+      "binding_arc_id": "us-d-02"
+    },
+    {
+      "case_id": "D3",
+      "base_condition_id": "delay_240h",
+      "delay_h": 240.0,
+      "binding_arc_id": "us-d-03"
+    }
+  ],
+  "max_paths_per_gateway": 8,
+  "endpoint_tasks": 32,
+  "share_bound_tasks": 32,
+  "time_limit_seconds_per_solver_call": 900.0,
+  "mip_relative_gap": 1e-08,
+  "interpretation_limit": "Only the diagnosed binding LA/LB-to-inland daily arc is varied; this is not a general capacity or timetable sensitivity grid."
+}
