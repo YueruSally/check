@@ -337,14 +337,22 @@ def _linear_system(
     for coefficients, upper_bound in additional_upper_bounds:
         if len(coefficients) != variable_count:
             raise ValueError("A bounded MILP coefficient vector has the wrong length.")
+        # Endpoint-equivalent share models add cost and time rows whose right-
+        # hand sides can differ by five orders of magnitude.  Normalize each
+        # added objective row by its largest coefficient before handing it to
+        # HiGHS.  This is an algebraically identical constraint, but avoids a
+        # false presolve-infeasible result when two tight lexicographic bounds
+        # intersect at an endpoint.
+        nonzero = [abs(coefficient) for coefficient in coefficients if coefficient]
+        row_scale = max(nonzero, default=1.0)
         add_row(
             {
-                index: coefficient
+                index: coefficient / row_scale
                 for index, coefficient in enumerate(coefficients)
                 if coefficient
             },
             -math.inf,
-            upper_bound,
+            upper_bound / row_scale,
         )
 
     row_indices: list[int] = []
