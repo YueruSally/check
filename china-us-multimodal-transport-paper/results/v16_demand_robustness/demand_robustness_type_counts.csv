@@ -1,0 +1,12 @@
+case_id,condition_id,performance_type,instance_count,total_instances
+D1,compound_30pct_delay_168h,simultaneously_lower_cost_and_faster,8,10
+D1,compound_30pct_delay_168h,unclassified_unproven_endpoint,2,10
+D1,delay_264h,no_material_improvement,10,10
+D1,delay_288h,simultaneously_lower_cost_and_faster,10,10
+D2,delay_240h,no_material_improvement,9,10
+D2,delay_240h,unclassified_unproven_endpoint,1,10
+D2,delay_264h,paid_speed,10,10
+D2,delay_288h,simultaneously_lower_cost_and_faster,9,10
+D2,delay_288h,unclassified_unproven_endpoint,1,10
+D3,delay_168h,no_material_improvement,10,10
+D3,delay_240h,simultaneously_lower_cost_and_faster,10,10

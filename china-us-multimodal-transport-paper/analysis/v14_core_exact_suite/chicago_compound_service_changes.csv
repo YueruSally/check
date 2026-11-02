@@ -1,0 +1,17 @@
+gateway_access,shipment_id,min_cost_endpoint_services,min_time_endpoint_services,same_service_set
+allowed,D1-05,tt-cn-02@8.0|tt-sea-04@192.0|tt-us-04@751.2,tt-cn-01@8.0|tt-sea-01@192.0,0
+allowed,D1-17,tt-cn-02@8.0|tt-sea-04@192.0|tt-us-04@751.2,tt-cn-01@8.0|tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0|tt-us-04@751.2,0
+allowed,D1-19,tt-cn-01@8.0|tt-sea-05@192.0,tt-sea-05@192.0,0
+allowed,D1-21,tt-cn-01@8.0|tt-sea-01@192.0|tt-us-01@717.6,tt-cn-02@8.0|tt-sea-04@192.0|tt-us-04@751.2,0
+allowed,D1-26,tt-cn-01@8.0|tt-sea-05@192.0,tt-sea-05@192.0,0
+allowed,D1-29,tt-cn-01@8.0|tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0|tt-us-04@751.2,tt-cn-01@8.0|tt-sea-01@192.0,0
+allowed,D1-30,tt-cn-01@8.0|tt-sea-01@192.0,tt-sea-01@192.0,0
+allowed,D1-32,tt-cn-01@8.0|tt-sea-01@192.0|tt-us-01@717.6,tt-cn-01@8.0|tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0|tt-us-04@751.2,0
+allowed,D1-40,tt-cn-01@8.0|tt-sea-01@192.0,tt-sea-01@192.0,0
+restricted,D1-05,tt-cn-02@8.0|tt-sea-04@192.0|tt-us-04@751.2,tt-cn-01@8.0|tt-sea-01@192.0,0
+restricted,D1-17,tt-cn-02@8.0|tt-sea-04@192.0|tt-us-04@751.2,tt-cn-01@8.0|tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0|tt-us-04@751.2,0
+restricted,D1-19,tt-cn-01@8.0|tt-sea-03@192.0|tt-us-04@784.8,tt-sea-03@192.0|tt-us-04@784.8,0
+restricted,D1-21,tt-cn-01@8.0|tt-sea-01@192.0|tt-us-01@717.6,tt-cn-02@8.0|tt-sea-04@192.0|tt-us-04@751.2,0
+restricted,D1-22,tt-sea-01@192.0,tt-cn-01@8.0|tt-sea-01@192.0,0
+restricted,D1-29,tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0|tt-us-04@751.2,tt-cn-01@8.0|tt-sea-01@192.0,0
+restricted,D1-32,tt-cn-01@8.0|tt-sea-01@192.0|tt-us-01@717.6,tt-cn-02@8.0|tt-sea-01@192.0|tt-sea-04@192.0|tt-us-04@751.2,0

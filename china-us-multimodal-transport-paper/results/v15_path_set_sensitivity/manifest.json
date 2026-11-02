@@ -1,0 +1,122 @@
+{
+  "generated_at_utc": "2026-11-02T21:26:05.828906+00:00",
+  "conditions": [
+    {
+      "case_id": "D1",
+      "condition_id": "delay_0h",
+      "family": "baseline",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_0h",
+      "family": "baseline",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_0h",
+      "family": "baseline",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_168h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "compound_30pct_delay_168h",
+      "family": "compound_disruption",
+      "uswc_capacity_multiplier": 0.3,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "compound_30pct_delay_168h",
+      "family": "compound_disruption",
+      "uswc_capacity_multiplier": 0.3,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "compound_30pct_delay_168h",
+      "family": "compound_disruption",
+      "uswc_capacity_multiplier": 0.3,
+      "uswc_delay_h": 168.0
+    }
+  ],
+  "endpoint_tasks_paths8": 64,
+  "paths4_source": "results/v14_core_exact_suite",
+  "nested_library_required": true,
+  "conditions_without_new_paths": [],
+  "interpretation": "A condition with no added path is reported as no effective coverage expansion, not as evidence that four paths are sufficient."
+}
