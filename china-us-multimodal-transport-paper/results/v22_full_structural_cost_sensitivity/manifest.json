@@ -1,0 +1,348 @@
+{
+  "generated_at_utc": "2026-11-02T22:52:14.429924+00:00",
+  "library_variant": "structural_full",
+  "structural_source": "results/v21_full_structural_core_exact",
+  "penalty_multipliers": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    1.5,
+    2.0
+  ],
+  "holding_multipliers": [
+    0.0,
+    0.5,
+    1.0,
+    2.0
+  ],
+  "holding_multiplier_1_represented_by_penalty_multiplier_1": true,
+  "targets": [
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_penalty_000pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_penalty_025pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.25,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_penalty_050pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.5,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_penalty_100pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 1.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_penalty_150pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 1.5,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_penalty_200pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 2.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_holding_000pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 0.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_holding_050pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 0.5,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h_holding_200pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 2.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_penalty_000pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_penalty_025pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.25,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_penalty_050pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.5,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_penalty_100pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 1.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_penalty_150pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 1.5,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_penalty_200pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 2.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_holding_000pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 0.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_holding_050pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 0.5,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h_holding_200pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 2.0,
+      "base_delay_h": 288.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_penalty_000pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.0,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_penalty_025pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.25,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_penalty_050pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 0.5,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_penalty_100pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 1.0,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_penalty_150pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 1.5,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_penalty_200pct",
+        "family": "tardiness_penalty_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "tardiness_penalty",
+      "multiplier": 2.0,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_holding_000pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 0.0,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_holding_050pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 0.5,
+      "base_delay_h": 240.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h_holding_200pct",
+        "family": "holding_cost_sensitivity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "dimension": "holding_cost",
+      "multiplier": 2.0,
+      "base_delay_h": 240.0
+    }
+  ],
+  "endpoint_tasks": 108,
+  "share_bound_tasks": 100
+}

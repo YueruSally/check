@@ -1,0 +1,29 @@
+{
+  "generated_at_utc": "2026-11-02T22:51:30.682642+00:00",
+  "results_source": "results/v21_full_structural_core_exact",
+  "path_library_decision": "exhaustive_structural_library_required",
+  "materially_changed_endpoint_count": 74,
+  "total_endpoint_count": 180,
+  "first_tested_delay_with_at_least_10pct_ny_nj_by_case": {
+    "D1": {
+      "delay_h": 288,
+      "endpoint": "min_cost_then_time",
+      "state": "all_endpoint_equivalent_solutions_at_least_10pct"
+    },
+    "D2": {
+      "delay_h": 288,
+      "endpoint": "min_cost_then_time",
+      "state": "all_endpoint_equivalent_solutions_at_least_10pct"
+    },
+    "D3": {
+      "delay_h": 240,
+      "endpoint": "min_cost_then_time",
+      "state": "all_endpoint_equivalent_solutions_at_least_10pct"
+    }
+  },
+  "interpretation_limits": [
+    "Delay values are tested grid points, not continuous real-world thresholds.",
+    "Cost and time benefits are endpoint-specific and are not simultaneous unless the same endpoint row demonstrates both.",
+    "Recovery ratios are suppressed when the no-NY/NJ disruption loss is numerically negligible."
+  ]
+}
