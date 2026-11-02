@@ -1,0 +1,17 @@
+case_id,comparison,component,paired_seeds,mean_h,mean_bootstrap_95_low_h,mean_bootstrap_95_high_h,median_h,negative_seed_count,positive_seed_count,tie_seed_count,sign_convention
+D1,delay_288h,allowed_minus_restricted_time_h,30,-8.832780065730178,-9.125276699796858,-8.525229173971503,-8.887364419121297,30,0,0,allowed_minus_restricted; negative is improvement
+D1,delay_288h,ny_nj_contribution_h,30,-0.23207194475369294,-0.5470443264941215,0.07418783657670781,-0.3759462864269857,19,11,0,allowed_minus_restricted; negative is improvement
+D1,delay_288h,west_coast_contribution_h,30,-8.600708120976446,-9.020459795551698,-8.166233709656352,-8.532982096228586,30,0,0,allowed_minus_restricted; negative is improvement
+D1,delay_288h,other_contribution_h,30,0.0,0.0,0.0,0.0,0,0,30,allowed_minus_restricted; negative is improvement
+D2,delay_264h,allowed_minus_restricted_time_h,30,-1.5222411445776365,-1.6811177586788455,-1.3509125963807875,-1.5741141035254032,30,0,0,allowed_minus_restricted; negative is improvement
+D2,delay_264h,ny_nj_contribution_h,30,6.072063157920304,5.544165893092521,6.590263084164372,6.098959870270239,0,30,0,allowed_minus_restricted; negative is improvement
+D2,delay_264h,west_coast_contribution_h,30,-7.594304302498017,-8.193754946179022,-6.987024324915338,-7.7462124585658,30,0,0,allowed_minus_restricted; negative is improvement
+D2,delay_264h,other_contribution_h,30,0.0,0.0,0.0,0.0,0,0,30,allowed_minus_restricted; negative is improvement
+D2,delay_288h,allowed_minus_restricted_time_h,30,-13.191186118240477,-13.471175818624413,-12.898383871382459,-13.397378155842432,30,0,0,allowed_minus_restricted; negative is improvement
+D2,delay_288h,ny_nj_contribution_h,30,0.9394646500161794,0.3457374973975746,1.4960826597352062,1.0858359975199787,7,23,0,allowed_minus_restricted; negative is improvement
+D2,delay_288h,west_coast_contribution_h,30,-14.130650768256597,-14.744538947687445,-13.500322150337988,-14.418378439403568,30,0,0,allowed_minus_restricted; negative is improvement
+D2,delay_288h,other_contribution_h,30,0.0,0.0,0.0,0.0,0,0,30,allowed_minus_restricted; negative is improvement
+D3,delay_240h,allowed_minus_restricted_time_h,30,-2.184876785649222,-2.2970136635323177,-2.069953964653124,-2.104532450160093,30,0,0,allowed_minus_restricted; negative is improvement
+D3,delay_240h,ny_nj_contribution_h,30,6.7818175419241005,6.372141547197539,7.19558988861002,6.678934519503391,0,30,0,allowed_minus_restricted; negative is improvement
+D3,delay_240h,west_coast_contribution_h,30,-8.966694327573263,-9.438855556940089,-8.508057204683782,-8.822023922262849,30,0,0,allowed_minus_restricted; negative is improvement
+D3,delay_240h,other_contribution_h,30,0.0,0.0,0.0,0.0,0,0,30,allowed_minus_restricted; negative is improvement

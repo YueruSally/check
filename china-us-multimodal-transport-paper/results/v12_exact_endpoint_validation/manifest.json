@@ -1,0 +1,73 @@
+{
+  "generated_at_utc": "2026-11-02T19:49:45.952135+00:00",
+  "conditions": [
+    {
+      "case_id": "D2",
+      "comparison": "delay_264h",
+      "gateway_access": "allowed",
+      "scenario": "uswc_departure_delay_264h"
+    },
+    {
+      "case_id": "D2",
+      "comparison": "delay_264h",
+      "gateway_access": "restricted",
+      "scenario": "uswc_departure_delay_264h_no_ny_nj"
+    },
+    {
+      "case_id": "D1",
+      "comparison": "delay_288h",
+      "gateway_access": "allowed",
+      "scenario": "uswc_departure_delay_288h"
+    },
+    {
+      "case_id": "D1",
+      "comparison": "delay_288h",
+      "gateway_access": "restricted",
+      "scenario": "uswc_departure_delay_288h_no_ny_nj"
+    },
+    {
+      "case_id": "D2",
+      "comparison": "delay_288h",
+      "gateway_access": "allowed",
+      "scenario": "uswc_departure_delay_288h"
+    },
+    {
+      "case_id": "D2",
+      "comparison": "delay_288h",
+      "gateway_access": "restricted",
+      "scenario": "uswc_departure_delay_288h_no_ny_nj"
+    },
+    {
+      "case_id": "D3",
+      "comparison": "delay_240h",
+      "gateway_access": "allowed",
+      "scenario": "uswc_departure_delay_240h"
+    },
+    {
+      "case_id": "D3",
+      "comparison": "delay_240h",
+      "gateway_access": "restricted",
+      "scenario": "uswc_departure_delay_240h_no_ny_nj"
+    },
+    {
+      "case_id": "D1",
+      "comparison": "compound_30pct_delay_168h",
+      "gateway_access": "allowed",
+      "scenario": "uswc_compound_30pct_delay_168h"
+    },
+    {
+      "case_id": "D1",
+      "comparison": "compound_30pct_delay_168h",
+      "gateway_access": "restricted",
+      "scenario": "uswc_compound_30pct_delay_168h_no_ny_nj"
+    }
+  ],
+  "endpoint_tasks": 20,
+  "maximum_solver_calls": 40,
+  "time_limit_seconds_per_call": 600.0,
+  "mip_relative_gap": 1e-08,
+  "primary_relative_tolerance": 1e-09,
+  "primary_absolute_tolerance": 1e-06,
+  "interpretation": "lexicographic_proven=1 requires both solver stages to terminate optimally within the recorded tolerance and the decoded allocation to match the independent evaluator and all three capacity accounts",
+  "quality_comparison": "heuristic_endpoint_quality.csv compares each best 30-seed NSGA-II primary endpoint with the corresponding MILP value; a formal gap is claimed only when the MILP endpoint is proven"
+}

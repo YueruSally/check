@@ -1,0 +1,11 @@
+case_id,comparison,endpoint,allowed_lexicographic_proven,restricted_lexicographic_proven,comparison_status,cost_avoided_by_allowing_ny_nj_usd,time_avoided_by_allowing_ny_nj_h,allowed_ny_nj_share
+D1,compound_30pct_delay_168h,min_cost_then_time,1,1,proven_lexicographic_endpoints,308894.81143607944,3.7232323232323097,0.1919191919191919
+D1,compound_30pct_delay_168h,min_time_then_cost,1,1,proven_lexicographic_endpoints,308894.75400000066,3.723232323232196,0.19191919191919202
+D1,delay_288h,min_cost_then_time,1,1,proven_lexicographic_endpoints,1732053.7297320962,5.029988776655387,0.6489337822671156
+D1,delay_288h,min_time_then_cost,1,1,proven_lexicographic_endpoints,1497214.655172035,9.993937506909901,0.32659944913370487
+D2,delay_264h,min_cost_then_time,1,1,proven_lexicographic_endpoints,0.07054030895233154,0.0,0.0
+D2,delay_264h,min_time_then_cost,1,1,proven_lexicographic_endpoints,-797133.9900000095,2.9393939393939945,0.3265993265993271
+D2,delay_288h,min_cost_then_time,1,1,proven_lexicographic_endpoints,1407017.196854949,13.913131313131203,0.3265993265993266
+D2,delay_288h,min_time_then_cost,1,1,proven_lexicographic_endpoints,1407017.2739999741,13.913131313131203,0.3265993265993266
+D3,delay_240h,min_cost_then_time,1,1,proven_lexicographic_endpoints,831555.6060000062,3.0700336700333537,0.3265993265993266
+D3,delay_240h,min_time_then_cost,1,1,proven_lexicographic_endpoints,831555.6059999913,3.0700336700334674,0.3265993265993266

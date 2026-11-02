@@ -1,0 +1,39 @@
+{
+  "generated_at_utc": "2026-11-02T19:49:41.031392+00:00",
+  "activation_threshold": 0.1,
+  "comparisons": [
+    {
+      "case_id": "D1",
+      "comparison": "delay_288h",
+      "allowed_scenario": "uswc_departure_delay_288h",
+      "restricted_scenario": "uswc_departure_delay_288h_no_ny_nj"
+    },
+    {
+      "case_id": "D2",
+      "comparison": "delay_264h",
+      "allowed_scenario": "uswc_departure_delay_264h",
+      "restricted_scenario": "uswc_departure_delay_264h_no_ny_nj"
+    },
+    {
+      "case_id": "D2",
+      "comparison": "delay_288h",
+      "allowed_scenario": "uswc_departure_delay_288h",
+      "restricted_scenario": "uswc_departure_delay_288h_no_ny_nj"
+    },
+    {
+      "case_id": "D3",
+      "comparison": "delay_240h",
+      "allowed_scenario": "uswc_departure_delay_240h",
+      "restricted_scenario": "uswc_departure_delay_240h_no_ny_nj"
+    }
+  ],
+  "archive_rule": "pool allowed and restricted objective points, retain the non-dominated union, then retain every distinct configuration found at those coordinates",
+  "activation_definitions": {
+    "first_solution_activation": "at least one retained found configuration has NY/NJ share at or above the threshold",
+    "front_wide_activation": "every retained found configuration has NY/NJ share at or above the threshold"
+  },
+  "decomposition_identity": "NY/NJ contribution + West Coast contribution + other contribution = allowed minus restricted quantity-weighted mean time",
+  "decomposition_limit": "shipment-matched change relative to each shipment's restricted mean; it is not unique tracking of every split freight unit",
+  "scope_limit": "Only the four targeted delay comparisons are closed by the new rerun. No claim is made that every cell in the historical capacity-delay map has a restricted-archive closure.",
+  "historical_compound_correction": "The existing Chicago 30%-capacity + 168 h closed archive contains zero-share points and is carried as a transition correction. It is not relabelled as a new configuration-complete rerun."
+}

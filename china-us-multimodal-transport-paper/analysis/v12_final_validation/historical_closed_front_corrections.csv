@@ -1,0 +1,2 @@
+case_id,comparison,retained_objective_points,zero_ny_nj_objective_points,ny_nj_share_min,ny_nj_share_max,first_solution_activation,front_wide_activation,classification,evidence_scope
+D1,compound_30pct_delay_168h,5,2,0.0,0.18169485340133534,1,0,transition,existing archive-closed objective points; sufficient to reject front-wide activation but not a configuration-complete rerun
