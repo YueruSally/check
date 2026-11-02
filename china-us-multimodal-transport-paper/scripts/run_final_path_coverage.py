@@ -433,6 +433,23 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
                     f"share={existing.get('ny_nj_share')}); recomputing",
                     flush=True,
                 )
+            if direction == "min" and float(endpoint.get("ny_nj_share", 1.0)) <= 1e-12:
+                payload = zero_share_lower_bound_certificate(
+                    bound_id=bound_id,
+                    condition=condition,
+                    endpoint_region=region,
+                    cost_upper_bound=cost_bound,
+                    time_upper_bound=time_bound,
+                    endpoint=endpoint,
+                )
+                write_json_atomic(checkpoint, payload)
+                completed += 1
+                print(
+                    f"[share {completed}/{total}] {bound_id} "
+                    "proven=1 certificate=nonnegative_share_lower_bound",
+                    flush=True,
+                )
+                continue
             if model is None:
                 model, _ = build_full_model(
                     case_data,
@@ -471,6 +488,71 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
                 f"share={payload['ny_nj_share']}",
                 flush=True,
             )
+
+
+def zero_share_lower_bound_certificate(
+    *,
+    bound_id: str,
+    condition: ExactCondition,
+    endpoint_region: str,
+    cost_upper_bound: float,
+    time_upper_bound: float,
+    endpoint: dict[str, object],
+) -> dict[str, object]:
+    """Certify a zero minimum share from a proven zero-share endpoint.
+
+    Gateway share is a sum of nonnegative allocation variables divided by
+    positive total demand, so zero is a global lower bound.  A proven,
+    evaluator-consistent endpoint with zero NY/NJ allocation attains that
+    bound inside its own endpoint-equivalent region; no additional MILP call
+    is required.
+    """
+    if int(endpoint.get("lexicographic_proven", 0)) != 1:
+        raise ValueError("A zero-share certificate requires a proven endpoint.")
+    if int(endpoint.get("evaluator_consistent", 0)) != 1:
+        raise ValueError(
+            "A zero-share certificate requires an evaluator-consistent endpoint."
+        )
+    if abs(float(endpoint.get("ny_nj_share", 1.0))) > 1e-12:
+        raise ValueError("The endpoint does not attain the zero-share lower bound.")
+    return {
+        "bound_id": bound_id,
+        "case_id": condition.case_id,
+        "condition_id": condition.condition_id,
+        "family": condition.family,
+        "endpoint_region": endpoint_region,
+        "direction": "min",
+        "cost_upper_bound_usd": cost_upper_bound,
+        "time_upper_bound_h": time_upper_bound,
+        "proven_optimal": 1,
+        "proven_infeasible": 0,
+        "evaluator_consistent": 1,
+        "ny_nj_share": 0.0,
+        "total_cost_usd": endpoint["total_cost_usd"],
+        "quantity_weighted_mean_delivery_time_h": endpoint[
+            "quantity_weighted_mean_delivery_time_h"
+        ],
+        "solver_call": {
+            "stage": 0,
+            "objective": "min_ny_nj_share",
+            "status_code": 0,
+            "status": "analytically_certified",
+            "success": True,
+            "objective_value": 0.0,
+            "dual_bound": 0.0,
+            "relative_gap": 0.0,
+            "node_count": 0,
+            "elapsed_seconds": 0.0,
+            "message": (
+                "A proven endpoint attains zero NY/NJ share; nonnegativity "
+                "therefore certifies the global minimum."
+            ),
+        },
+        "allocations": endpoint["allocations"],
+        "certificate_type": "nonnegative_share_lower_bound",
+        "certificate_source_validation_id": endpoint["validation_id"],
+        "library_variant": "structural_full",
+    }
 
 
 def share_bound_complete(payload: dict[str, object]) -> bool:
