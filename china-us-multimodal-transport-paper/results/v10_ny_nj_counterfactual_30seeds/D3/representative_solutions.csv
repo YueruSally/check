@@ -1,0 +1,17 @@
+solution_id,case_id,scenario,roles,source_seed,total_cost_usd,quantity_weighted_mean_delivery_time_h,makespan_h,max_lead_time_h,total_tardiness_feu_h,route_allocations
+D3_uswc_compound_30pct_delay_168h_no_ny_nj_001,D3,uswc_compound_30pct_delay_168h_no_ny_nj,min_cost,20260917,65532474.98414238,859.5037326602544,940.8,940.8,299913.2232805966,80
+D3_uswc_compound_30pct_delay_168h_no_ny_nj_002,D3,uswc_compound_30pct_delay_168h_no_ny_nj,,20260912,65638823.61265712,858.0677948745688,940.8,940.8,296610.26401709276,80
+D3_uswc_compound_30pct_delay_168h_no_ny_nj_003,D3,uswc_compound_30pct_delay_168h_no_ny_nj,balanced,20260912,65719914.52142488,857.8353345959354,940.8,940.8,296724.4333390295,86
+D3_uswc_compound_30pct_delay_168h_no_ny_nj_004,D3,uswc_compound_30pct_delay_168h_no_ny_nj,,20260912,65728877.71726311,857.8118437113785,940.8,940.8,296672.10739367915,85
+D3_uswc_compound_30pct_delay_168h_no_ny_nj_005,D3,uswc_compound_30pct_delay_168h_no_ny_nj,,20260912,65748345.239097275,857.698748924733,940.8,940.8,296335.18632131774,86
+D3_uswc_compound_30pct_delay_168h_no_ny_nj_006,D3,uswc_compound_30pct_delay_168h_no_ny_nj,,20260912,65854431.599436134,857.6051986921079,940.8,940.8,296346.40903185407,84
+D3_uswc_compound_30pct_delay_168h_no_ny_nj_007,D3,uswc_compound_30pct_delay_168h_no_ny_nj,min_delivery_time,20260931,66228573.90660102,857.5241450719844,940.8,940.8,294850.58298606094,76
+D3_uswc_departure_delay_240h_no_ny_nj_001,D3,uswc_departure_delay_240h_no_ny_nj,min_cost,20260935,70002011.39655712,859.6108757361513,899.8,899.8,296919.2257022768,68
+D3_uswc_departure_delay_240h_no_ny_nj_002,D3,uswc_departure_delay_240h_no_ny_nj,,20260935,70012684.89190413,859.5741341580906,899.8,899.8,296837.3838371474,69
+D3_uswc_departure_delay_240h_no_ny_nj_003,D3,uswc_departure_delay_240h_no_ny_nj,,20260935,70016534.40236445,859.5723176762111,899.8,899.8,296833.33762376045,68
+D3_uswc_departure_delay_240h_no_ny_nj_004,D3,uswc_departure_delay_240h_no_ny_nj,,20260935,70018141.42411183,859.566777911459,899.8,899.8,296820.99779777485,69
+D3_uswc_departure_delay_240h_no_ny_nj_005,D3,uswc_departure_delay_240h_no_ny_nj,,20260935,70021499.70219883,859.5520611624759,899.8,899.8,296788.21623941505,68
+D3_uswc_departure_delay_240h_no_ny_nj_006,D3,uswc_departure_delay_240h_no_ny_nj,balanced,20260935,70028539.02281262,859.532585055966,899.8,899.8,296744.83321216394,70
+D3_uswc_departure_delay_240h_no_ny_nj_007,D3,uswc_departure_delay_240h_no_ny_nj,,20260915,70035658.15809573,859.5316194782282,899.8,899.8,296742.68238775333,73
+D3_uswc_departure_delay_240h_no_ny_nj_008,D3,uswc_departure_delay_240h_no_ny_nj,,20260908,70356643.49167703,859.5310610596022,899.8,899.8,296741.4385102645,75
+D3_uswc_departure_delay_240h_no_ny_nj_009,D3,uswc_departure_delay_240h_no_ny_nj,min_delivery_time,20260907,70662559.9348238,859.5306823028516,899.8,899.8,296740.5948296015,76
