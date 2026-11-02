@@ -330,20 +330,46 @@ def endpoint_region_bounds(
     absolute_tolerance: float,
     relative_tolerance: float,
 ) -> tuple[float, float]:
-    cost = float(payload["total_cost_usd"])
-    time_h = float(payload["quantity_weighted_mean_delivery_time_h"])
     primary = str(payload["primary_objective"])
     primary_optimum = float(payload["primary_optimum"])
     primary_tolerance = float(payload["primary_tolerance"])
+    secondary = str(payload["secondary_objective"])
+
+    # Define the endpoint-equivalent region in the MILP objective space.  The
+    # independent evaluator intentionally decodes and cleans tiny allocation
+    # residuals, so its recomputed cost/time can differ slightly from the raw
+    # linear objective.  Using that recomputed value as a hard MILP bound can
+    # therefore exclude the very endpoint whose share is being bounded.  The
+    # stage-two solver objective is the correct secondary optimum for this
+    # purpose.  The fallback includes the recorded evaluator discrepancy for
+    # old/reused payloads that do not retain stage calls.
+    secondary_optimum = None
+    for call in reversed(list(payload.get("solver_calls", []))):
+        if (
+            int(call.get("stage", 0)) == 2
+            and str(call.get("objective", "")) == secondary
+            and call.get("objective_value") is not None
+        ):
+            secondary_optimum = float(call["objective_value"])
+            break
+    if secondary_optimum is None:
+        if secondary == "cost":
+            evaluated = float(payload["total_cost_usd"])
+            discrepancy = float(payload.get("evaluator_cost_abs_error") or 0.0)
+        else:
+            evaluated = float(payload["quantity_weighted_mean_delivery_time_h"])
+            discrepancy = float(payload.get("evaluator_time_abs_error") or 0.0)
+        secondary_optimum = evaluated + abs(discrepancy)
+    secondary_bound = secondary_optimum + numerical_tolerance(
+        secondary_optimum, absolute_tolerance, relative_tolerance
+    )
     if primary == "cost":
         return (
             primary_optimum + primary_tolerance,
-            time_h + numerical_tolerance(
-                time_h, absolute_tolerance, relative_tolerance
-            ),
+            secondary_bound,
         )
     return (
-        cost + numerical_tolerance(cost, absolute_tolerance, relative_tolerance),
+        secondary_bound,
         primary_optimum + primary_tolerance,
     )
 
