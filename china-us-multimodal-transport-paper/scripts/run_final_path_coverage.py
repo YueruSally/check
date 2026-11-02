@@ -422,10 +422,17 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
             checkpoint = bound_root / f"{bound_id}.json"
             if checkpoint.exists():
                 existing = load_json(checkpoint)
-                if int(existing.get("proven_optimal", 0)) == 1:
+                if share_bound_complete(existing):
                     completed += 1
                     print(f"[share {completed}/{total}] resume {bound_id}", flush=True)
                     continue
+                print(
+                    f"[share retry] {bound_id} has an incomplete checkpoint "
+                    f"(proven={existing.get('proven_optimal')}, "
+                    f"consistent={existing.get('evaluator_consistent')}, "
+                    f"share={existing.get('ny_nj_share')}); recomputing",
+                    flush=True,
+                )
             if model is None:
                 model, _ = build_full_model(
                     case_data,
@@ -459,9 +466,27 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
             completed += 1
             print(
                 f"[share {completed}/{total}] {bound_id} "
-                f"proven={payload['proven_optimal']}",
+                f"proven={payload['proven_optimal']} "
+                f"consistent={payload['evaluator_consistent']} "
+                f"share={payload['ny_nj_share']}",
                 flush=True,
             )
+
+
+def share_bound_complete(payload: dict[str, object]) -> bool:
+    """Return whether a share-bound checkpoint is safe to reuse.
+
+    A solver status alone is insufficient for downstream gateway-share
+    analysis.  The decoded allocation must also pass the common evaluator and
+    supply the objective values used to define the endpoint-equivalent region.
+    """
+    return (
+        int(payload.get("proven_optimal", 0)) == 1
+        and int(payload.get("evaluator_consistent", 0)) == 1
+        and payload.get("ny_nj_share") is not None
+        and payload.get("total_cost_usd") is not None
+        and payload.get("quantity_weighted_mean_delivery_time_h") is not None
+    )
 
 
 def finalize(args, data, conditions):
@@ -555,6 +580,63 @@ def finalize(args, data, conditions):
     for payload in share_payloads:
         key = (payload["case_id"], payload["condition_id"], payload["endpoint_region"])
         share_groups.setdefault(key, {})[payload["direction"]] = payload
+    unresolved_rows = []
+    for (case_id, condition_id, region), directions in sorted(share_groups.items()):
+        for direction in ("min", "max"):
+            payload = directions.get(direction)
+            if payload is not None and share_bound_complete(payload):
+                continue
+            unresolved_rows.append(
+                {
+                    "case_id": case_id,
+                    "condition_id": condition_id,
+                    "endpoint_region": region,
+                    "direction": direction,
+                    "bound_id": payload.get("bound_id", "") if payload else "",
+                    "status": (
+                        payload.get("solver_call", {}).get("status", "")
+                        if payload
+                        else "missing_checkpoint"
+                    ),
+                    "proven_optimal": (
+                        payload.get("proven_optimal", "") if payload else ""
+                    ),
+                    "proven_infeasible": (
+                        payload.get("proven_infeasible", "") if payload else ""
+                    ),
+                    "evaluator_consistent": (
+                        payload.get("evaluator_consistent", "") if payload else ""
+                    ),
+                    "ny_nj_share": payload.get("ny_nj_share", "") if payload else "",
+                    "solver_message": (
+                        payload.get("solver_call", {}).get("message", "")
+                        if payload
+                        else ""
+                    ),
+                }
+            )
+    write_csv(
+        args.output / "unresolved_share_bounds.csv",
+        unresolved_rows,
+        [
+            "case_id", "condition_id", "endpoint_region", "direction",
+            "bound_id", "status", "proven_optimal", "proven_infeasible",
+            "evaluator_consistent", "ny_nj_share", "solver_message",
+        ],
+    )
+    if unresolved_rows:
+        identifiers = ", ".join(
+            str(row["bound_id"] or (
+                f"{row['case_id']}_{row['condition_id']}_"
+                f"{row['endpoint_region']}_{row['direction']}"
+            ))
+            for row in unresolved_rows
+        )
+        raise RuntimeError(
+            f"{len(unresolved_rows)} share-bound task(s) lack a proven, "
+            "evaluator-consistent NY/NJ share: " + identifiers + ". "
+            f"See {args.output / 'unresolved_share_bounds.csv'}."
+        )
     share_rows = []
     for (case_id, condition_id, region), directions in sorted(share_groups.items()):
         minimum = directions["min"]
