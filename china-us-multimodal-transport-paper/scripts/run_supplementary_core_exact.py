@@ -335,6 +335,14 @@ def endpoint_region_bounds(
     primary_tolerance = float(payload["primary_tolerance"])
     secondary = str(payload["secondary_objective"])
 
+    def evaluator_error(objective: str) -> float:
+        field = (
+            "evaluator_cost_abs_error"
+            if objective == "cost"
+            else "evaluator_time_abs_error"
+        )
+        return abs(float(payload.get(field) or 0.0))
+
     # Define the endpoint-equivalent region in the MILP objective space.  The
     # independent evaluator intentionally decodes and cleans tiny allocation
     # residuals, so its recomputed cost/time can differ slightly from the raw
@@ -360,17 +368,33 @@ def endpoint_region_bounds(
             evaluated = float(payload["quantity_weighted_mean_delivery_time_h"])
             discrepancy = float(payload.get("evaluator_time_abs_error") or 0.0)
         secondary_optimum = evaluated + abs(discrepancy)
-    secondary_bound = secondary_optimum + numerical_tolerance(
-        secondary_optimum, absolute_tolerance, relative_tolerance
+    secondary_bound = secondary_optimum + max(
+        numerical_tolerance(
+            secondary_optimum, absolute_tolerance, relative_tolerance
+        ),
+        evaluator_error(secondary),
+    )
+    primary_bound = primary_optimum + primary_tolerance
+    # The stage-two endpoint may sit exactly on its primary-objective row.
+    # Reconstructing that row in a separate share-bound MILP can otherwise be
+    # declared infeasible by presolve at floating-point feasibility tolerance.
+    # The independently recorded decoder discrepancy is a data-derived safety
+    # margin (milliseconds / cents in the observed cases), not an economic
+    # relaxation of the endpoint definition.
+    primary_bound += max(
+        numerical_tolerance(
+            primary_bound, absolute_tolerance, relative_tolerance
+        ),
+        evaluator_error(primary),
     )
     if primary == "cost":
         return (
-            primary_optimum + primary_tolerance,
+            primary_bound,
             secondary_bound,
         )
     return (
         secondary_bound,
-        primary_optimum + primary_tolerance,
+        primary_bound,
     )
 
 
