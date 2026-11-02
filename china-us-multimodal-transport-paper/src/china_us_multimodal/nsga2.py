@@ -347,6 +347,7 @@ def run_nsga2(
         max_legs=model_config.constraints.max_legs_per_path,
         max_mode_changes=model_config.constraints.max_mode_changes,
         max_paths_per_gateway=algorithm_config.max_paths_per_gateway,
+        disabled_gateways=set(model_config.scenario.disabled_gateways),
     )
     for shipment_id in shipment_ids:
         if shipment_id not in library or not library[shipment_id]:

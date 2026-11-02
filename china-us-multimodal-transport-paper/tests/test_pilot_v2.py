@@ -40,3 +40,26 @@ def test_gateway_aware_martins_library_keeps_all_three_gateways():
         if len(path) >= 2 and data.arcs[path[1]].mode == Mode.OCEAN
     }
     assert gateways == {"la_lb", "seattle_tacoma", "ny_nj"}
+
+
+def test_gateway_aware_martins_library_can_disable_ny_nj():
+    data = select_case(load_model_data(ROOT / "data" / "pilot_v2"), "D1")
+    config = load_config(
+        ROOT / "configs" / "nsga2_pilot.toml",
+        "uswc_departure_delay_288h_no_ny_nj",
+    )
+    assert config.scenario.disabled_gateways == ("ny_nj",)
+    library = build_gateway_aware_library(
+        data,
+        max_legs=config.constraints.max_legs_per_path,
+        max_mode_changes=config.constraints.max_mode_changes,
+        max_paths_per_gateway=4,
+        disabled_gateways=set(config.scenario.disabled_gateways),
+    )
+    first = library[sorted(library)[0]]
+    gateways = {
+        data.arcs[path[1]].destination
+        for path in first
+        if len(path) >= 2 and data.arcs[path[1]].mode == Mode.OCEAN
+    }
+    assert gateways == {"la_lb", "seattle_tacoma"}

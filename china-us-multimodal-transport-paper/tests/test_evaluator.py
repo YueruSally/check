@@ -225,3 +225,30 @@ def test_gateway_specific_controls_are_distinct_and_additive():
     assert _scenario_ocean_departure_delay_h(seattle_arc, config) == 17
     assert _scenario_port_capacity_multiplier("la_lb", config) == 0.4
     assert _scenario_port_capacity_multiplier("seattle_tacoma", config) == 0.2
+
+
+def test_disabled_gateway_path_is_infeasible():
+    nodes = {
+        "a": Node("a", "A", NodeKind.CN_ORIGIN, "CN"),
+        "ny_nj": Node("ny_nj", "New York/New Jersey", NodeKind.US_PORT, "US"),
+        "b": Node("b", "B", NodeKind.DESTINATION, "US"),
+    }
+    arcs = {
+        "in": Arc("in", "a", "ny_nj", Mode.ROAD, 1, 1),
+        "out": Arc("out", "ny_nj", "b", Mode.ROAD, 1, 1),
+    }
+    data = ModelData(nodes, arcs, {}, {"s": Shipment("s", "a", "b", 10)})
+    config = ModelConfig(
+        "FEU",
+        ("total_cost_usd", "quantity_weighted_mean_delivery_time_h"),
+        ConstraintConfig(enforce_timetable=False, enforce_capacity=False),
+        PenaltyConfig(),
+        ScenarioConfig("no_ny", disabled_gateways=("ny_nj",)),
+    )
+    result = evaluate_solution(
+        data,
+        [RouteAllocation("s", 10, ("in", "out"))],
+        config,
+    )
+    assert not result.feasible
+    assert any("uses disabled gateway(s): ny_nj" in item for item in result.violations)

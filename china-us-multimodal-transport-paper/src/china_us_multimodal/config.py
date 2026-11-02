@@ -46,6 +46,7 @@ class ScenarioConfig:
     la_lb_ocean_departure_delay_h: float = 0.0
     seattle_tacoma_ocean_departure_delay_h: float = 0.0
     demand_multiplier: float = 1.0
+    disabled_gateways: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -81,7 +82,11 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
     selected = scenario_name or model.get("active_scenario")
     if not selected or selected not in scenarios:
         raise ValueError(f"Unknown or missing active scenario: {selected!r}.")
-    scenario = ScenarioConfig(name=selected, **scenarios[selected])
+    scenario_values = dict(scenarios[selected])
+    scenario_values["disabled_gateways"] = tuple(
+        scenario_values.get("disabled_gateways", ())
+    )
+    scenario = ScenarioConfig(name=selected, **scenario_values)
 
     if quantity_unit != "FEU":
         raise ValueError("All pilot quantities and capacities must be converted to FEU.")
@@ -114,6 +119,12 @@ def load_config(path: str | Path, scenario_name: str | None = None) -> ModelConf
     ):
         if delay_h < 0:
             raise ValueError(f"{field_name} must be non-negative.")
+    allowed_gateways = {"la_lb", "seattle_tacoma", "ny_nj"}
+    unknown_gateways = set(scenario.disabled_gateways) - allowed_gateways
+    if unknown_gateways:
+        raise ValueError(
+            "Unknown disabled gateway(s): " + ", ".join(sorted(unknown_gateways))
+        )
     if constraints.max_paths_per_shipment < 1:
         raise ValueError("max_paths_per_shipment must be positive.")
     if not 0 < constraints.min_path_share <= 1:

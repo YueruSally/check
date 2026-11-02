@@ -24,6 +24,14 @@ SCENARIO_ORDER = [
     "uswc_departure_delay_336h",
     "uswc_compound_30pct_delay_168h",
     "uswc_compound_40pct_delay_168h",
+    "uswc_port_capacity_40pct",
+    "uswc_port_capacity_35pct",
+    "uswc_capacity_60pct_delay_168h",
+    "uswc_compound_35pct_delay_168h",
+    "uswc_capacity_60pct_delay_288h",
+    "uswc_capacity_40pct_delay_288h",
+    "uswc_capacity_35pct_delay_288h",
+    "demand_150pct_uswc_capacity_60pct",
 ]
 GATEWAY_ARCS = {
     "la_lb": {"sea-01", "sea-02"},

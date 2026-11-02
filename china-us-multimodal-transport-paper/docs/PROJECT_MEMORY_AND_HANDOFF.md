@@ -335,3 +335,34 @@ Alternative:
 ## 20. Use of this experiment task
 
 Use this task for narrow new scenarios, GitHub code/configuration changes, remote-server nohup commands, completion checks, uploaded-result interpretation and experimental diagnostics. Do not use this task as the main manuscript-writing workspace.
+
+## 21. Argument-focused supplementary stage (v0.9–v1.1)
+
+The next approved stage contains only experiments that extend the substantive
+argument:
+
+1. v0.9 maps NY/NJ activation over a 3 × 3 grid of remaining West Coast
+   capacity (60%, 40%, 35%) and departure delay (0, 168, 288 h). It adds an
+   equal nominal load-pressure comparison between 40% capacity with baseline
+   demand and 60% capacity with 1.5 × demand, plus actual capacity-utilization
+   reconstruction.
+2. v1.0 compares NY/NJ allowed with NY/NJ disabled under identical disruptions
+   and the same seeds. The allowed cases reuse existing v0.7/v0.8 runs; only
+   180 disabled-gateway runs are new. This directly measures the loss avoided
+   by retaining access to NY/NJ and any change in feasibility.
+3. v1.1 is analysis-only. It decomposes balanced solutions immediately below
+   and above the three activation intervals into China inland, ocean, US
+   inland, waiting, transfer, processing and tardiness components.
+
+The single background entry point is `scripts/run_argument_experiments.sh` and
+the complete protocol is `docs/v09_v11_argument_experiments.md`.
+
+The manuscript should use one stable-activation definition: every solution on
+the cross-seed non-dominated union uses NY/NJ and the minimum NY/NJ share is at
+least 10%. Balanced-solution shares remain descriptive and must not be called
+stable activation by themselves.
+
+Excluded from this stage because they are mainly defensive rather than
+argument-advancing: exact MILP benchmarking, candidate-path-count sensitivity,
+5%/10%/20% activation-definition sensitivity, broad one-at-a-time parameter
+sweeps, additional seed counts, and dynamic recovery/rollover modelling.

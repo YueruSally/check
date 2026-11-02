@@ -148,6 +148,16 @@ def evaluate_solution(
             except (KeyError, ValueError) as exc:
                 add_violation(str(exc))
                 continue
+            disabled_gateways = set(config.scenario.disabled_gateways)
+            used_disabled_gateways = sorted(
+                disabled_gateways
+                & {node_id for arc in arcs for node_id in (arc.origin, arc.destination)}
+            )
+            if used_disabled_gateways:
+                add_violation(
+                    f"Shipment {shipment_id} uses disabled gateway(s): "
+                    + ", ".join(used_disabled_gateways)
+                )
             if len(arcs) > config.constraints.max_legs_per_path:
                 add_violation(
                     f"Shipment {shipment_id} exceeds the path leg limit.",

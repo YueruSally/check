@@ -191,3 +191,27 @@ After completion, use the scenario and paired-statistics analysis commands in
 `docs/v08_focused_threshold_protocol.md`. The decision rule treats NY/NJ as a
 meaningful alternative gateway when its cross-seed non-dominated-union share
 reaches at least 10%.
+
+## v0.9–v1.1 argument-focused supplementary experiments
+
+The next supplementary stage is limited to three analyses that strengthen the
+paper's mechanism and managerial claims:
+
+1. a 3 × 3 remaining-capacity by sailing-delay activation regime, including
+   actual utilization diagnostics and a load-pressure-equivalent comparison;
+2. same-seed, same-disruption counterfactuals with NY/NJ allowed versus
+   disabled, which quantify the value of retaining the alternative gateway;
+3. a destination-level cost and time decomposition immediately below and
+   above the observed activation intervals.
+
+Run all three stages sequentially with one `nohup` job:
+
+```bash
+mkdir -p logs
+nohup nice -n 10 bash scripts/run_argument_experiments.sh \
+  > logs/v09_v11_argument_experiments.log 2>&1 &
+echo $! > logs/v09_v11_argument_experiments.pid
+```
+
+The full protocol, runtime estimate, monitoring commands, output paths and
+result-upload commands are in `docs/v09_v11_argument_experiments.md`.

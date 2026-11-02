@@ -35,10 +35,14 @@ def build_gateway_aware_library(
     max_legs: int,
     max_mode_changes: int,
     max_paths_per_gateway: int = 4,
+    disabled_gateways: set[str] | None = None,
 ) -> PathLibrary:
     """Run Martins separately by US gateway, then merge unique candidate paths."""
+    excluded = disabled_gateways or set()
     gateways = sorted(
-        node_id for node_id, node in data.nodes.items() if node.kind == NodeKind.US_PORT
+        node_id
+        for node_id, node in data.nodes.items()
+        if node.kind == NodeKind.US_PORT and node_id not in excluded
     )
     if not gateways:
         raise ValueError("The pilot network has no US gateway nodes.")

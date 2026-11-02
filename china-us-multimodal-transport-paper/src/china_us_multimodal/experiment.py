@@ -70,7 +70,7 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
     solution_by_point: dict[tuple[float, float], BatchSolution] = {}
     for item in result.pareto_front:
         evaluation = item.evaluation
-        if evaluation is None:
+        if evaluation is None or not evaluation.feasible:
             continue
         point = item.objectives
         solution_by_point.setdefault(
