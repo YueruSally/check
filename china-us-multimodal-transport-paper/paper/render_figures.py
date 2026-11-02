@@ -489,14 +489,13 @@ for case_id, comparison, _ in mechanism_order:
     )
     estimate = float(row["allowed_minus_restricted_time_h"])
     totals.append(estimate)
-axis.errorbar(
+axis.scatter(
     positions,
     totals,
-    fmt="D",
+    marker="D",
     color="#222222",
-    markerfacecolor="white",
-    capsize=3,
-    markersize=5,
+    facecolors="white",
+    s=34,
     label="System total",
 )
 axis.axhline(0.0, color="#555555", linewidth=0.8)
