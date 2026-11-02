@@ -1,0 +1,16 @@
+case_id,comparison,service_id,scheduled_departure_h,origin,destination,allowed_used_feu,restricted_used_feu,allowed_minus_restricted_used_feu
+D1,delay_288h,tt-sea-01,192,shanghai,la_lb,1499.9997270546723,2227.5,-727.5002729453277
+D1,delay_288h,tt-sea-05,192,shanghai,ny_nj,727.5002729453277,0.0,727.5002729453277
+D1,delay_288h,tt-us-01,852,la_lb,chicago,0.0,727.5,-727.5
+D2,delay_264h,tt-sea-01,192,shanghai,la_lb,1499.9999999999989,2227.5,-727.5000000000011
+D2,delay_264h,tt-sea-05,192,shanghai,ny_nj,727.5000000000011,0.0,727.5000000000011
+D2,delay_264h,tt-us-02,818.4,la_lb,memphis,0.0,727.5,-727.5
+D2,delay_288h,tt-sea-01,192,shanghai,la_lb,1500.0,2227.5,-727.5
+D2,delay_288h,tt-sea-05,192,shanghai,ny_nj,727.5,0.0,727.5
+D2,delay_288h,tt-us-02,852,la_lb,memphis,0.0,727.5,-727.5
+D3,delay_240h,tt-sea-01,192,shanghai,la_lb,1500.0,2227.5,-727.5
+D3,delay_240h,tt-sea-05,192,shanghai,ny_nj,727.5,0.0,727.5
+D3,delay_240h,tt-us-03,784.8,la_lb,columbus,0.0,727.4999999999995,-727.4999999999995
+D1,compound_30pct_delay_168h,tt-sea-03,192,shanghai,seattle_tacoma,0.0,427.5,-427.5
+D1,compound_30pct_delay_168h,tt-sea-05,192,shanghai,ny_nj,427.5000000000002,0.0,427.5000000000002
+D1,compound_30pct_delay_168h,tt-us-04,784.8,seattle_tacoma,chicago,0.0,427.5,-427.5

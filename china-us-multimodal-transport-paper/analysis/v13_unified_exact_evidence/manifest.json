@@ -1,0 +1,36 @@
+{
+  "generated_at_utc": "2026-11-02T20:25:27.026511+00:00",
+  "analysis_type": "postprocessing_only_no_optimization",
+  "comparisons": [
+    {
+      "case_id": "D1",
+      "comparison": "delay_288h"
+    },
+    {
+      "case_id": "D2",
+      "comparison": "delay_264h"
+    },
+    {
+      "case_id": "D2",
+      "comparison": "delay_288h"
+    },
+    {
+      "case_id": "D3",
+      "comparison": "delay_240h"
+    },
+    {
+      "case_id": "D1",
+      "comparison": "compound_30pct_delay_168h"
+    }
+  ],
+  "objective_equivalence_tolerances": {
+    "cost_absolute_usd": 0.07987278529000001,
+    "time_absolute_h": 1.8995824915824915e-06,
+    "source": "maximum recorded primary tolerance among proven exact endpoints"
+  },
+  "dominance_rule": "two-objective minimization with the recorded exact-endpoint absolute tolerances; equivalent endpoint allocations are counted once",
+  "classification_scope": "current-known non-dominated union only; no universal full-front configuration claim is made",
+  "singleton_front_rule": "coincident proven minimum-cost and minimum-time allowed endpoints imply a singleton objective-space front within tolerance, but not a unique allocation configuration",
+  "decomposition_identity": "NY/NJ contribution + West Coast contribution + other contribution = allowed minus restricted quantity-weighted mean delivery time",
+  "decomposition_scope": "proven exact minimum-time endpoints; shipment-matched, not unique freight-unit lineage"
+}
