@@ -8,10 +8,9 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import BoundaryNorm, ListedColormap, Normalize
+from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-from matplotlib.ticker import MaxNLocator
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +28,7 @@ RESULTS = {
 REVISED = ROOT / "analysis" / "paper_revised"
 FINAL_VALIDATION = ROOT / "analysis" / "v12_final_validation"
 EXACT_VALIDATION = ROOT / "results" / "v12_exact_endpoint_validation"
-V12_RESULTS = ROOT / "results" / "v12_final_closed_fronts_30seeds"
+UNIFIED_EVIDENCE = ROOT / "analysis" / "v13_unified_exact_evidence"
 CASES = (("D1", "Chicago"), ("D2", "Memphis"), ("D3", "Columbus"))
 COLORS = {"D1": "#0072B2", "D2": "#D55E00", "D3": "#009E73"}
 
@@ -112,55 +111,46 @@ def save(figure: plt.Figure, name: str) -> None:
     plt.close(figure)
 
 
-# Figure 1: cost-time trade-offs under baseline and severe disruptions.
+# Figure 1: baseline archives and the current-known targeted disruption points.
 fronts = {
     version: read(ROOT / "results" / directory / "combined_pareto.csv")
     for version, directory in RESULTS.items()
 }
-v12_fronts = {
-    case_id: read(V12_RESULTS / case_id / "combined_pareto.csv")
-    for case_id, _ in CASES
-}
+unified_points = read(UNIFIED_EVIDENCE / "unified_nondominated_points.csv")
 figure, axes = plt.subplots(1, 3, figsize=(11.5, 3.8), sharex=True, sharey=True)
-scenario_colors = ("#4D4D4D", "#0072B2", "#D55E00")
 for index, (case_id, city) in enumerate(CASES):
     delay = {"D1": 288, "D2": 288, "D3": 240}[case_id]
-    settings = (
-        (fronts[7], "pilot_baseline", "Baseline"),
-        (v12_fronts[case_id], f"uswc_departure_delay_{delay}h", f"Delay: {delay} h"),
-        (fronts[7], "uswc_compound_30pct_delay_168h", "30% capacity + 168 h delay"),
+    baseline = [
+        row
+        for row in fronts[7]
+        if row["case_id"] == case_id and row["scenario"] == "pilot_baseline"
+    ]
+    targeted = [
+        row
+        for row in unified_points
+        if row["case_id"] == case_id
+        and row["comparison"] == f"delay_{delay}h"
+    ]
+    axes[index].scatter(
+        [float(row["quantity_weighted_mean_delivery_time_h"]) for row in baseline],
+        [float(row["total_cost_usd"]) / 1e6 for row in baseline],
+        s=18,
+        color="#4D4D4D",
+        marker="o",
+        label="Baseline search archive",
+        alpha=0.72,
+        linewidths=0.2,
     )
-    for setting_index, (source, scenario, label) in enumerate(settings):
-        points = [
-            row
-            for row in source
-            if row["case_id"] == case_id and row["scenario"] == scenario
-        ]
-        axes[index].scatter(
-            [float(row["quantity_weighted_mean_delivery_time_h"]) for row in points],
-            [float(row["total_cost_usd"]) / 1e6 for row in points],
-            s=19,
-            color=scenario_colors[setting_index],
-            marker=("o", "^", "s")[setting_index],
-            label=label,
-            alpha=0.85,
-            linewidths=0.2,
-        )
-        if setting_index == 1:
-            inset = axes[index].inset_axes([0.48, 0.19, 0.47, 0.29])
-            inset.scatter(
-                [float(row["quantity_weighted_mean_delivery_time_h"]) for row in points],
-                [float(row["total_cost_usd"]) / 1e6 for row in points],
-                color=scenario_colors[setting_index],
-                s=8,
-                marker="^",
-            )
-            inset.set_title("Delay scenario: enlarged", fontsize=7, pad=3)
-            inset.tick_params(labelsize=6, pad=1)
-            inset.ticklabel_format(useOffset=False, style="plain")
-            inset.xaxis.set_major_locator(MaxNLocator(3))
-            inset.yaxis.set_major_locator(MaxNLocator(3))
-            inset.grid(color="#dddddd", linewidth=0.4)
+    axes[index].scatter(
+        [float(row["display_quantity_weighted_mean_delivery_time_h"]) for row in targeted],
+        [float(row["display_total_cost_usd"]) / 1e6 for row in targeted],
+        s=54,
+        color=COLORS[case_id],
+        marker="D",
+        label=f"Unified evidence: {delay} h delay",
+        edgecolors="black",
+        linewidths=0.4,
+    )
     axes[index].set_title(f"({chr(97 + index)}) {city}")
     axes[index].set_xlabel("Weighted mean delivery time (hours)")
     axes[index].legend(fontsize=7, loc="upper left", frameon=False)
@@ -170,16 +160,16 @@ figure.tight_layout()
 save(figure, "fig01_cost_time_fronts")
 
 
-# Figure 2: balanced solution and full archive range under delay-only scenarios.
+# Figure 2: delay screening with unified exact-evidence ranges at critical conditions.
 activation = {version: analysis_rows(version, "ny_activation.csv") for version in SUITES}
-closed_activation = {
-    (row["case_id"], row["allowed_scenario"]): row
-    for row in read(FINAL_VALIDATION / "closed_front_classification.csv")
+unified_activation = {
+    (row["case_id"], row["comparison"]): row
+    for row in read(UNIFIED_EVIDENCE / "unified_classification.csv")
 }
 figure, axes = plt.subplots(1, 3, figsize=(11.5, 4.0), sharex=True, sharey=True)
 for index, (case_id, city) in enumerate(CASES):
     axis = axes[index]
-    lower, upper = {"D1": (264, 288), "D2": (264, 288), "D3": (168, 240)}[case_id]
+    lower, upper = {"D1": (264, 288), "D2": (240, 264), "D3": (168, 240)}[case_id]
     axis.axvspan(lower, upper, facecolor=COLORS[case_id], alpha=0.10)
     axis.axhline(10.0, color="#555555", linestyle="--", linewidth=0.8)
     tested = [(6, 0), (6, 96), (6, 120), (6, 168), (7, 240)]
@@ -192,7 +182,7 @@ for index, (case_id, city) in enumerate(CASES):
             if delay_value == 0
             else f"uswc_departure_delay_{delay_value}h"
         )
-        final_row = closed_activation.get((case_id, scenario))
+        final_row = unified_activation.get((case_id, f"delay_{delay_value}h"))
         if final_row is None:
             row = select(activation[version], case_id, scenario)
             minimum, maximum = all_solution_range(row)
@@ -206,7 +196,7 @@ for index, (case_id, city) in enumerate(CASES):
     axis.text(
         (lower + upper) / 2,
         92,
-        f"Front-wide interval: ({lower}, {upper}] h",
+        f"First material-use bracket: ({lower}, {upper}] h",
         ha="center",
         fontsize=8,
         color=COLORS[case_id],
@@ -287,64 +277,122 @@ figure.tight_layout(rect=(0, 0.10, 1, 1))
 save(figure, "fig03_activation_regime")
 
 
-# Figure 4: configuration-preserving closed fronts from the targeted rerun.
+# Figure 4: exact endpoints integrated with the superseded heuristic evidence.
 counterfactual_points = read(FINAL_VALIDATION / "closed_front_points.csv")
-figure, axes = plt.subplots(1, 3, figsize=(11.5, 3.9))
-normalizer = Normalize(vmin=0.0, vmax=60.0)
-for index, (case_id, city) in enumerate(CASES):
-    comparison = {"D1": "delay_288h", "D2": "delay_264h", "D3": "delay_240h"}[case_id]
-    restricted_scenario = {
-        "D1": "uswc_departure_delay_288h_no_ny_nj",
-        "D2": "uswc_departure_delay_264h_no_ny_nj",
-        "D3": "uswc_departure_delay_240h_no_ny_nj",
-    }[case_id]
-    rows = [
-        row
-        for row in counterfactual_points
-        if row["case_id"] == case_id and row["comparison"] == comparison
-    ]
-    restricted = [
-        row
-        for row in v12_fronts[case_id]
-        if row["case_id"] == case_id and row["scenario"] == restricted_scenario
-    ]
-    image = axes[index].scatter(
-        [float(row["quantity_weighted_mean_delivery_time_h"]) for row in rows],
-        [float(row["total_cost_usd"]) / 1e6 for row in rows],
-        c=[
-            50.0 * (float(row["ny_nj_share_min"]) + float(row["ny_nj_share_max"]))
-            for row in rows
-        ],
-        cmap="viridis",
-        norm=normalizer,
+historical_points = read(REVISED / "counterfactual_front_points.csv")
+exact_summary = read(EXACT_VALIDATION / "exact_endpoint_summary.csv")
+classification = {
+    (row["case_id"], row["comparison"]): row
+    for row in read(UNIFIED_EVIDENCE / "unified_classification.csv")
+}
+front_order = [
+    ("D1", "delay_288h", "Chicago\n288 h delay"),
+    ("D2", "delay_264h", "Memphis\n264 h delay"),
+    ("D2", "delay_288h", "Memphis\n288 h delay"),
+    ("D3", "delay_240h", "Columbus\n240 h delay"),
+    ("D1", "compound_30pct_delay_168h", "Chicago\n30% + 168 h"),
+]
+figure, axes = plt.subplots(2, 3, figsize=(11.5, 7.1))
+for index, (case_id, comparison, title) in enumerate(front_order):
+    axis = axes.flat[index]
+    if comparison == "compound_30pct_delay_168h":
+        heuristic = [
+            row
+            for row in historical_points
+            if row["case_id"] == case_id
+            and row["comparison"] == "extreme_compound"
+            and row["condition"] == "archive_closed_allowed"
+        ]
+        heuristic_x = [float(row["quantity_weighted_mean_delivery_time_h"]) for row in heuristic]
+        heuristic_y = [float(row["total_cost_usd"]) / 1e6 for row in heuristic]
+    else:
+        heuristic = [
+            row
+            for row in counterfactual_points
+            if row["case_id"] == case_id and row["comparison"] == comparison
+        ]
+        heuristic_x = [float(row["quantity_weighted_mean_delivery_time_h"]) for row in heuristic]
+        heuristic_y = [float(row["total_cost_usd"]) / 1e6 for row in heuristic]
+    axis.scatter(
+        heuristic_x,
+        heuristic_y,
         marker="o",
-        s=24,
-        edgecolors="black",
-        linewidths=0.2,
-        label="Closed non-dominated union",
+        facecolors="none",
+        edgecolors="#AAAAAA",
+        s=21,
+        linewidths=0.7,
+        label="Superseded heuristic point",
     )
-    axes[index].scatter(
-        [float(row["quantity_weighted_mean_delivery_time_h"]) for row in restricted],
-        [float(row["total_cost_usd"]) / 1e6 for row in restricted],
+    exact_allowed = [
+        row
+        for row in exact_summary
+        if row["case_id"] == case_id
+        and row["comparison"] == comparison
+        and row["gateway_access"] == "allowed"
+    ]
+    exact_restricted = [
+        row
+        for row in exact_summary
+        if row["case_id"] == case_id
+        and row["comparison"] == comparison
+        and row["gateway_access"] == "restricted"
+    ]
+    for endpoint, marker, label in (
+        ("min_cost_then_time", "o", "Exact allowed: minimum cost"),
+        ("min_time_then_cost", "D", "Exact allowed: minimum time"),
+    ):
+        row = next(item for item in exact_allowed if item["endpoint"] == endpoint)
+        axis.scatter(
+            float(row["quantity_weighted_mean_delivery_time_h"]),
+            float(row["total_cost_usd"]) / 1e6,
+            marker=marker,
+            color=COLORS[case_id],
+            edgecolors="black",
+            linewidths=0.5,
+            s=53,
+            label=label,
+            zorder=4,
+        )
+    axis.scatter(
+        [float(row["quantity_weighted_mean_delivery_time_h"]) for row in exact_restricted],
+        [float(row["total_cost_usd"]) / 1e6 for row in exact_restricted],
         marker="x",
-        color="#777777",
-        s=28,
-        linewidth=1.0,
-        label="NY/NJ restricted",
+        color="#333333",
+        linewidths=1.1,
+        s=35,
+        label="Exact NY/NJ-restricted endpoint",
+        zorder=3,
     )
-    axes[index].set_title(f"({chr(97 + index)}) {city}")
-    axes[index].set_xlabel("Weighted mean delivery time (hours)")
-    axes[index].ticklabel_format(useOffset=False, style="plain")
-    clean(axes[index])
-    axes[index].legend(frameon=False, fontsize=7)
-axes[0].set_ylabel("Total operational cost (USD million)")
-figure.subplots_adjust(left=0.07, right=0.88, bottom=0.16, top=0.90, wspace=0.28)
-# Reserve a dedicated axis outside the three panels.  Calling subplots_adjust
-# after figure.colorbar moves the panels without moving the colorbar and can
-# leave the scale overlapping the Columbus panel in the exported figure.
-colorbar_axis = figure.add_axes((0.91, 0.20, 0.015, 0.64))
-colorbar = figure.colorbar(image, cax=colorbar_axis)
-colorbar.set_label("NY/NJ share range midpoint (%)")
+    if classification[(case_id, comparison)]["exact_allowed_endpoint_relation"].startswith(
+        "proven_singleton"
+    ):
+        axis.text(
+            0.04,
+            0.93,
+            "Singleton objective front",
+            transform=axis.transAxes,
+            fontsize=7,
+            va="top",
+            color=COLORS[case_id],
+        )
+    axis.set_title(f"({chr(97 + index)}) {title}")
+    axis.set_xlabel("Weighted mean delivery time (hours)")
+    axis.ticklabel_format(useOffset=False, style="plain")
+    clean(axis)
+axes.flat[5].axis("off")
+axes[0, 0].set_ylabel("Total operational cost (USD million)")
+axes[1, 0].set_ylabel("Total operational cost (USD million)")
+handles, labels = axes.flat[0].get_legend_handles_labels()
+figure.legend(
+    handles,
+    labels,
+    loc="lower center",
+    bbox_to_anchor=(0.5, 0.01),
+    ncol=2,
+    frameon=False,
+    fontsize=8,
+)
+figure.tight_layout(rect=(0, 0.10, 1, 1))
 save(figure, "fig04_counterfactual_fronts")
 
 
@@ -398,13 +446,14 @@ figure.tight_layout()
 save(figure, "fig05_counterfactual_benefits")
 
 
-# Figure 6: seed-paired shipment-matched time decomposition.
-mechanism = read(FINAL_VALIDATION / "batch_matched_time_decomposition_summary.csv")
+# Figure 6: exact-endpoint shipment-matched time decomposition.
+mechanism = read(UNIFIED_EVIDENCE / "exact_batch_matched_time_decomposition.csv")
 mechanism_order = [
     ("D1", "delay_288h", "Chicago\n288 h"),
     ("D2", "delay_264h", "Memphis\n264 h"),
     ("D2", "delay_288h", "Memphis\n288 h"),
     ("D3", "delay_240h", "Columbus\n240 h"),
+    ("D1", "compound_30pct_delay_168h", "Chicago\n30% + 168 h"),
 ]
 positions = list(range(len(mechanism_order)))
 figure, axis = plt.subplots(figsize=(9.6, 4.6))
@@ -414,49 +463,35 @@ for offset, component, label, color in (
     (width / 2, "west_coast_contribution_h", "West Coast-assigned component", "#0072B2"),
 ):
     estimates = []
-    lower = []
-    upper = []
     for case_id, comparison, _ in mechanism_order:
         row = next(
             item
             for item in mechanism
             if item["case_id"] == case_id
             and item["comparison"] == comparison
-            and item["component"] == component
         )
-        estimate = float(row["mean_h"])
+        estimate = float(row[component])
         estimates.append(estimate)
-        lower.append(estimate - float(row["mean_bootstrap_95_low_h"]))
-        upper.append(float(row["mean_bootstrap_95_high_h"]) - estimate)
     axis.bar(
         [position + offset for position in positions],
         estimates,
         width=width,
         color=color,
         label=label,
-        yerr=[lower, upper],
-        capsize=3,
-        error_kw={"linewidth": 0.8},
     )
 totals = []
-total_low = []
-total_high = []
 for case_id, comparison, _ in mechanism_order:
     row = next(
         item
         for item in mechanism
         if item["case_id"] == case_id
         and item["comparison"] == comparison
-        and item["component"] == "allowed_minus_restricted_time_h"
     )
-    estimate = float(row["mean_h"])
+    estimate = float(row["allowed_minus_restricted_time_h"])
     totals.append(estimate)
-    total_low.append(estimate - float(row["mean_bootstrap_95_low_h"]))
-    total_high.append(float(row["mean_bootstrap_95_high_h"]) - estimate)
 axis.errorbar(
     positions,
     totals,
-    yerr=[total_low, total_high],
     fmt="D",
     color="#222222",
     markerfacecolor="white",
@@ -476,7 +511,7 @@ save(figure, "fig06_destination_mechanism")
 # Supplementary Figure S1: 168-hour compound disruption.
 historical_corrections = {
     (row["case_id"], row["comparison"]): row
-    for row in read(FINAL_VALIDATION / "historical_closed_front_corrections.csv")
+    for row in read(UNIFIED_EVIDENCE / "unified_classification.csv")
 }
 figure, axes = plt.subplots(1, 3, figsize=(11.5, 3.8), sharex=True, sharey=True)
 for index, (case_id, city) in enumerate(CASES):
