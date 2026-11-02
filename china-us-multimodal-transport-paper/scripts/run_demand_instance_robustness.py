@@ -273,9 +273,19 @@ def main() -> None:
                         )
                         checkpoint = checkpoints / f"{task_id}.json"
                         if checkpoint.exists():
-                            completed += 1
-                            print(f"[{completed}/{total}] resume {task_id}", flush=True)
-                            continue
+                            existing = load_json(checkpoint)
+                            if int(existing.get("lexicographic_proven", 0)) == 1:
+                                completed += 1
+                                print(
+                                    f"[{completed}/{total}] resume {task_id}",
+                                    flush=True,
+                                )
+                                continue
+                            print(
+                                f"[refresh] recomputing inconsistent endpoint "
+                                f"{task_id}",
+                                flush=True,
+                            )
                         if model is None:
                             model = build_exact_endpoint_model(
                                 case_data,

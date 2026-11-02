@@ -134,10 +134,14 @@ The observed solver times in v1.4--v1.6 imply an expected duration of roughly
 analysis, and figure rendering. The job writes the corrected core evidence to
 `results/v17_core_exact_paths8`, the matched analysis to
 `analysis/v17_core_exact_paths8`, and the ten-instance results to
-`results/v18_demand_robustness_paths8`.
+`results/v18_demand_robustness_paths8`. After the eight-path diagnostic, the
+same script runs the single selected driver experiment and writes it to
+`results/v19_binding_arc_capacity_sensitivity`.
 
-The repeated 727.5 and 427.5 FEU quantities in the four-path run coincide with
-binding West Coast resources, not binding NY/NJ resources. A separate capacity
-sensitivity is deferred until the eight-path revalidation establishes which
-repeated quantities remain in the corrected candidate library. No timetable,
-due-date, penalty, or NY/NJ-capacity scan should be run in parallel.
+The eight-path diagnostic removes the repeated 427.5 FEU quantity but retains
+727.5 FEU at the Memphis 288 h endpoints and the Columbus 240 h minimum-cost
+endpoint. In all three retained occurrences, the relevant LA/LB-to-inland
+daily arc carries exactly 1,500 FEU at 100% utilization. Stage 3 therefore
+varies only that diagnosed daily-arc capacity at 50%, 100%, 150%, and 200% of
+its base value. No timetable, due-date, penalty, NY/NJ-capacity, or general
+capacity scan is included.

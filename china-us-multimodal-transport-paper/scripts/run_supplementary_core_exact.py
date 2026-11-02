@@ -493,9 +493,19 @@ def run_endpoints(args, data, base_config, conditions, checkpoints):
                     + ".json"
                 )
                 if checkpoint.exists():
-                    completed += 1
-                    print(f"[{completed}/{total}] resume {checkpoint.stem}", flush=True)
-                    continue
+                    existing = load_json(checkpoint)
+                    if int(existing.get("lexicographic_proven", 0)) == 1:
+                        completed += 1
+                        print(
+                            f"[{completed}/{total}] resume {checkpoint.stem}",
+                            flush=True,
+                        )
+                        continue
+                    print(
+                        f"[refresh] recomputing inconsistent endpoint "
+                        f"{checkpoint.stem}",
+                        flush=True,
+                    )
                 key = (condition.case_id, condition.condition_id, access, endpoint)
                 if key in reused:
                     payload = import_reused_endpoint(

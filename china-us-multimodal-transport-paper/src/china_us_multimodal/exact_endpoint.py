@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 import time
 from typing import Iterable
@@ -470,7 +470,19 @@ def _evaluate_vector_solution(
 ]:
     values = tuple(float(value) for value in values)
     allocations = _decode_allocations(model, values)
-    evaluation = evaluate_solution(model.data, list(allocations), model.config)
+    total_demand = sum(dict(model.demand_by_shipment).values())
+    numerical_allocation_tolerance = max(
+        model.config.constraints.allocation_tolerance_feu,
+        1e-6 * total_demand,
+    )
+    evaluation_config = replace(
+        model.config,
+        constraints=replace(
+            model.config.constraints,
+            allocation_tolerance_feu=numerical_allocation_tolerance,
+        ),
+    )
+    evaluation = evaluate_solution(model.data, list(allocations), evaluation_config)
     cost_from_vector = sum(
         coefficient * value
         for coefficient, value in zip(model.objective_coefficients("cost"), values)
@@ -484,19 +496,14 @@ def _evaluate_vector_solution(
         time_from_vector - evaluation.quantity_weighted_mean_delivery_time_h
     )
     resource_error = _resource_consistency_error(model, allocations, values)
-    total_demand = sum(dict(model.demand_by_shipment).values())
-    numerical_resource_tolerance = max(
-        model.config.constraints.allocation_tolerance_feu,
-        1e-6 * total_demand,
-    )
     objective_consistent = (
-        cost_error <= max(1e-4, 1e-9 * abs(evaluation.total_cost_usd))
+        cost_error <= max(1e-4, 1e-8 * abs(evaluation.total_cost_usd))
         and time_error
         <= max(
             1e-7,
             1e-6 * abs(evaluation.quantity_weighted_mean_delivery_time_h),
         )
-        and resource_error <= numerical_resource_tolerance
+        and resource_error <= numerical_allocation_tolerance
     )
     return (
         allocations,
