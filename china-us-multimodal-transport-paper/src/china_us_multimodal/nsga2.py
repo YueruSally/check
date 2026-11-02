@@ -76,6 +76,7 @@ class NSGA2Result:
     population: tuple[Individual, ...]
     pareto_front: tuple[Individual, ...]
     history: tuple[GenerationRecord, ...]
+    pareto_archive: tuple[Individual, ...] = ()
 
 
 def _normalize_sparse(
@@ -333,6 +334,50 @@ def _history_record(generation: int, population: list[Individual]) -> Generation
     )
 
 
+def _allocation_signature(
+    individual: Individual,
+) -> tuple[tuple[str, float, tuple[str, ...]], ...]:
+    return tuple(
+        sorted(
+            (
+                allocation.shipment_id,
+                round(allocation.quantity_feu, 12),
+                tuple(allocation.arc_ids),
+            )
+            for allocation in individual.allocations
+        )
+    )
+
+
+def _update_pareto_archive(
+    archive: dict[tuple[tuple[str, float, tuple[str, ...]], ...], Individual],
+    candidates: Iterable[Individual],
+) -> None:
+    """Incrementally retain every distinct feasible non-dominated configuration.
+
+    The archive is observational only: it is never used for tournaments or
+    environmental selection and therefore does not change the NSGA-II search.
+    Equal objective coordinates with different allocation signatures are kept.
+    """
+    for candidate in candidates:
+        if candidate.evaluation is None or not candidate.evaluation.feasible:
+            continue
+        signature = _allocation_signature(candidate)
+        if signature in archive:
+            continue
+        retained = list(archive.items())
+        if any(_dominates(existing, candidate) for _, existing in retained):
+            continue
+        dominated_signatures = [
+            existing_signature
+            for existing_signature, existing in retained
+            if _dominates(candidate, existing)
+        ]
+        for existing_signature in dominated_signatures:
+            del archive[existing_signature]
+        archive[signature] = candidate
+
+
 def run_nsga2(
     data: ModelData,
     model_config: ModelConfig,
@@ -382,6 +427,10 @@ def run_nsga2(
         population.append(Individual(genome))
     for individual in population:
         _evaluate(individual, data, model_config, shipment_ids, library)
+    pareto_archive: dict[
+        tuple[tuple[str, float, tuple[str, ...]], ...], Individual
+    ] = {}
+    _update_pareto_archive(pareto_archive, population)
     _rank_population(population)
     history = [_history_record(0, population)]
 
@@ -408,6 +457,7 @@ def run_nsga2(
             child = Individual(genome)
             _evaluate(child, data, model_config, shipment_ids, library)
             offspring.append(child)
+        _update_pareto_archive(pareto_archive, offspring)
         population = _environmental_selection(
             population + offspring,
             algorithm_config.population_size,
@@ -416,10 +466,18 @@ def run_nsga2(
 
     fronts = _rank_population(population)
     pareto = tuple(item for item in fronts[0] if item.evaluation and item.evaluation.feasible)
+    archived = tuple(
+        individual
+        for _, individual in sorted(
+            pareto_archive.items(),
+            key=lambda item: (item[1].objectives, item[0]),
+        )
+    )
     return NSGA2Result(
         shipment_ids=shipment_ids,
         candidate_library=library,
         population=tuple(population),
         pareto_front=pareto,
         history=tuple(history),
+        pareto_archive=archived,
     )

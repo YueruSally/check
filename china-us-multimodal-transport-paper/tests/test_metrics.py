@@ -1,7 +1,9 @@
 from china_us_multimodal.experiment import (
     BatchRun,
     BatchSolution,
+    found_configuration_rows,
     representative_rows,
+    run_endpoint_rows,
     summarize_runs,
 )
 from china_us_multimodal.metrics import hypervolume_2d, nondominated_points, spacing
@@ -42,3 +44,42 @@ def test_representative_rows_preserve_allocations() -> None:
     solutions, allocations = representative_rows([run])
     assert solutions[0]["roles"] == "min_cost|min_delivery_time|balanced"
     assert allocations[0]["arc_ids"] == "A1|A2"
+
+
+def test_equal_objective_configurations_are_preserved_separately() -> None:
+    first = BatchSolution(
+        10.0, 5.0, 5.0, 4.0, 0.0,
+        (("S1", 2.5, ("A1", "A2")),),
+    )
+    second = BatchSolution(
+        10.0, 5.0, 5.0, 4.0, 0.0,
+        (("S1", 2.5, ("B1", "B2")),),
+    )
+    run = BatchRun(
+        "D1", "base", 7, 1.0, 8, 2, 8, 1, 10.0, 5.0,
+        ((10.0, 5.0),), (first, second), 2,
+    )
+    configurations, allocations = found_configuration_rows([run])
+    assert len(configurations) == 2
+    assert len({row["configuration_sha256"] for row in configurations}) == 2
+    assert {row["arc_ids"] for row in allocations} == {"A1|A2", "B1|B2"}
+
+
+def test_run_endpoint_rows_report_equal_objective_ties() -> None:
+    first = BatchSolution(
+        10.0, 5.0, 5.0, 4.0, 0.0,
+        (("S1", 2.5, ("A1",)),),
+    )
+    second = BatchSolution(
+        10.0, 5.0, 5.0, 4.0, 0.0,
+        (("S1", 2.5, ("B1",)),),
+    )
+    run = BatchRun(
+        "D1", "base", 7, 1.0, 8, 2, 8, 1, 10.0, 5.0,
+        ((10.0, 5.0),), (first, second), 2,
+    )
+    endpoints, allocations = run_endpoint_rows([run])
+    assert len(endpoints) == 1
+    assert endpoints[0]["roles"] == "min_cost|min_delivery_time"
+    assert endpoints[0]["equal_objective_configuration_count"] == 2
+    assert len(allocations) == 1

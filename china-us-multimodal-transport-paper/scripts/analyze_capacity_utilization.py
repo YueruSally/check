@@ -47,26 +47,46 @@ def write_csv(path: Path, rows: list[dict[str, object]], fields: list[str]) -> N
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Reconstruct capacity utilization for representative solutions."
+        description=(
+            "Reconstruct capacity utilization for representative solutions or for "
+            "all distinct configurations found at retained objective points."
+        )
     )
     parser.add_argument("results", type=Path)
     parser.add_argument("data", type=Path)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--all-found-configurations",
+        action="store_true",
+        help=(
+            "Use found_configuration_*.csv instead of only role-labelled "
+            "representative solutions."
+        ),
+    )
     args = parser.parse_args()
 
-    solution_rows = read_csv(args.results / "representative_solutions.csv")
-    allocation_rows = read_csv(args.results / "representative_allocations.csv")
-    representative = {
-        row["solution_id"]: row
-        for row in solution_rows
-        if row.get("roles", "").strip()
-    }
+    if args.all_found_configurations:
+        solution_rows = read_csv(args.results / "found_configuration_solutions.csv")
+        allocation_rows = read_csv(
+            args.results / "found_configuration_allocations.csv"
+        )
+        id_field = "configuration_id"
+        representative = {row[id_field]: row for row in solution_rows}
+    else:
+        solution_rows = read_csv(args.results / "representative_solutions.csv")
+        allocation_rows = read_csv(args.results / "representative_allocations.csv")
+        id_field = "solution_id"
+        representative = {
+            row[id_field]: row
+            for row in solution_rows
+            if row.get("roles", "").strip()
+        }
     grouped: dict[str, list[RouteAllocation]] = defaultdict(list)
     for row in allocation_rows:
-        if row["solution_id"] not in representative:
+        if row[id_field] not in representative:
             continue
-        grouped[row["solution_id"]].append(
+        grouped[row[id_field]].append(
             RouteAllocation(
                 shipment_id=row["shipment_id"],
                 quantity_feu=float(row["quantity_feu"]),
@@ -149,7 +169,7 @@ def main() -> None:
         ],
     )
     print(
-        f"Wrote capacity diagnostics for {len(representative)} representative solutions "
+        f"Wrote capacity diagnostics for {len(representative)} selected configurations "
         f"to {args.output}."
     )
 

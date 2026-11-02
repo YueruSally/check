@@ -73,11 +73,13 @@ The committed smoke outputs only prove that the full pipeline runs. They are
 not paper findings. Follow `docs/experiment_protocol.md` for multi-seed paper
 experiments and equal evaluation budgets across NSGA-II, SPEA2 and MOEA/D.
 `run-experiment` writes per-run metrics, every final objective-space front,
-the cross-seed non-dominated union, representative route allocations and an
-experiment manifest. Each completed run is printed immediately so nohup logs
-show live progress. Hypervolume and spacing are calculated after normalizing
-every run in a case/scenario group against the same pooled ideal and nadir
-points.
+the cross-seed non-dominated union, representative route allocations, all
+distinct non-dominated configurations retained by the observational search
+archive, seed-level cost/time endpoints, and an experiment manifest. The
+observational archive is not used for selection. Each completed run is printed
+immediately so nohup logs show live progress. Hypervolume and spacing are
+calculated after normalizing every run in a case/scenario group against the
+same pooled ideal and nadir points.
 
 ## Convergence calibration
 
@@ -228,3 +230,26 @@ the manuscript tables to `analysis/paper_revised/` and refreshes PNG, SVG and
 PDF files in `paper/figures/`. The canonical experimental-design and results
 texts are `paper/06_experimental_design.md` and `paper/07_results.md`, with
 Chinese working versions in the corresponding `_CN.md` files.
+
+## v1.2 final evidence-consistency validation
+
+The final validation stage does not expand the broad scenario grid. It reruns
+four targeted allowed/restricted delay comparisons (240 runs), retains all
+distinct configurations found at equal non-dominated objective coordinates,
+performs a seed-paired shipment-matched time decomposition with an identity
+check, and validates selected cost/time endpoints with a path-allocation MILP.
+The MILP includes service-departure, daily-arc, and node-day capacity and is
+independently checked by the shared evaluator before the batch proceeds.
+
+Run it only on the server after installing the optional exact dependency:
+
+```bash
+python -m pip install -e '.[analysis,exact]'
+mkdir -p logs
+nohup nice -n 10 bash scripts/run_final_validation.sh \
+  > logs/v12_final_validation.log 2>&1 &
+echo $! > logs/v12_final_validation.pid
+```
+
+Definitions, scope limits, output files, runtime bounds, and completion rules
+are documented in `docs/v12_final_validation_protocol.md`.

@@ -42,6 +42,35 @@ class BatchRun:
     min_weighted_mean_delivery_time_h: float | None
     points: tuple[tuple[float, float], ...]
     solutions: tuple[BatchSolution, ...] = ()
+    pareto_configuration_count: int = 0
+
+
+AllocationSignature = tuple[tuple[str, float, tuple[str, ...]], ...]
+
+
+def allocation_signature(solution: BatchSolution) -> AllocationSignature:
+    """Return a stable signature for one *found* route-allocation configuration.
+
+    Objective points and allocation configurations intentionally use different
+    identities.  Equal objective values may correspond to different gateway or
+    shipment allocations; those variants matter for activation and mechanism
+    analysis even though metrics such as hypervolume need only unique points.
+    """
+    return tuple(
+        sorted(
+            (
+                shipment_id,
+                round(quantity_feu, 12),
+                tuple(arc_ids),
+            )
+            for shipment_id, quantity_feu, arc_ids in solution.allocations
+        )
+    )
+
+
+def _signature_digest(signature: AllocationSignature) -> str:
+    payload = json.dumps(signature, separators=(",", ":"), ensure_ascii=True)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _percentile(values: list[float], probability: float) -> float | None:
@@ -67,15 +96,16 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
     feasible = [
         item for item in result.population if item.evaluation and item.evaluation.feasible
     ]
-    solution_by_point: dict[tuple[float, float], BatchSolution] = {}
-    for item in result.pareto_front:
+    solutions_by_point: dict[
+        tuple[float, float], dict[AllocationSignature, BatchSolution]
+    ] = {}
+    archived_candidates = result.pareto_archive or result.pareto_front
+    for item in archived_candidates:
         evaluation = item.evaluation
         if evaluation is None or not evaluation.feasible:
             continue
         point = item.objectives
-        solution_by_point.setdefault(
-            point,
-            BatchSolution(
+        solution = BatchSolution(
                 total_cost_usd=evaluation.total_cost_usd,
                 quantity_weighted_mean_delivery_time_h=(
                     evaluation.quantity_weighted_mean_delivery_time_h
@@ -91,10 +121,16 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
                     )
                     for allocation in item.allocations
                 ),
-            ),
         )
-    points = nondominated_points(solution_by_point)
-    solutions = tuple(solution_by_point[point] for point in points)
+        solutions_by_point.setdefault(point, {}).setdefault(
+            allocation_signature(solution), solution
+        )
+    points = nondominated_points(solutions_by_point)
+    solutions = tuple(
+        solutions_by_point[point][signature]
+        for point in points
+        for signature in sorted(solutions_by_point[point])
+    )
     return BatchRun(
         case_id=case_id,
         scenario=scenario,
@@ -110,6 +146,7 @@ def _run_one(payload: tuple[str, str, str, str, int, NSGA2Config]) -> BatchRun:
         ),
         points=points,
         solutions=solutions,
+        pareto_configuration_count=len(solutions),
     )
 
 
@@ -309,11 +346,204 @@ def representative_rows(runs: Iterable[BatchRun]) -> tuple[list[dict], list[dict
     return solution_rows, allocation_rows
 
 
+def found_configuration_rows(
+    runs: Iterable[BatchRun],
+) -> tuple[list[dict], list[dict]]:
+    """Expose distinct configurations found at retained union-front points.
+
+    Unlike :func:`representative_rows`, this output does not collapse equal
+    objective coordinates to a single route allocation. Exact duplicate
+    allocation signatures found under multiple seeds are represented once and
+    their source seeds are retained. This is the correct output for gateway-
+    share ranges and mechanism analyses; it is not a claim that every possible
+    configuration has been enumerated.
+    """
+    runs = list(runs)
+    solution_rows: list[dict] = []
+    allocation_rows: list[dict] = []
+    groups = sorted({(run.case_id, run.scenario) for run in runs})
+    role_order = ("min_cost", "min_delivery_time", "balanced")
+    for case_id, scenario in groups:
+        group = [
+            run for run in runs if run.case_id == case_id and run.scenario == scenario
+        ]
+        union_front = nondominated_points(
+            point for run in group for point in run.points
+        )
+        if not union_front:
+            continue
+        ideal = (min(p[0] for p in union_front), min(p[1] for p in union_front))
+        nadir = (max(p[0] for p in union_front), max(p[1] for p in union_front))
+        normalized = normalize_points(union_front, ideal, nadir)
+        min_cost = min(union_front, key=lambda point: (point[0], point[1]))
+        min_delivery_time = min(
+            union_front, key=lambda point: (point[1], point[0])
+        )
+        balanced = union_front[
+            min(
+                range(len(union_front)),
+                key=lambda index: normalized[index][0] ** 2
+                + normalized[index][1] ** 2,
+            )
+        ]
+        roles_by_point: dict[tuple[float, float], set[str]] = {
+            point: set() for point in union_front
+        }
+        roles_by_point[min_cost].add("min_cost")
+        roles_by_point[min_delivery_time].add("min_delivery_time")
+        roles_by_point[balanced].add("balanced")
+
+        candidates: dict[
+            tuple[float, float],
+            dict[AllocationSignature, tuple[set[int], BatchSolution]],
+        ] = {point: {} for point in union_front}
+        for run in group:
+            for solution in run.solutions:
+                point = (
+                    solution.total_cost_usd,
+                    solution.quantity_weighted_mean_delivery_time_h,
+                )
+                if point not in candidates:
+                    continue
+                signature = allocation_signature(solution)
+                if signature not in candidates[point]:
+                    candidates[point][signature] = ({run.seed}, solution)
+                else:
+                    candidates[point][signature][0].add(run.seed)
+
+        for point_index, point in enumerate(union_front, start=1):
+            roles = "|".join(
+                role for role in role_order if role in roles_by_point[point]
+            )
+            for configuration_index, signature in enumerate(
+                sorted(candidates[point]), start=1
+            ):
+                seeds, solution = candidates[point][signature]
+                configuration_id = (
+                    f"{case_id}_{scenario}_{point_index:03d}_"
+                    f"cfg{configuration_index:03d}"
+                )
+                solution_rows.append(
+                    {
+                        "configuration_id": configuration_id,
+                        "case_id": case_id,
+                        "scenario": scenario,
+                        "objective_point_id": point_index,
+                        "configuration_index_at_point": configuration_index,
+                        "configuration_sha256": _signature_digest(signature),
+                        "roles": roles,
+                        "source_seeds": "|".join(map(str, sorted(seeds))),
+                        "total_cost_usd": solution.total_cost_usd,
+                        "quantity_weighted_mean_delivery_time_h": (
+                            solution.quantity_weighted_mean_delivery_time_h
+                        ),
+                        "makespan_h": solution.makespan_h,
+                        "max_lead_time_h": solution.max_lead_time_h,
+                        "total_tardiness_feu_h": solution.total_tardiness_feu_h,
+                        "route_allocations": len(solution.allocations),
+                    }
+                )
+                for allocation_index, (
+                    shipment_id,
+                    quantity_feu,
+                    arc_ids,
+                ) in enumerate(solution.allocations, start=1):
+                    allocation_rows.append(
+                        {
+                            "configuration_id": configuration_id,
+                            "allocation_id": allocation_index,
+                            "shipment_id": shipment_id,
+                            "quantity_feu": quantity_feu,
+                            "arc_ids": "|".join(arc_ids),
+                        }
+                    )
+    return solution_rows, allocation_rows
+
+
+def run_endpoint_rows(
+    runs: Iterable[BatchRun],
+) -> tuple[list[dict], list[dict]]:
+    """Select deterministic cost/time endpoints for every independent run.
+
+    These seed-level records support paired allowed-versus-restricted
+    comparisons. When several found configurations share an endpoint, the
+    lexicographically smallest allocation signature is selected and the tie
+    count is recorded rather than silently ignored.
+    """
+    solution_rows: list[dict] = []
+    allocation_rows: list[dict] = []
+    for run in sorted(runs, key=lambda item: (item.case_id, item.scenario, item.seed)):
+        if not run.points:
+            continue
+        endpoints = {
+            "min_cost": min(run.points, key=lambda point: (point[0], point[1])),
+            "min_delivery_time": min(
+                run.points, key=lambda point: (point[1], point[0])
+            ),
+        }
+        roles_by_point: dict[tuple[float, float], list[str]] = {}
+        for role, point in endpoints.items():
+            roles_by_point.setdefault(point, []).append(role)
+        for endpoint_index, point in enumerate(sorted(roles_by_point), start=1):
+            candidates = [
+                solution
+                for solution in run.solutions
+                if (
+                    solution.total_cost_usd,
+                    solution.quantity_weighted_mean_delivery_time_h,
+                )
+                == point
+            ]
+            if not candidates:
+                continue
+            candidates.sort(key=allocation_signature)
+            solution = candidates[0]
+            signature = allocation_signature(solution)
+            endpoint_id = (
+                f"{run.case_id}_{run.scenario}_{run.seed}_ep{endpoint_index:02d}"
+            )
+            solution_rows.append(
+                {
+                    "endpoint_solution_id": endpoint_id,
+                    "case_id": run.case_id,
+                    "scenario": run.scenario,
+                    "seed": run.seed,
+                    "roles": "|".join(roles_by_point[point]),
+                    "equal_objective_configuration_count": len(candidates),
+                    "configuration_sha256": _signature_digest(signature),
+                    "total_cost_usd": solution.total_cost_usd,
+                    "quantity_weighted_mean_delivery_time_h": (
+                        solution.quantity_weighted_mean_delivery_time_h
+                    ),
+                    "makespan_h": solution.makespan_h,
+                    "max_lead_time_h": solution.max_lead_time_h,
+                    "total_tardiness_feu_h": solution.total_tardiness_feu_h,
+                    "route_allocations": len(solution.allocations),
+                }
+            )
+            for allocation_index, (
+                shipment_id,
+                quantity_feu,
+                arc_ids,
+            ) in enumerate(solution.allocations, start=1):
+                allocation_rows.append(
+                    {
+                        "endpoint_solution_id": endpoint_id,
+                        "allocation_id": allocation_index,
+                        "shipment_id": shipment_id,
+                        "quantity_feu": quantity_feu,
+                        "arc_ids": "|".join(arc_ids),
+                    }
+                )
+    return solution_rows, allocation_rows
+
+
 def _report_progress(run: BatchRun, completed: int, total: int) -> None:
     print(
         f"[{completed}/{total}] {run.case_id} {run.scenario} "
         f"seed={run.seed} feasible={run.feasible_population}/"
         f"{run.population_size} front={run.pareto_size} "
+        f"configurations={run.pareto_configuration_count} "
         f"elapsed={run.elapsed_seconds:.2f}s",
         flush=True,
     )
@@ -386,7 +616,8 @@ def run_batch_experiment(
         output_directory / "runs.csv",
         [
             "case_id", "scenario", "seed", "elapsed_seconds", "population_size",
-            "generations", "feasible_population", "pareto_size", "min_cost_usd",
+            "generations", "feasible_population", "pareto_size",
+            "pareto_configuration_count", "min_cost_usd",
             "min_weighted_mean_delivery_time_h", "hypervolume_normalized",
             "spacing_normalized",
         ],
@@ -440,6 +671,48 @@ def run_batch_experiment(
         ],
         allocation_rows,
     )
+    configuration_solution_rows, configuration_allocation_rows = (
+        found_configuration_rows(runs)
+    )
+    _write_csv(
+        output_directory / "found_configuration_solutions.csv",
+        [
+            "configuration_id", "case_id", "scenario", "objective_point_id",
+            "configuration_index_at_point", "configuration_sha256", "roles",
+            "source_seeds", "total_cost_usd",
+            "quantity_weighted_mean_delivery_time_h", "makespan_h",
+            "max_lead_time_h", "total_tardiness_feu_h", "route_allocations",
+        ],
+        configuration_solution_rows,
+    )
+    _write_csv(
+        output_directory / "found_configuration_allocations.csv",
+        [
+            "configuration_id", "allocation_id", "shipment_id", "quantity_feu",
+            "arc_ids",
+        ],
+        configuration_allocation_rows,
+    )
+    endpoint_solution_rows, endpoint_allocation_rows = run_endpoint_rows(runs)
+    _write_csv(
+        output_directory / "run_endpoint_solutions.csv",
+        [
+            "endpoint_solution_id", "case_id", "scenario", "seed", "roles",
+            "equal_objective_configuration_count", "configuration_sha256",
+            "total_cost_usd", "quantity_weighted_mean_delivery_time_h",
+            "makespan_h", "max_lead_time_h", "total_tardiness_feu_h",
+            "route_allocations",
+        ],
+        endpoint_solution_rows,
+    )
+    _write_csv(
+        output_directory / "run_endpoint_allocations.csv",
+        [
+            "endpoint_solution_id", "allocation_id", "shipment_id",
+            "quantity_feu", "arc_ids",
+        ],
+        endpoint_allocation_rows,
+    )
 
     conversion_path = data_directory / "conversion_report.json"
     conversion = (
@@ -471,7 +744,10 @@ def run_batch_experiment(
         ],
         "files": {
             "runs.csv": "one row per independent run",
-            "fronts.csv": "all final feasible non-dominated objective points",
+            "fronts.csv": (
+                "unique feasible non-dominated objective points in each run's "
+                "observational search archive"
+            ),
             "aggregate.csv": "cross-seed stability summary",
             "combined_pareto.csv": "non-dominated union over seeds",
             "representative_solutions.csv": (
@@ -480,11 +756,28 @@ def run_batch_experiment(
             "representative_allocations.csv": (
                 "shipment quantities and arc sequences for union-front solutions"
             ),
+            "found_configuration_solutions.csv": (
+                "all distinct route-allocation configurations found at retained "
+                "union-front objective coordinates; not an enumeration of all "
+                "possible configurations"
+            ),
+            "found_configuration_allocations.csv": (
+                "complete shipment allocations for the distinct found "
+                "configurations"
+            ),
+            "run_endpoint_solutions.csv": (
+                "deterministically selected cost/time endpoints for every seed"
+            ),
+            "run_endpoint_allocations.csv": (
+                "complete allocations for the seed-level endpoint solutions"
+            ),
         },
         "note": (
-            "Calibration baseline, not a paper conclusion. Comparator algorithms "
-            "and scenario experiments must use the same evaluation budget and "
-            "shared normalization bounds."
+            "The external search archive is observational and is not used in "
+            "selection, so it does not change the NSGA-II evaluation budget or "
+            "search pressure. It retains distinct configurations found during the "
+            "run. Comparator algorithms and scenarios must use the same evaluation "
+            "budget and shared normalization bounds."
         ),
     }
     (output_directory / "manifest.json").write_text(

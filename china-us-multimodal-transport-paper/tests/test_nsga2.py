@@ -36,7 +36,9 @@ def test_nsga2_returns_feasible_front_for_two_route_problem():
         candidate_library={"s": (("cheap",), ("fast",))},
     )
     assert result.pareto_front
+    assert result.pareto_archive
     assert all(item.evaluation and item.evaluation.feasible for item in result.pareto_front)
+    assert all(item.evaluation and item.evaluation.feasible for item in result.pareto_archive)
     objectives = {item.objectives for item in result.pareto_front}
     assert (10, 10) in objectives
     assert (20, 5) in objectives
