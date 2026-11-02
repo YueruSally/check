@@ -1,0 +1,145 @@
+{
+  "generated_at_utc": "2026-11-02T22:57:15.276643+00:00",
+  "results_source": "results/v22_full_structural_cost_sensitivity",
+  "zero_tardiness_penalty_min_cost_endpoint": {
+    "D1": {
+      "ny_nj_min_share": 0.8978675287000029,
+      "ny_nj_max_share": 0.8978675645342312,
+      "cost_avoided_usd": 1112938.9772375152
+    },
+    "D2": {
+      "ny_nj_min_share": 0.10213243546576883,
+      "ny_nj_max_share": 0.10213253230577905,
+      "cost_avoided_usd": 113486.09999999404
+    },
+    "D3": {
+      "ny_nj_min_share": 1.0,
+      "ny_nj_max_share": 1.0,
+      "cost_avoided_usd": 2407653.4279843457
+    }
+  },
+  "penalty_min_cost_sequences": {
+    "D1": [
+      {
+        "multiplier": 0.0,
+        "min_share": 0.8978675287000029,
+        "max_share": 0.8978675645342312,
+        "cost_avoided_usd": 1112938.9772375152
+      },
+      {
+        "multiplier": 0.25,
+        "min_share": 0.7270481979888458,
+        "max_share": 0.7270482603815938,
+        "cost_avoided_usd": 1517174.2184003368
+      },
+      {
+        "multiplier": 0.5,
+        "min_share": 0.6734006226547343,
+        "max_share": 0.6734006734006734,
+        "cost_avoided_usd": 1745324.9657453299
+      },
+      {
+        "multiplier": 1.0,
+        "min_share": 0.6489337822671156,
+        "max_share": 0.6489337822671156,
+        "cost_avoided_usd": 1732053.8078727871
+      },
+      {
+        "multiplier": 1.5,
+        "min_share": 0.3265993265993266,
+        "max_share": 0.3265994491337266,
+        "cost_avoided_usd": 2374922.349000007
+      },
+      {
+        "multiplier": 2.0,
+        "min_share": 0.3265993265993266,
+        "max_share": 0.3265994195128641,
+        "cost_avoided_usd": 2859714.0928596407
+      }
+    ],
+    "D2": [
+      {
+        "multiplier": 0.0,
+        "min_share": 0.10213243546576883,
+        "max_share": 0.10213253230577905,
+        "cost_avoided_usd": 113486.09999999404
+      },
+      {
+        "multiplier": 0.25,
+        "min_share": 0.0,
+        "max_share": 0.0,
+        "cost_avoided_usd": 7.450580596923828e-09
+      },
+      {
+        "multiplier": 0.5,
+        "min_share": 0.22603815937149277,
+        "max_share": 0.22603821543246405,
+        "cost_avoided_usd": 125980.58509003371
+      },
+      {
+        "multiplier": 1.0,
+        "min_share": 0.3265993265993266,
+        "max_share": 0.32659935342940183,
+        "cost_avoided_usd": 1370003.1363699734
+      },
+      {
+        "multiplier": 1.5,
+        "min_share": 0.3265993265993266,
+        "max_share": 0.3265993476640569,
+        "cost_avoided_usd": 2110217.3401101828
+      },
+      {
+        "multiplier": 2.0,
+        "min_share": 0.3265993265993266,
+        "max_share": 0.32659934520322964,
+        "cost_avoided_usd": 2464524.8724645227
+      }
+    ],
+    "D3": [
+      {
+        "multiplier": 0.0,
+        "min_share": 1.0,
+        "max_share": 1.0,
+        "cost_avoided_usd": 2407653.4279843457
+      },
+      {
+        "multiplier": 0.25,
+        "min_share": 0.832996576622321,
+        "max_share": 0.832996632996633,
+        "cost_avoided_usd": 2100355.625551343
+      },
+      {
+        "multiplier": 0.5,
+        "min_share": 0.5982042648709316,
+        "max_share": 0.5982042648709316,
+        "cost_avoided_usd": 779711.7480000108
+      },
+      {
+        "multiplier": 1.0,
+        "min_share": 0.3265993265993266,
+        "max_share": 0.3265993542365615,
+        "cost_avoided_usd": 827195.7508271933
+      },
+      {
+        "multiplier": 1.5,
+        "min_share": 0.3169472502805836,
+        "max_share": 0.3169472502805836,
+        "cost_avoided_usd": 571724.7685716748
+      },
+      {
+        "multiplier": 2.0,
+        "min_share": 0.1259259259259259,
+        "max_share": 0.1259259259259259,
+        "cost_avoided_usd": 193343.69399997592
+      }
+    ]
+  },
+  "all_zero_penalty_min_cost_regions_use_ny_nj": true,
+  "holding_sensitivity_has_any_endpoint_activation_change": false,
+  "interpretation": [
+    "NY/NJ remains in every tested minimum-cost endpoint region when tardiness penalties are set to zero; its cost value is therefore not generated solely by tardiness penalties.",
+    "Minimum-cost gateway shares need not change monotonically with the tardiness multiplier because discrete path, service, and minimum-share choices change jointly.",
+    "Cost-component differences are restricted minus allowed at the same lexicographic endpoint; positive values are avoided costs and negative values are added costs.",
+    "Cost and time benefits remain endpoint-specific and must not be presented as simultaneous unless they occur in the same endpoint row."
+  ]
+}

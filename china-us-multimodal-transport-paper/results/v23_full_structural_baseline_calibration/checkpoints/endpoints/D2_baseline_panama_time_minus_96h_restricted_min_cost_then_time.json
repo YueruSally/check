@@ -1,0 +1,528 @@
+{
+  "validation_id": "D2_baseline_panama_time_minus_96h_restricted_min_cost_then_time",
+  "case_id": "D2",
+  "condition_id": "baseline_panama_time_minus_96h",
+  "family": "baseline_gateway_calibration",
+  "gateway_access": "restricted",
+  "scenario": "supp_baseline_panama_time_minus_96h_no_ny_nj",
+  "uswc_capacity_multiplier": 1.0,
+  "uswc_delay_h": 0.0,
+  "endpoint": "min_cost_then_time",
+  "primary_objective": "cost",
+  "secondary_objective": "time",
+  "max_paths_per_gateway": 8,
+  "candidate_paths": 640,
+  "binary_variables": 640,
+  "stage_one_proven": 1,
+  "lexicographic_proven": 1,
+  "evaluator_consistent": 1,
+  "primary_optimum": 22429970.197999984,
+  "primary_tolerance": 0.022430970197999986,
+  "total_cost_usd": 22429970.197999995,
+  "quantity_weighted_mean_delivery_time_h": 687.5340067340067,
+  "feasible": 1,
+  "violations": "",
+  "evaluator_cost_abs_error": 0.0,
+  "evaluator_time_abs_error": 2.2737367544323206e-13,
+  "resource_max_abs_error_feu": 0.0,
+  "ny_nj_share": 0.0,
+  "la_lb_share": 0.8978675645342312,
+  "seattle_tacoma_share": 0.10213243546576879,
+  "solver_calls": [
+    {
+      "stage": 1,
+      "objective": "cost",
+      "status_code": 0,
+      "status": "optimal_within_tolerance",
+      "success": true,
+      "objective_value": 22429970.197999984,
+      "dual_bound": 22429970.197999984,
+      "relative_gap": 0.0,
+      "node_count": 1,
+      "elapsed_seconds": 0.11700270790606737,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)"
+    },
+    {
+      "stage": 2,
+      "objective": "time",
+      "status_code": 0,
+      "status": "optimal_within_tolerance",
+      "success": true,
+      "objective_value": 687.5340067340068,
+      "dual_bound": 687.5340013803433,
+      "relative_gap": 7.78676171632859e-09,
+      "node_count": 1,
+      "elapsed_seconds": 0.8569971802644432,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)"
+    }
+  ],
+  "solver_call_count": 2,
+  "solver_runtime_seconds": 0.9739998881705105,
+  "maximum_relative_gap": 7.78676171632859e-09,
+  "reused_from": "",
+  "allocations": [
+    {
+      "shipment_id": "D2-01",
+      "quantity_feu": 60.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-02",
+      "quantity_feu": 55.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-03",
+      "quantity_feu": 50.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-04",
+      "quantity_feu": 47.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-d-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-05",
+      "quantity_feu": 65.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-06",
+      "quantity_feu": 57.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-07",
+      "quantity_feu": 52.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-08",
+      "quantity_feu": 45.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-09",
+      "quantity_feu": 62.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-10",
+      "quantity_feu": 24.400000000000013,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-10",
+      "quantity_feu": 45.59999999999999,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-03",
+        "us-r-05"
+      ]
+    },
+    {
+      "shipment_id": "D2-11",
+      "quantity_feu": 14.750000000000028,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-11",
+      "quantity_feu": 25.74999999999997,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-12",
+      "quantity_feu": 62.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-13",
+      "quantity_feu": 65.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-14",
+      "quantity_feu": 45.5,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-03",
+        "us-r-05"
+      ]
+    },
+    {
+      "shipment_id": "D2-15",
+      "quantity_feu": 61.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-16",
+      "quantity_feu": 63.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-17",
+      "quantity_feu": 45.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-18",
+      "quantity_feu": 49.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-19",
+      "quantity_feu": 75.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-20",
+      "quantity_feu": 51.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-21",
+      "quantity_feu": 73.0,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-03",
+        "us-r-05"
+      ]
+    },
+    {
+      "shipment_id": "D2-22",
+      "quantity_feu": 4.700000000000003,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-22",
+      "quantity_feu": 42.3,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-d-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-23",
+      "quantity_feu": 61.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-24",
+      "quantity_feu": 48.6,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-24",
+      "quantity_feu": 5.4,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-03",
+        "us-r-05"
+      ]
+    },
+    {
+      "shipment_id": "D2-25",
+      "quantity_feu": 43.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-26",
+      "quantity_feu": 56.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-27",
+      "quantity_feu": 74.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-28",
+      "quantity_feu": 52.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-29",
+      "quantity_feu": 41.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-30",
+      "quantity_feu": 68.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-d-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-31",
+      "quantity_feu": 66.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-32",
+      "quantity_feu": 46.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-33",
+      "quantity_feu": 49.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-34",
+      "quantity_feu": 53.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-35",
+      "quantity_feu": 58.0,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-03",
+        "us-r-05"
+      ]
+    },
+    {
+      "shipment_id": "D2-36",
+      "quantity_feu": 5.049999999999997,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-36",
+      "quantity_feu": 45.45,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-d-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-37",
+      "quantity_feu": 41.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-38",
+      "quantity_feu": 17.75000000000002,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-38",
+      "quantity_feu": 24.24999999999998,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-d-01",
+        "sea-01",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-39",
+      "quantity_feu": 70.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    },
+    {
+      "shipment_id": "D2-40",
+      "quantity_feu": 56.5,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-02",
+        "us-r-02"
+      ]
+    }
+  ],
+  "library_variant": "structural_full",
+  "calibration_dimension": "panama_transit_time_reduction_h",
+  "calibration_value": 96.0
+}
