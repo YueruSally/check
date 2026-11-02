@@ -532,6 +532,7 @@ def solve_bounded_milp(
     maximize: bool = False,
     time_limit_seconds: float = 900.0,
     mip_relative_gap: float = 1e-8,
+    presolve: bool = True,
 ) -> BoundedMilpResult:
     """Solve one linear MILP without conflating timeout and infeasibility."""
     try:
@@ -560,7 +561,7 @@ def solve_bounded_milp(
         options={
             "time_limit": float(time_limit_seconds),
             "mip_rel_gap": float(mip_relative_gap),
-            "presolve": True,
+            "presolve": bool(presolve),
         },
     )
     call = _solver_call(

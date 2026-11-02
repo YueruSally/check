@@ -456,15 +456,17 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
                     config,
                     case_enumerations[condition.case_id],
                 )
-            result = solve_bounded_milp(
-                model,
-                objective_coefficients=model.gateway_share_coefficients("ny_nj"),
-                objective_name="ny_nj_share",
-                upper_bounds=(
-                    (model.objective_coefficients("cost"), cost_bound),
-                    (model.objective_coefficients("time"), time_bound),
-                ),
-                maximize=direction == "max",
+            (
+                result,
+                applied_cost_bound,
+                applied_time_bound,
+                solver_attempts,
+                retry_mode,
+            ) = solve_share_bound_with_numerical_retry(
+                model=model,
+                direction=direction,
+                cost_bound=cost_bound,
+                time_bound=time_bound,
                 time_limit_seconds=args.time_limit_seconds,
                 mip_relative_gap=args.mip_relative_gap,
             )
@@ -473,21 +475,107 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
                 condition=condition,
                 endpoint_region=region,
                 direction=direction,
-                cost_upper_bound=cost_bound,
-                time_upper_bound=time_bound,
+                cost_upper_bound=applied_cost_bound,
+                time_upper_bound=applied_time_bound,
                 result=result,
                 data=case_data,
             )
             payload["library_variant"] = "structural_full"
+            payload["strict_cost_upper_bound_usd"] = cost_bound
+            payload["strict_time_upper_bound_h"] = time_bound
+            payload["share_bound_retry_mode"] = retry_mode
+            payload["solver_attempts"] = solver_attempts
+            payload["additional_cost_tolerance_usd"] = (
+                applied_cost_bound - cost_bound
+            )
+            payload["additional_time_tolerance_h"] = (
+                applied_time_bound - time_bound
+            )
             write_json_atomic(checkpoint, payload)
             completed += 1
             print(
                 f"[share {completed}/{total}] {bound_id} "
                 f"proven={payload['proven_optimal']} "
                 f"consistent={payload['evaluator_consistent']} "
-                f"share={payload['ny_nj_share']}",
+                f"share={payload['ny_nj_share']} retry={retry_mode}",
                 flush=True,
             )
+
+
+def solve_share_bound_with_numerical_retry(
+    *,
+    model,
+    direction: str,
+    cost_bound: float,
+    time_bound: float,
+    time_limit_seconds: float,
+    mip_relative_gap: float,
+):
+    """Solve a share bound with a pre-registered numerical retry ladder.
+
+    A lexicographic endpoint itself certifies that the strict region is
+    nonempty.  HiGHS can nevertheless declare the two-row intersection
+    infeasible during presolve.  We first disable presolve without changing
+    the model.  Only if that also returns proven infeasible do we apply a
+    practically zero endpoint-equivalence tolerance of USD 1 and one
+    second.  Every attempt is retained in the checkpoint.
+    """
+    objective = model.gateway_share_coefficients("ny_nj")
+    cost_coefficients = model.objective_coefficients("cost")
+    time_coefficients = model.objective_coefficients("time")
+
+    def solve(current_cost: float, current_time: float, *, presolve: bool):
+        return solve_bounded_milp(
+            model,
+            objective_coefficients=objective,
+            objective_name="ny_nj_share",
+            upper_bounds=(
+                (cost_coefficients, current_cost),
+                (time_coefficients, current_time),
+            ),
+            maximize=direction == "max",
+            time_limit_seconds=time_limit_seconds,
+            mip_relative_gap=mip_relative_gap,
+            presolve=presolve,
+        )
+
+    result = solve(cost_bound, time_bound, presolve=True)
+    attempts = [
+        {
+            "mode": "strict_with_presolve",
+            "cost_upper_bound_usd": cost_bound,
+            "time_upper_bound_h": time_bound,
+            **asdict(result.solver_call),
+        }
+    ]
+    retry_mode = "strict_with_presolve"
+    applied_cost = cost_bound
+    applied_time = time_bound
+    if result.proven_infeasible:
+        result = solve(cost_bound, time_bound, presolve=False)
+        retry_mode = "strict_without_presolve"
+        attempts.append(
+            {
+                "mode": retry_mode,
+                "cost_upper_bound_usd": cost_bound,
+                "time_upper_bound_h": time_bound,
+                **asdict(result.solver_call),
+            }
+        )
+    if result.proven_infeasible:
+        applied_cost = cost_bound + 1.0
+        applied_time = time_bound + (1.0 / 3600.0)
+        result = solve(applied_cost, applied_time, presolve=False)
+        retry_mode = "one_dollar_one_second_without_presolve"
+        attempts.append(
+            {
+                "mode": retry_mode,
+                "cost_upper_bound_usd": applied_cost,
+                "time_upper_bound_h": applied_time,
+                **asdict(result.solver_call),
+            }
+        )
+    return result, applied_cost, applied_time, attempts, retry_mode
 
 
 def zero_share_lower_bound_certificate(
