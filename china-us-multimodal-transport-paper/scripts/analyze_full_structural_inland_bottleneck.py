@@ -78,9 +78,16 @@ def main() -> None:
 
     rows: list[dict[str, object]] = []
     for row in new_values:
-        share = range_index[
+        share = range_index.get(
             (row["case_id"], row["condition_id"], row["endpoint"])
-        ]
+        ) or range_index.get(
+            (row["case_id"], row["condition_id"], "coincident_endpoints")
+        )
+        if share is None:
+            raise KeyError(
+                "Missing endpoint share range for "
+                f"{row['case_id']}/{row['condition_id']}/{row['endpoint']}"
+            )
         low = float(share["ny_nj_min_share"])
         high = float(share["ny_nj_max_share"])
         rows.append(
