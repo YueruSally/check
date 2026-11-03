@@ -1,0 +1,19 @@
+{
+  "generated_at_utc": "2026-11-03T08:53:40.267003+00:00",
+  "single_wave_source": "analysis/v21_full_structural_core_exact",
+  "multi_wave_source": "results/v24_full_structural_release_robustness",
+  "activation_share": 0.1,
+  "interpretation": [
+    "Release dispersion preserves the qualitative value of an alternative gateway but materially changes its first tested use and its objective dependence.",
+    "Chicago minimum-cost use remains at 288 h across multi-wave designs, while its minimum-time use moves to 336 h.",
+    "Memphis generally moves from 288 h under the single wave to 336 h under multi-wave release; one daily instance reaches 10% in the minimum-cost endpoint at 288 h.",
+    "Columbus minimum-cost use varies between 168 h and 264 h across daily assignments, whereas minimum-time use occurs at 336 h in every tested multi-wave instance.",
+    "The repeated 32.66% single-wave share is not a universal capacity ceiling: multi-wave exact shares cover multiple intermediate values and 100%.",
+    "Most highlighted multi-wave solutions do not bind service, daily-arc, or node capacities, so gateway switching cannot be attributed solely to capacity overflow."
+  ],
+  "limits": [
+    "Constructed release instances are robustness cases, not empirical occurrence probabilities.",
+    "First-use statements refer only to the tested delay grid.",
+    "Cost and time values remain endpoint-specific."
+  ]
+}

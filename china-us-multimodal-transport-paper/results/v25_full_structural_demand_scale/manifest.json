@@ -1,0 +1,83 @@
+{
+  "generated_at_utc": "2026-11-03T08:54:35.030091+00:00",
+  "library_variant": "structural_full",
+  "structural_source": "results/v21_full_structural_core_exact",
+  "baseline_100pct_source_reused_in_analysis": "results/v21_full_structural_core_exact",
+  "baseline_100pct_duplicate_runs_suppressed": true,
+  "demand_multipliers": [
+    0.8,
+    1.2
+  ],
+  "base_conditions": [
+    {
+      "case_id": "D1",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    }
+  ],
+  "endpoint_tasks": 72,
+  "share_bound_tasks": 72,
+  "interpretation_limits": [
+    "Demand scaling is proportional across all batches and does not represent a new empirical demand forecast.",
+    "The 100% exact endpoints are reused from v2.1 rather than redundantly re-optimized.",
+    "Cost and time values remain endpoint-specific."
+  ]
+}
