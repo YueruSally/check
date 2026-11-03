@@ -504,7 +504,16 @@ def main() -> None:
                     "arc_ids": "|".join(allocation.arc_ids),
                 }
             )
-    write_csv(args.output / "epsilon_tradeoff_solver_calls.csv", solver_rows, list(solver_rows[0]))
+    solver_fields = list(solver_rows[0])
+    for solver_row in solver_rows[1:]:
+        for field in solver_row:
+            if field not in solver_fields:
+                solver_fields.append(field)
+    write_csv(
+        args.output / "epsilon_tradeoff_solver_calls.csv",
+        solver_rows,
+        solver_fields,
+    )
     write_csv(args.output / "epsilon_tradeoff_allocations.csv", allocation_rows, list(allocation_rows[0]))
 
     groups: dict[str, dict[str, dict[str, object]]] = {}
