@@ -1,0 +1,26 @@
+{
+  "generated_at_utc": "2026-11-03T09:19:33.415334+00:00",
+  "library_variant": "structural_full",
+  "structural_source": "results/v21_full_structural_core_exact",
+  "internal_time_caps_per_condition": 8,
+  "conditions": [
+    {
+      "case_id": "D1",
+      "condition_id": "delay_288h",
+      "family": "epsilon_tradeoff",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_240h",
+      "family": "epsilon_tradeoff",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    }
+  ],
+  "tradeoff_tasks": 32,
+  "share_bound_tasks": 32,
+  "interpretation": "Each internal point minimizes cost subject to a fixed delivery-time upper bound and then minimizes time within the proven cost optimum.",
+  "interpretation_limit": "These are exactly solved epsilon-constrained trade-off solutions, not a claim that the entire Pareto front has been enumerated."
+}

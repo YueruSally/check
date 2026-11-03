@@ -1,0 +1,9 @@
+{
+  "generated_at_utc": "2026-11-03T09:19:33.524387+00:00",
+  "results_source": "results/v27_full_structural_epsilon_tradeoffs",
+  "description": "Exact cost-minimizing solutions at common delivery-time caps, with NY/NJ share bounds for the allowed model.",
+  "limits": [
+    "Internal epsilon points support preference-dependence analysis but are not labelled a complete Pareto front.",
+    "Cost savings compare allowed and restricted models at the same time cap; infeasible restricted caps are reported rather than imputed."
+  ]
+}
