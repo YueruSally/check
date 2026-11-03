@@ -161,9 +161,13 @@ def main() -> None:
             allowed_value = float(row[f"allowed_{metric}_usd"] if metric == "cost" else row["allowed_time_h"])
             disruption_loss = restricted_value - baseline_value
             avoided_loss = restricted_value - allowed_value
+            primary_metric = (
+                (row["endpoint"] == "min_cost_then_time" and metric == "cost")
+                or (row["endpoint"] == "min_time_then_cost" and metric == "time")
+            )
             recovery = (
                 avoided_loss / disruption_loss
-                if abs(disruption_loss) > denominator_tolerance
+                if primary_metric and disruption_loss > denominator_tolerance
                 else None
             )
             recovery_rows.append(

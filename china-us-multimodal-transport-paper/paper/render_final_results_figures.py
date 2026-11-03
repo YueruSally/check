@@ -57,6 +57,27 @@ plt.rcParams.update(
 
 # Figure 1: exact gateway value over the delay grid.
 delay = read(ROOT / "analysis/v21_full_structural_core_exact/delay_gateway_value.csv")
+delay_additional = read(
+    ROOT
+    / "analysis/v26_full_structural_inland_bottleneck/inland_capacity_delay_interaction.csv"
+)
+delay_index = {
+    (row["case_id"], row["endpoint"], float(row["delay_h"])): row for row in delay
+}
+for row in delay_additional:
+    delay_h = float(row["delay_h"])
+    if abs(float(row["inland_capacity_multiplier"]) - 1.0) > 1e-9:
+        continue
+    if (row["case_id"], delay_h) not in {("D2", 276.0), ("D3", 216.0)}:
+        continue
+    delay_index[(row["case_id"], row["endpoint"], delay_h)] = {
+        "case_id": row["case_id"],
+        "endpoint": row["endpoint"],
+        "delay_h": row["delay_h"],
+        "cost_avoided_by_allowing_ny_nj_usd": row["cost_avoided_usd"],
+        "time_avoided_by_allowing_ny_nj_h": row["time_avoided_h"],
+    }
+delay = list(delay_index.values())
 figure, axes = plt.subplots(1, 2, figsize=(10.8, 4.1))
 for case_id, city in CASES:
     cost_rows = sorted(

@@ -44,6 +44,16 @@ def main() -> None:
         default=Path("results/v24_full_structural_release_robustness"),
     )
     parser.add_argument(
+        "--single-wave-inland-analysis",
+        type=Path,
+        default=Path("analysis/v26_full_structural_inland_bottleneck"),
+        help=(
+            "Additional exact single-wave delay levels solved in the inland "
+            "interaction experiment; only the unchanged 100% inland-capacity "
+            "rows are merged."
+        ),
+    )
+    parser.add_argument(
         "--output",
         type=Path,
         default=Path("analysis/v24_full_structural_release_robustness"),
@@ -51,6 +61,9 @@ def main() -> None:
     args = parser.parse_args()
 
     single = read_csv(args.single_wave_analysis / "delay_gateway_value.csv")
+    single_additional = read_csv(
+        args.single_wave_inland_analysis / "inland_capacity_delay_interaction.csv"
+    )
     values = read_csv(args.release_results / "release_pattern_gateway_value.csv")
     shares = read_csv(args.release_results / "endpoint_ny_nj_share_ranges.csv")
     capacities = read_csv(args.release_results / "exact_endpoint_capacity_usage.csv")
@@ -85,6 +98,31 @@ def main() -> None:
                 "time_avoided_h": float(
                     row["time_avoided_by_allowing_ny_nj_h"]
                 ),
+            }
+        )
+
+    # The inland-interaction design solved two additional delay levels without
+    # changing inland capacity: Memphis at 276 h and Columbus at 216 h.  These
+    # are exact single-wave observations and must be included when identifying
+    # the first tested material-use level.
+    for row in single_additional:
+        delay = float(row["delay_h"])
+        if abs(float(row["inland_capacity_multiplier"]) - 1.0) > 1e-9:
+            continue
+        if (row["case_id"], delay) not in {("D2", 276.0), ("D3", 216.0)}:
+            continue
+        evidence.append(
+            {
+                "release_pattern": "single_wave",
+                "release_instance_id": "v21_single_wave",
+                "release_generator_seed": "",
+                "case_id": row["case_id"],
+                "delay_h": delay,
+                "endpoint": row["endpoint"],
+                "ny_nj_min_share": float(row["ny_nj_min_share"]),
+                "ny_nj_max_share": float(row["ny_nj_max_share"]),
+                "cost_avoided_usd": float(row["cost_avoided_usd"]),
+                "time_avoided_h": float(row["time_avoided_h"]),
             }
         )
 
