@@ -1,0 +1,14 @@
+{
+  "generated_at_utc": "2026-11-02T23:04:13.288768+00:00",
+  "results_source": "results/v23_full_structural_baseline_calibration",
+  "maximum_tested_ocean_cost_reduction_fraction": 0.3,
+  "maximum_tested_panama_time_reduction_h": 96.0,
+  "any_endpoint_region_reaches_10pct_ny_nj": false,
+  "material_rows": 1,
+  "interpretation": [
+    "A 30% USEC ocean-cost reduction does not introduce NY/NJ into either exact endpoint for any destination.",
+    "A 48-hour Panama transit-time reduction does not introduce NY/NJ into either exact endpoint for any destination.",
+    "At a 96-hour reduction, only the Columbus minimum-cost endpoint uses NY/NJ and its exact share remains below the 10% network-level criterion.",
+    "The baseline is therefore robust to the tested one-factor changes but represents a timetable- and delivery-sensitive case-study setting rather than a universal market calibration."
+  ]
+}

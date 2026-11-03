@@ -1,0 +1,302 @@
+{
+  "generated_at_utc": "2026-11-02T23:08:37.402365+00:00",
+  "library_variant": "structural_full",
+  "structural_source": "results/v21_full_structural_core_exact",
+  "single_wave_exact_source_reused_in_analysis": "results/v21_full_structural_core_exact",
+  "single_wave_duplicate_runs_suppressed": true,
+  "release_instances": [
+    {
+      "instance_id": "two_weekly_waves_i01",
+      "pattern": "two_weekly_waves",
+      "seed": 20261121,
+      "wave_offsets_h": [
+        0.0,
+        168.0
+      ]
+    },
+    {
+      "instance_id": "two_weekly_waves_i02",
+      "pattern": "two_weekly_waves",
+      "seed": 20261122,
+      "wave_offsets_h": [
+        0.0,
+        168.0
+      ]
+    },
+    {
+      "instance_id": "two_weekly_waves_i03",
+      "pattern": "two_weekly_waves",
+      "seed": 20261123,
+      "wave_offsets_h": [
+        0.0,
+        168.0
+      ]
+    },
+    {
+      "instance_id": "two_weekly_waves_i04",
+      "pattern": "two_weekly_waves",
+      "seed": 20261124,
+      "wave_offsets_h": [
+        0.0,
+        168.0
+      ]
+    },
+    {
+      "instance_id": "two_weekly_waves_i05",
+      "pattern": "two_weekly_waves",
+      "seed": 20261125,
+      "wave_offsets_h": [
+        0.0,
+        168.0
+      ]
+    },
+    {
+      "instance_id": "four_weekly_waves_i01",
+      "pattern": "four_weekly_waves",
+      "seed": 20261121,
+      "wave_offsets_h": [
+        0.0,
+        168.0,
+        336.0,
+        504.0
+      ]
+    },
+    {
+      "instance_id": "four_weekly_waves_i02",
+      "pattern": "four_weekly_waves",
+      "seed": 20261122,
+      "wave_offsets_h": [
+        0.0,
+        168.0,
+        336.0,
+        504.0
+      ]
+    },
+    {
+      "instance_id": "four_weekly_waves_i03",
+      "pattern": "four_weekly_waves",
+      "seed": 20261123,
+      "wave_offsets_h": [
+        0.0,
+        168.0,
+        336.0,
+        504.0
+      ]
+    },
+    {
+      "instance_id": "four_weekly_waves_i04",
+      "pattern": "four_weekly_waves",
+      "seed": 20261124,
+      "wave_offsets_h": [
+        0.0,
+        168.0,
+        336.0,
+        504.0
+      ]
+    },
+    {
+      "instance_id": "four_weekly_waves_i05",
+      "pattern": "four_weekly_waves",
+      "seed": 20261125,
+      "wave_offsets_h": [
+        0.0,
+        168.0,
+        336.0,
+        504.0
+      ]
+    },
+    {
+      "instance_id": "daily_over_four_weeks_i01",
+      "pattern": "daily_over_four_weeks",
+      "seed": 20261121,
+      "wave_offsets_h": [
+        0.0,
+        24.0,
+        48.0,
+        72.0,
+        96.0,
+        120.0,
+        144.0,
+        168.0,
+        192.0,
+        216.0,
+        240.0,
+        264.0,
+        288.0,
+        312.0,
+        336.0,
+        360.0,
+        384.0,
+        408.0,
+        432.0,
+        456.0,
+        480.0,
+        504.0,
+        528.0,
+        552.0,
+        576.0,
+        600.0,
+        624.0,
+        648.0
+      ]
+    },
+    {
+      "instance_id": "daily_over_four_weeks_i02",
+      "pattern": "daily_over_four_weeks",
+      "seed": 20261122,
+      "wave_offsets_h": [
+        0.0,
+        24.0,
+        48.0,
+        72.0,
+        96.0,
+        120.0,
+        144.0,
+        168.0,
+        192.0,
+        216.0,
+        240.0,
+        264.0,
+        288.0,
+        312.0,
+        336.0,
+        360.0,
+        384.0,
+        408.0,
+        432.0,
+        456.0,
+        480.0,
+        504.0,
+        528.0,
+        552.0,
+        576.0,
+        600.0,
+        624.0,
+        648.0
+      ]
+    },
+    {
+      "instance_id": "daily_over_four_weeks_i03",
+      "pattern": "daily_over_four_weeks",
+      "seed": 20261123,
+      "wave_offsets_h": [
+        0.0,
+        24.0,
+        48.0,
+        72.0,
+        96.0,
+        120.0,
+        144.0,
+        168.0,
+        192.0,
+        216.0,
+        240.0,
+        264.0,
+        288.0,
+        312.0,
+        336.0,
+        360.0,
+        384.0,
+        408.0,
+        432.0,
+        456.0,
+        480.0,
+        504.0,
+        528.0,
+        552.0,
+        576.0,
+        600.0,
+        624.0,
+        648.0
+      ]
+    },
+    {
+      "instance_id": "daily_over_four_weeks_i04",
+      "pattern": "daily_over_four_weeks",
+      "seed": 20261124,
+      "wave_offsets_h": [
+        0.0,
+        24.0,
+        48.0,
+        72.0,
+        96.0,
+        120.0,
+        144.0,
+        168.0,
+        192.0,
+        216.0,
+        240.0,
+        264.0,
+        288.0,
+        312.0,
+        336.0,
+        360.0,
+        384.0,
+        408.0,
+        432.0,
+        456.0,
+        480.0,
+        504.0,
+        528.0,
+        552.0,
+        576.0,
+        600.0,
+        624.0,
+        648.0
+      ]
+    },
+    {
+      "instance_id": "daily_over_four_weeks_i05",
+      "pattern": "daily_over_four_weeks",
+      "seed": 20261125,
+      "wave_offsets_h": [
+        0.0,
+        24.0,
+        48.0,
+        72.0,
+        96.0,
+        120.0,
+        144.0,
+        168.0,
+        192.0,
+        216.0,
+        240.0,
+        264.0,
+        288.0,
+        312.0,
+        336.0,
+        360.0,
+        384.0,
+        408.0,
+        432.0,
+        456.0,
+        480.0,
+        504.0,
+        528.0,
+        552.0,
+        576.0,
+        600.0,
+        624.0,
+        648.0
+      ]
+    }
+  ],
+  "delay_grid_h": [
+    0.0,
+    168.0,
+    240.0,
+    264.0,
+    288.0,
+    336.0
+  ],
+  "delivery_allowance_preserved": true,
+  "total_demand_and_batch_count_preserved": true,
+  "assignment_rule": "seeded FEU-balanced greedy assignment to fixed waves",
+  "endpoint_tasks": 1080,
+  "share_bound_tasks": 936,
+  "interpretation_limits": [
+    "The five instances per multi-wave pattern are constructed release assignments, not occurrence probabilities.",
+    "The single-wave exact results are reused from v2.1 rather than redundantly re-optimized.",
+    "Tested delays identify grid transitions rather than continuous real-world thresholds."
+  ]
+}
