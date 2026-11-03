@@ -296,6 +296,9 @@ def main() -> None:
     findings = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "single_wave_source": str(args.single_wave_analysis),
+        "single_wave_additional_delay_source": str(
+            args.single_wave_inland_analysis
+        ),
         "multi_wave_source": str(args.release_results),
         "activation_share": 0.10,
         "interpretation": [

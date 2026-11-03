@@ -223,7 +223,7 @@ def main() -> None:
         "interpretation_limits": [
             "Delay values are tested grid points, not continuous real-world thresholds.",
             "Cost and time benefits are endpoint-specific and are not simultaneous unless the same endpoint row demonstrates both.",
-            "Recovery ratios are suppressed when the no-NY/NJ disruption loss is numerically negligible.",
+            "Recovery ratios are reported only for a positive primary-objective disruption loss: cost at the minimum-cost endpoint and time at the minimum-time endpoint.",
         ],
     }
     args.output.mkdir(parents=True, exist_ok=True)
