@@ -1,0 +1,57 @@
+{
+  "generated_at_utc": "2026-11-03T09:01:55.869982+00:00",
+  "library_variant": "structural_full",
+  "structural_source": "results/v21_full_structural_core_exact",
+  "capacity_multipliers": [
+    0.5,
+    1.0,
+    1.5
+  ],
+  "targets": {
+    "D2": {
+      "arc_id": "us-d-02",
+      "delays_h": [
+        264.0,
+        276.0,
+        288.0
+      ]
+    },
+    "D3": {
+      "arc_id": "us-d-03",
+      "delays_h": [
+        216.0,
+        240.0,
+        264.0
+      ]
+    }
+  },
+  "core_exact_conditions_reused_in_analysis": [
+    {
+      "case_id": "D2",
+      "delay_h": 264.0,
+      "capacity_multiplier": 1.0
+    },
+    {
+      "case_id": "D2",
+      "delay_h": 288.0,
+      "capacity_multiplier": 1.0
+    },
+    {
+      "case_id": "D3",
+      "delay_h": 240.0,
+      "capacity_multiplier": 1.0
+    },
+    {
+      "case_id": "D3",
+      "delay_h": 264.0,
+      "capacity_multiplier": 1.0
+    }
+  ],
+  "endpoint_tasks": 56,
+  "share_bound_tasks": 44,
+  "interpretation_limits": [
+    "Only one diagnosed LA/LB-to-inland daily arc is changed per destination.",
+    "The experiment identifies an interaction mechanism and is not a general inland-network capacity grid.",
+    "The four already available 100% capacity conditions are reused from v2.1."
+  ]
+}

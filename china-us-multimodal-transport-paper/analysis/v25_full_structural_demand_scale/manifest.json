@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-11-03T09:01:32.664675+00:00",
+  "core_source": "analysis/v21_full_structural_core_exact",
+  "demand_scale_source": "results/v25_full_structural_demand_scale",
+  "demand_multipliers": [
+    0.8,
+    1.0,
+    1.2
+  ],
+  "all_capacity35_endpoints_exclude_ny_nj": true,
+  "interpretation": [
+    "At 35% West Coast port capacity, neither endpoint uses NY/NJ at 80%, 100%, or 120% demand for any destination, despite binding West Coast resources in the scaled cases.",
+    "At the tested severe delays, demand intensity changes the exact NY/NJ share and the value of access but does not erase destination and endpoint dependence.",
+    "Memphis at 288 h uses NY/NJ at both endpoints across all three demand levels, with a larger share at higher total demand.",
+    "Columbus at 240 h uses NY/NJ in the minimum-cost endpoint across all three demand levels but not in the minimum-time endpoint."
+  ],
+  "limits": [
+    "Demand is proportionally scaled and is not an empirical forecast distribution.",
+    "Port-capacity robustness does not by itself identify the effect of a specific inland bottleneck under delay."
+  ]
+}
