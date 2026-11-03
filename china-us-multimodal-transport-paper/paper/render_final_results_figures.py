@@ -320,10 +320,14 @@ for axis, (case_id, city, condition_id) in zip(
     axis.yaxis.set_major_formatter(FuncFormatter(lambda value, _: f"{value:.1f}"))
     axis.legend(frameon=False, fontsize=8)
     clean(axis)
+# Reserve a dedicated margin for the colour bar.  Creating it from the two
+# subplot axes and then shrinking the figure caused the bar to overlap the
+# Columbus legend and the rightmost observations in the publication export.
+figure.subplots_adjust(wspace=0.28, right=0.84, bottom=0.16, top=0.90)
 if last_scatter is not None:
-    colorbar = figure.colorbar(last_scatter, ax=axes.ravel().tolist(), pad=0.02)
+    colorbar_axis = figure.add_axes((0.87, 0.16, 0.018, 0.74))
+    colorbar = figure.colorbar(last_scatter, cax=colorbar_axis)
     colorbar.set_label("NY/NJ share in allowed solution (%)")
-figure.subplots_adjust(wspace=0.28, right=0.88)
 save(figure, "fig10_exact_epsilon_tradeoffs")
 
 print(f"Final Results figures written to {OUT}.")
