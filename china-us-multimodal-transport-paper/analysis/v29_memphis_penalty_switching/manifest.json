@@ -1,0 +1,16 @@
+{
+  "generated_at_utc": "2026-11-04T18:31:29.407497+00:00",
+  "results_source": "results/v22_full_structural_cost_sensitivity",
+  "case_id": "D2",
+  "endpoint": "min_cost_then_time",
+  "penalty_multipliers": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    1.5,
+    2.0
+  ],
+  "all_tardiness_monotonicity_checks_passed": true,
+  "switch_rows": 52
+}

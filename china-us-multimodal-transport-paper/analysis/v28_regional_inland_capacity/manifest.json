@@ -1,0 +1,7 @@
+{
+  "generated_at_utc": "2026-11-04T18:31:29.310617+00:00",
+  "results_source": "results/v28_regional_inland_capacity",
+  "comparison_rows": 24,
+  "binding_target_arc_day_rows": 202,
+  "interpretation": "All rail and road daily-arc capacities from LA/LB and Seattle/Tacoma to each independently solved destination are scaled together; service and gateway-node capacities remain fixed."
+}

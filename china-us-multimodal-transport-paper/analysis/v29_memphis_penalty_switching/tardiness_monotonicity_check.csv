@@ -1,0 +1,6 @@
+lower_penalty_multiplier,upper_penalty_multiplier,lower_base_weighted_tardiness_cost_usd,upper_base_weighted_tardiness_cost_usd,change_base_weighted_tardiness_cost_usd,nonincreasing_within_tolerance
+0.0,0.25,73995747.458,55155738.878,-18840008.580000006,1
+0.25,0.5,55155738.878,48820082.3,-6335656.578000002,1
+0.5,1.0,48820082.3,48179054.54,-641027.7599999979,1
+1.0,1.5,48179054.54,48179054.54,0.0,1
+1.5,2.0,48179054.54,48179054.54,0.0,1

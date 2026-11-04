@@ -1,0 +1,262 @@
+{
+  "generated_at_utc": "2026-11-04T18:31:29.238707+00:00",
+  "library_variant": "structural_full",
+  "structural_source": "results/v21_full_structural_core_exact",
+  "capacity_multipliers": [
+    0.3,
+    0.5
+  ],
+  "west_coast_delays_h": [
+    0.0,
+    168.0
+  ],
+  "conditions": [
+    {
+      "case_id": "D1",
+      "condition_id": "delay_0h_regional_inland_capacity_030pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0,
+      "capacity_multiplier": 0.3,
+      "target_arc_ids": [
+        "us-d-01",
+        "us-d-04",
+        "us-r-01",
+        "us-r-04"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-01": 1500.0,
+        "us-d-04": 1500.0,
+        "us-r-01": 1000.0,
+        "us-r-04": 1000.0
+      }
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_0h_regional_inland_capacity_050pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0,
+      "capacity_multiplier": 0.5,
+      "target_arc_ids": [
+        "us-d-01",
+        "us-d-04",
+        "us-r-01",
+        "us-r-04"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-01": 1500.0,
+        "us-d-04": 1500.0,
+        "us-r-01": 1000.0,
+        "us-r-04": 1000.0
+      }
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_168h_regional_inland_capacity_030pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0,
+      "capacity_multiplier": 0.3,
+      "target_arc_ids": [
+        "us-d-01",
+        "us-d-04",
+        "us-r-01",
+        "us-r-04"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-01": 1500.0,
+        "us-d-04": 1500.0,
+        "us-r-01": 1000.0,
+        "us-r-04": 1000.0
+      }
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_168h_regional_inland_capacity_050pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0,
+      "capacity_multiplier": 0.5,
+      "target_arc_ids": [
+        "us-d-01",
+        "us-d-04",
+        "us-r-01",
+        "us-r-04"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-01": 1500.0,
+        "us-d-04": 1500.0,
+        "us-r-01": 1000.0,
+        "us-r-04": 1000.0
+      }
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_0h_regional_inland_capacity_030pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0,
+      "capacity_multiplier": 0.3,
+      "target_arc_ids": [
+        "us-d-02",
+        "us-d-05",
+        "us-r-02",
+        "us-r-05"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-02": 1500.0,
+        "us-d-05": 1500.0,
+        "us-r-02": 1000.0,
+        "us-r-05": 1000.0
+      }
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_0h_regional_inland_capacity_050pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0,
+      "capacity_multiplier": 0.5,
+      "target_arc_ids": [
+        "us-d-02",
+        "us-d-05",
+        "us-r-02",
+        "us-r-05"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-02": 1500.0,
+        "us-d-05": 1500.0,
+        "us-r-02": 1000.0,
+        "us-r-05": 1000.0
+      }
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_168h_regional_inland_capacity_030pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0,
+      "capacity_multiplier": 0.3,
+      "target_arc_ids": [
+        "us-d-02",
+        "us-d-05",
+        "us-r-02",
+        "us-r-05"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-02": 1500.0,
+        "us-d-05": 1500.0,
+        "us-r-02": 1000.0,
+        "us-r-05": 1000.0
+      }
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_168h_regional_inland_capacity_050pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0,
+      "capacity_multiplier": 0.5,
+      "target_arc_ids": [
+        "us-d-02",
+        "us-d-05",
+        "us-r-02",
+        "us-r-05"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-02": 1500.0,
+        "us-d-05": 1500.0,
+        "us-r-02": 1000.0,
+        "us-r-05": 1000.0
+      }
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_0h_regional_inland_capacity_030pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0,
+      "capacity_multiplier": 0.3,
+      "target_arc_ids": [
+        "us-d-03",
+        "us-d-06",
+        "us-r-03",
+        "us-r-06"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-03": 1500.0,
+        "us-d-06": 1500.0,
+        "us-r-03": 1000.0,
+        "us-r-06": 1000.0
+      }
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_0h_regional_inland_capacity_050pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0,
+      "capacity_multiplier": 0.5,
+      "target_arc_ids": [
+        "us-d-03",
+        "us-d-06",
+        "us-r-03",
+        "us-r-06"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-03": 1500.0,
+        "us-d-06": 1500.0,
+        "us-r-03": 1000.0,
+        "us-r-06": 1000.0
+      }
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_168h_regional_inland_capacity_030pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0,
+      "capacity_multiplier": 0.3,
+      "target_arc_ids": [
+        "us-d-03",
+        "us-d-06",
+        "us-r-03",
+        "us-r-06"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-03": 1500.0,
+        "us-d-06": 1500.0,
+        "us-r-03": 1000.0,
+        "us-r-06": 1000.0
+      }
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_168h_regional_inland_capacity_050pct",
+      "family": "regional_west_coast_inland_capacity",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0,
+      "capacity_multiplier": 0.5,
+      "target_arc_ids": [
+        "us-d-03",
+        "us-d-06",
+        "us-r-03",
+        "us-r-06"
+      ],
+      "base_capacities_feu_per_day": {
+        "us-d-03": 1500.0,
+        "us-d-06": 1500.0,
+        "us-r-03": 1000.0,
+        "us-r-06": 1000.0
+      }
+    }
+  ],
+  "endpoint_tasks": 48,
+  "share_bound_tasks": 42,
+  "interpretation_limits": [
+    "All rail and road arcs from LA/LB and Seattle/Tacoma to the selected destination are scaled together.",
+    "Service-departure capacities and gateway-node capacities remain unchanged.",
+    "The experiment represents a regional inland-capacity shortage in three independent destination cases, not a joint multi-destination network."
+  ]
+}
