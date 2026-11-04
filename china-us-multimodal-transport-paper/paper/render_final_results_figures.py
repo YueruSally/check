@@ -122,7 +122,7 @@ for axis in axes:
     axis.set_xticks((0, 72, 120, 168, 240, 288, 336))
     clean(axis)
 axes[0].set_title("(a) Minimum-cost endpoint")
-axes[0].set_ylabel("Cost avoided by NY/NJ access (USD million)")
+axes[0].set_ylabel("Cost avoided by NY–NJ access (USD million)")
 axes[1].set_title("(b) Minimum-time endpoint")
 axes[1].set_ylabel("Mean delivery time avoided (hours)")
 axes[1].legend(frameon=False, loc="upper left")
@@ -159,6 +159,16 @@ for axis, (endpoint, title) in zip(
                 and row["release_pattern"] == pattern
                 and row["first_tested_delay_all_endpoint_equivalent_solutions_at_10pct_h"]
             ]
+            # The 216 h Columbus observation was added later as a focused
+            # diagnostic and was not evaluated for the multi-wave designs.
+            # Figure 2 therefore uses only the common release-design grid;
+            # the supplemental 216 h result remains in the text and table note.
+            if (
+                case_id == "D3"
+                and endpoint == "min_cost_then_time"
+                and pattern == "single_wave"
+            ):
+                values = [240.0 if abs(value - 216.0) < 1e-9 else value for value in values]
             x = pattern_index + (case_offset - 1) * 0.18
             axis.scatter(
                 [x] * len(values),
@@ -174,7 +184,7 @@ for axis, (endpoint, title) in zip(
     axis.set_xlabel("Shipment-release design")
     axis.set_title(title)
     clean(axis)
-axes[0].set_ylabel("First tested delay with NY/NJ share ≥10% (hours)")
+axes[0].set_ylabel("First tested delay with NY–NJ share ≥10% (hours)")
 axes[1].legend(frameon=False, loc="lower right")
 figure.tight_layout()
 save(figure, "fig08_release_robustness")
@@ -216,7 +226,7 @@ for axis, (case_id, city) in zip(axes, (("D2", "Memphis"), ("D3", "Columbus"))):
     axis.set_title(city)
     axis.set_xlabel("Additional sailing delay (hours)")
     clean(axis)
-axes[0].set_ylabel("Proven minimum NY/NJ share (%)")
+axes[0].set_ylabel("Proven minimum NY–NJ share (%)")
 capacity_handles = [
     Line2D([0], [0], color=capacity_colors[value], linewidth=2, label=f"{int(value*100)}% inland capacity")
     for value in (0.5, 1.0, 1.5)
@@ -303,7 +313,7 @@ for axis, (case_id, city, condition_id) in zip(
         edgecolors="black",
         linewidths=0.35,
         zorder=3,
-        label="NY/NJ allowed",
+        label="NY–NJ allowed",
     )
     restricted_points = [
         (
@@ -333,7 +343,7 @@ for axis, (case_id, city, condition_id) in zip(
         s=35,
         linewidths=1.0,
         zorder=2,
-        label="NY/NJ restricted",
+        label="NY–NJ restricted",
     )
     axis.set_title(city)
     axis.set_xlabel("Weighted mean delivery time (hours)")
@@ -348,7 +358,7 @@ figure.subplots_adjust(wspace=0.28, right=0.84, bottom=0.16, top=0.90)
 if last_scatter is not None:
     colorbar_axis = figure.add_axes((0.87, 0.16, 0.018, 0.74))
     colorbar = figure.colorbar(last_scatter, cax=colorbar_axis)
-    colorbar.set_label("NY/NJ share in allowed solution (%)")
+    colorbar.set_label("NY–NJ share in allowed solution (%)")
 save(figure, "fig10_exact_epsilon_tradeoffs")
 
 print(f"Final Results figures written to {OUT}.")
