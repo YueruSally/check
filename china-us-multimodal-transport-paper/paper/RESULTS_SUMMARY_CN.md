@@ -1,72 +1,89 @@
-# 最终实验结果速查（v1.2）
+# 最终实验结果速查（完整结构路径与精确端点版）
 
-本文件是论文写作时的结果口径速查。最终英文正文见 `paper/07_results.md`，中文正文见 `paper/07_results_CN.md`。若历史说明与本文件冲突，以v1.2最终验证CSV和上述正文为准。
+本文件记录论文最终结果口径。英文正文为 `paper/07_results.md`，中文对应稿为 `paper/07_results_CN.md`。历史NSGA-II档案只保留为探索性记录，不再作为最终前沿或门户激活结论的依据。
 
-## 一、必须区分的两个激活概念
+## 1. 模型与求解口径
 
-- **首次方案激活**：闭合非支配并集中至少一个已找到配置的NY/NJ网络份额达到10%。
-- **前沿范围激活**：闭合并集中的每一个已找到配置都达到10%。
-- 两者之间为**转换状态**，表示是否使用NY/NJ取决于成本—时间偏好。
+- 使用结构限制下枚举得到的全部简单路径：最多八个弧段、最多四次模式转换、不重复节点。
+- 每个起点—目的地—门户组合有八条结构路径。
+- 三个目的地分别求解，不是共享容量的联合多目的地模型。
+- 每个条件求两个精确词典序端点：最低成本、再最短时间；最短时间、再最低成本。
+- NY/NJ份额上下界在端点等价区域内单独求解。
+- 集中单波次是压力情景；多波次结果用于检验需求时间分布敏感性。
 
-这两个网络级指标与“每条启用路径至少承担该批次10%需求”的模型约束不同。
+## 2. 基准与延误结果
 
-## 二、最终激活结论
+基准下，三个目的地两个端点的NY/NJ已证明份额上下界均为零。
 
-| 目的地 | 条件 | 配置范围 | 最终解释 |
-| --- | --- | ---: | --- |
-| Chicago | 288小时延误 | 32.75%—50.56% | 首次方案和前沿范围激活同时出现 |
-| Memphis | 264小时延误 | 0%—26.04%，27个配置中8个为零 | 转换状态，不是前沿范围激活 |
-| Memphis | 288小时延误 | 31.72%—32.79% | 前沿范围激活 |
-| Columbus | 240小时延误 | 24.17%—28.13% | 前沿范围激活 |
-| Chicago | 30%容量+168小时 | 0%—18.17%，5个目标点中2个为零 | 历史闭合档案支持转换状态 |
+| 目的地 | 集中单波次下的精确状态变化 |
+|---|---|
+| Chicago | 264 h仍为零；288 h两个端点均达到实质使用 |
+| Memphis | 276 h仍为零；288 h两个端点均达到实质使用 |
+| Columbus最低成本端 | 168 h为零；216 h达到10.056% |
+| Columbus最短时间端 | 240 h为零；264 h达到32.66% |
 
-因此：首次方案达到10%的顺序为Columbus 240小时、Memphis 264小时、Chicago 288小时；前沿范围激活为Columbus 240小时，Chicago和Memphis均为288小时。不能再写“Memphis在264小时全部激活”，也不能把Chicago 30%+168小时写成全部激活。
+以上只表示相邻已测试条件，不是连续现实阈值。Columbus在216 h的10.056%满足5%和10%判据，但不满足20%判据。
 
-## 三、精确端点价值
+## 3. NY/NJ的精确价值
 
-20个词典序MILP端点全部得到最优性证明，并通过独立评估器及服务—出发批次、弧段—日期、节点—日期三类容量账户核对。精确性以候选路径库为边界。
+| 条件 | 端点 | NY/NJ份额 | 避免成本 | 避免时间 |
+|---|---|---:|---:|---:|
+| Chicago 288 h | 最低成本端 | 64.89% | 173.2万美元 | 5.030 h |
+| Chicago 288 h | 最短时间端 | 32.66% | 226.0万美元 | 3.266 h |
+| Memphis 288 h | 最低成本端 | 32.66% | 137.0万美元 | 11.311 h |
+| Memphis 288 h | 最短时间端 | 32.66% | 196.6万美元 | 2.613 h |
+| Columbus 216 h | 最低成本端 | 10.056% | 14.4万美元 | −1.668 h |
+| Columbus 240 h | 最低成本端 | 32.66% | 82.7万美元 | 2.764 h |
 
-| 关键条件 | 最低成本端 | 最短时间端 |
-| --- | --- | --- |
-| Chicago 288小时 | 使用64.89% NY/NJ；节省173.2万美元和5.030小时 | 使用32.66%；节省149.7万美元和9.994小时 |
-| Memphis 264小时 | 不使用NY/NJ；相对禁止组无收益 | 使用32.66%；节省2.939小时，但多花79.7万美元 |
-| Memphis 288小时 | 使用32.66%；节省140.7万美元和13.913小时 | 同左 |
-| Columbus 240小时 | 使用32.66%；节省83.2万美元和3.070小时 | 同左 |
-| Chicago 30%+168小时 | 使用19.19%；节省30.9万美元和3.723小时 | 同左 |
+成本和时间来自端点特定方案，不得解释为另一个端点方案同时取得两项收益。
 
-门户份额不等于经济价值。Memphis 264小时最能说明：NY/NJ已经是时间导向的可行选择，但还不是最低成本选择。
+首次实质使用时，NY/NJ只挽回0.38%—3.04%的成本损失和0—1.13%的时间损失；到336 h，挽回比例增加至成本10.91%—28.46%、时间7.37%—11.87%。因此，高门户份额不等于挽回大部分中断损失。
 
-## 四、同批次时间机制
+## 4. 罚金机制
 
-符号为“允许NY/NJ减去禁止NY/NJ”，负值表示改善。
+Memphis 288 h最低成本端的NY/NJ份额为：
 
-| 条件 | 系统总变化 | NY/NJ货物构成 | 西海岸货物构成 |
-| --- | ---: | ---: | ---: |
-| Chicago 288小时 | -8.83小时 | -0.23小时，区间跨零 | -8.60小时 |
-| Memphis 264小时 | -1.52小时 | +6.07小时 | -7.59小时 |
-| Memphis 288小时 | -13.19小时 | +0.94小时 | -14.13小时 |
-| Columbus 240小时 | -2.18小时 | +6.78小时 | -8.97小时 |
+| 罚金倍率 | 0 | 0.25 | 0.5 | 1 | 1.5 | 2 |
+|---|---:|---:|---:|---:|---:|---:|
+| NY/NJ份额 | 10.21% | 0 | 22.60% | 32.66% | 32.66% | 32.66% |
 
-Memphis 264小时和Columbus 240小时支持“部分货物采用较慢NY/NJ构成，但西海岸货物改善更多”的解释；Chicago 288小时的NY/NJ构成近似中性，不能用同一机制概括全部目的地。模型没有内生排队，不能写成“缓解港口拥堵”。
+份额虽然非单调，但总迟到量与按基准批次罚金率加权的迟到暴露均随罚金倍率上升而非增。0→0.25倍时，四个NY/NJ批次（227.5 FEU）回到更早的西海岸连接；0.25→0.5倍时，十个批次（503.5 FEU）转向NY/NJ并进一步减少迟到。因此，该现象是离散路径与班期配置排序变化，不是求解错误。
 
-## 五、容量结果和证据边界
+## 5. 容量位置效应
 
-- 单独降低容量时没有实质NY/NJ使用；部分平衡方案的最大西海岸节点—日期利用率达到97.89%—99.99%。准确表述是“西海岸重配容纳了容量下降”，而不是“整个系统已饱和”。
-- 大范围容量—延误状态图多数只有允许组搜索证据，属于探索性筛查，不能全部称为最终闭合前沿。
-- 30个种子衡量算法搜索波动，不代表现实输入不确定性。
-- NSGA-II用于展示权衡结构；所选端点用精确MILP锚定。验证模型中，启发式最低成本主目标差距为0.516%—4.338%，因此旧版很小的启发式成本收益不再作为核心结论。
+- 西海岸门户节点容量单独降至35%仍不激活NY/NJ。
+- 西海岸区域内陆公路与铁路日容量同时降至50%或30%，在零附加延误下也不激活NY/NJ。
+- 50%区域内陆运力与168 h延误叠加时，三个目的地仍为零。
+- 30%区域内陆运力与168 h延误叠加时，仅Columbus使用5.724%，低于10%实质使用判据；该条件避免71,787美元和0.538 h。
+- Columbus该条件下，`us-d-03`在模型期29、31达到450 FEU/day，`us-r-03`在期29达到300 FEU/day，`us-d-06`在期30、31达到450 FEU/day。
 
-## 六、论文主结论
+因此可以写：门户节点容量下降和无附加延误的区域内陆运力下降未激活NY/NJ；容量限制与延误叠加会放大跨海岸响应。不能写成“所有容量扰动都不起作用”。
 
-> NY/NJ不是在唯一“阈值时刻”统一启用的备用港，而是在目的地、中断程度和成本—时间偏好共同作用下进入竞争集合。容量下降与班期延误产生不对称网络响应；较高NY/NJ份额也不必然带来成本收益。其最稳妥的管理定位是严重中断下的表现多样化选项，而不是普遍的低成本或可行性保障通道。
+## 6. 释放设计与偏好
 
-## 七、权威数据文件
+- Chicago最低成本端在全部释放设计中首次于288 h达到实质使用。
+- Chicago最短时间端由集中单波次的288 h推迟至所有多波次实例的336 h。
+- Memphis多波次大多由288 h推迟至336 h。
+- Columbus对释放结构最敏感。
 
-- `analysis/v12_final_validation/closed_front_classification.csv`
-- `analysis/v12_final_validation/closed_front_points.csv`
-- `analysis/v12_final_validation/historical_closed_front_corrections.csv`
-- `analysis/v12_final_validation/batch_matched_time_decomposition_summary.csv`
-- `analysis/v12_final_validation/service_departure_quantity_changes.csv`
-- `results/v12_exact_endpoint_validation/exact_endpoint_summary.csv`
-- `results/v12_exact_endpoint_validation/exact_counterfactual_value.csv`
-- `results/v12_exact_endpoint_validation/heuristic_endpoint_quality.csv`
+由于释放时刻、需求集中度、资源竞争和可衔接服务日期同时变化，结论只能写成“门户选择对需求时间分布敏感”，不能声称已经单独识别班期相位效应。
+
+ε约束结果表明：Chicago在部分严格交付时间上限下，禁止NY/NJ模型不可行，而允许模型可行；Columbus在相同时间上限下两组模型均可行，但允许NY/NJ可以降低成本。这里的可行性结论只适用于额外时间要求，不能写成NY/NJ对核心网络可行性不可或缺。
+
+## 7. 最终主结论
+
+> 在所构造的三个独立目的地案例中，替代门户的采用不是由单一容量阈值决定。门户节点容量、区域或局部内陆运力、航次延误、目标偏好以及需求时间分布共同决定NY/NJ是否进入最优配置。NY/NJ在严重延误下能够降低成本或时间、扩展可达到的交付时间区域，但首次激活时通常只挽回有限比例的中断损失。
+
+## 8. 最新权威数据文件
+
+- `results/v21_full_structural_core_exact/exact_endpoint_summary.csv`
+- `analysis/v21_full_structural_core_exact/disruption_loss_recovery.csv`
+- `results/v22_full_structural_cost_sensitivity/exact_endpoint_summary.csv`
+- `analysis/v24_full_structural_release_robustness/combined_release_evidence.csv`
+- `analysis/v26_full_structural_inland_bottleneck/inland_capacity_delay_interaction.csv`
+- `analysis/v27_full_structural_epsilon_tradeoffs/epsilon_tradeoff_summary.csv`
+- `analysis/v28_regional_inland_capacity/regional_inland_capacity_comparison.csv`
+- `analysis/v28_regional_inland_capacity/binding_regional_inland_arc_days.csv`
+- `analysis/v29_memphis_penalty_switching/penalty_level_summary.csv`
+- `analysis/v29_memphis_penalty_switching/adjacent_penalty_switches.csv`
+- `analysis/v29_memphis_penalty_switching/tardiness_monotonicity_check.csv`
