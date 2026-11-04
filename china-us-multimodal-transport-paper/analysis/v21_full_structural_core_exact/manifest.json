@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-02T22:51:30.682642+00:00",
+  "generated_at_utc": "2026-11-04T18:01:40.232514+00:00",
   "results_source": "results/v21_full_structural_core_exact",
   "path_library_decision": "exhaustive_structural_library_required",
   "materially_changed_endpoint_count": 74,
@@ -24,6 +24,6 @@
   "interpretation_limits": [
     "Delay values are tested grid points, not continuous real-world thresholds.",
     "Cost and time benefits are endpoint-specific and are not simultaneous unless the same endpoint row demonstrates both.",
-    "Recovery ratios are suppressed when the no-NY/NJ disruption loss is numerically negligible."
+    "Recovery ratios are reported only for a positive primary-objective disruption loss: cost at the minimum-cost endpoint and time at the minimum-time endpoint."
   ]
 }

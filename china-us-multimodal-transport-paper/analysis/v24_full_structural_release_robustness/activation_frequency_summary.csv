@@ -15,7 +15,7 @@ single_wave,D1,min_cost_then_time,1,288.0:1,288.0:1
 single_wave,D1,min_time_then_cost,1,288.0:1,288.0:1
 single_wave,D2,min_cost_then_time,1,288.0:1,288.0:1
 single_wave,D2,min_time_then_cost,1,288.0:1,288.0:1
-single_wave,D3,min_cost_then_time,1,240.0:1,240.0:1
+single_wave,D3,min_cost_then_time,1,216.0:1,216.0:1
 single_wave,D3,min_time_then_cost,1,264.0:1,264.0:1
 two_weekly_waves,D1,min_cost_then_time,5,288.0:5,288.0:5
 two_weekly_waves,D1,min_time_then_cost,5,336.0:5,336.0:5

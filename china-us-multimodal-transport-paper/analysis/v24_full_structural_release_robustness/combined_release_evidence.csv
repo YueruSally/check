@@ -35,6 +35,10 @@ single_wave,v21_single_wave,,D3,288.0,min_cost_then_time,0.7739618203833487,0.77
 single_wave,v21_single_wave,,D3,288.0,min_time_then_cost,0.32660010347840707,0.32660090058581465,4518877.276262194,8.393600804818902
 single_wave,v21_single_wave,,D3,336.0,min_cost_then_time,1.0,1.0,21288034.21828805,46.37609427609436
 single_wave,v21_single_wave,,D3,336.0,min_time_then_cost,0.67340066951857,0.6734006734006736,18668844.977999985,39.884511784511915
+single_wave,v21_single_wave,,D2,276.0,min_cost_then_time,0.0,0.0,-2.9802322387695312e-08,0.0
+single_wave,v21_single_wave,,D2,276.0,min_time_then_cost,0.0,0.0,1.4901161193847656e-08,0.0
+single_wave,v21_single_wave,,D3,216.0,min_cost_then_time,0.1005611672278339,0.1005611672278339,143919.98800004274,-1.667811447811232
+single_wave,v21_single_wave,,D3,216.0,min_time_then_cost,0.0,0.0,0.0,0.0
 two_weekly_waves,two_weekly_waves_i01,20261121,D1,0.0,min_cost_then_time,0.0,0.0,-3.725290298461914e-09,0.0
 two_weekly_waves,two_weekly_waves_i01,20261121,D1,0.0,min_time_then_cost,0.0,0.0,0.0,0.0
 two_weekly_waves,two_weekly_waves_i01,20261121,D1,168.0,min_cost_then_time,0.0,0.0,2.2351741790771484e-08,-1.1368683772161603e-13

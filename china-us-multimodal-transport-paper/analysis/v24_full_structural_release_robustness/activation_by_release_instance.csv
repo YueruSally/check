@@ -63,7 +63,7 @@ single_wave,v21_single_wave,D1,min_cost_then_time,288.0,288.0
 single_wave,v21_single_wave,D1,min_time_then_cost,288.0,288.0
 single_wave,v21_single_wave,D2,min_cost_then_time,288.0,288.0
 single_wave,v21_single_wave,D2,min_time_then_cost,288.0,288.0
-single_wave,v21_single_wave,D3,min_cost_then_time,240.0,240.0
+single_wave,v21_single_wave,D3,min_cost_then_time,216.0,216.0
 single_wave,v21_single_wave,D3,min_time_then_cost,264.0,264.0
 two_weekly_waves,two_weekly_waves_i01,D1,min_cost_then_time,288.0,288.0
 two_weekly_waves,two_weekly_waves_i01,D1,min_time_then_cost,336.0,336.0

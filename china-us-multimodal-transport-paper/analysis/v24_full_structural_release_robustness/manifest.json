@@ -1,6 +1,7 @@
 {
-  "generated_at_utc": "2026-11-03T08:53:40.267003+00:00",
+  "generated_at_utc": "2026-11-04T18:01:40.500567+00:00",
   "single_wave_source": "analysis/v21_full_structural_core_exact",
+  "single_wave_additional_delay_source": "analysis/v26_full_structural_inland_bottleneck",
   "multi_wave_source": "results/v24_full_structural_release_robustness",
   "activation_share": 0.1,
   "interpretation": [
