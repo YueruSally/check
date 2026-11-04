@@ -39,6 +39,8 @@
 
 首次实质使用时，NY–NJ只挽回0.38%—3.04%的成本损失和0—1.13%的时间损失；到336 h，挽回比例增加至成本10.91%—28.46%、时间7.37%—11.87%。因此，高门户份额不等于挽回大部分中断损失。
 
+在禁止NY–NJ的重点条件中，中断成本损失主要由迟到成本构成：Chicago 288 h、Memphis 288 h和Columbus 240 h的迟到损失分别为5104.9万、5019.6万和3892.2万美元，对应总损失为5700.9万、5608.4万和4502.9万美元。
+
 ## 4. 罚金机制
 
 Memphis 288 h最低成本端的NY–NJ份额为：
@@ -48,6 +50,8 @@ Memphis 288 h最低成本端的NY–NJ份额为：
 | NY–NJ份额 | 10.21% | 0 | 22.60% | 32.66% | 32.66% | 32.66% |
 
 份额虽然非单调，但总迟到量与按基准批次罚金率加权的迟到暴露均随罚金倍率上升而非增。0→0.25倍时，四个NY–NJ批次（227.5 FEU）回到更早的西海岸连接；0.25→0.5倍时，十个批次（503.5 FEU）转向NY–NJ并进一步减少迟到。因此，该现象是离散路径与班期配置排序变化，不是求解错误。
+
+使用匹配的零罚金无扰动参照时，Chicago 288 h、Memphis 288 h和Columbus 240 h的成本损失挽回比例分别为91.00%、11.05%和99.38%。由于这三个无扰动参照本身已使用NY–NJ，这些数值是费用设定敏感性，不是中断激活比例。
 
 ## 5. 容量位置效应
 
@@ -87,3 +91,5 @@ Memphis 288 h最低成本端的NY–NJ份额为：
 - `analysis/v29_memphis_penalty_switching/penalty_level_summary.csv`
 - `analysis/v29_memphis_penalty_switching/adjacent_penalty_switches.csv`
 - `analysis/v29_memphis_penalty_switching/tardiness_monotonicity_check.csv`
+- `analysis/v30_final_results_addenda/zero_penalty_loss_recovery.csv`
+- `analysis/v30_final_results_addenda/restricted_disruption_loss_cost_components.csv`

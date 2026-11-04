@@ -87,6 +87,16 @@ where \(B\) is the undisturbed baseline, \(R\) is the disrupted solution without
 
 At 336 h, the corresponding recovery fractions were 17.50%, 10.91%, and 28.46% for cost and 9.00%, 7.37%, and 11.87% for time for Chicago, Memphis, and Columbus, respectively. These values were clearly higher than at the first material-use condition within the tested delay set. A large gateway share nevertheless did not imply that most of the disruption loss had been recovered.
 
+The restricted disruption loss was dominated by tardiness cost rather than by transport or holding cost (Supplementary Table S2). At the focal common-grid conditions, tardiness accounted for USD 51.049 million of Chicago's USD 57.009 million cost loss, USD 50.196 million of Memphis's USD 56.084 million loss, and USD 38.922 million of Columbus's USD 45.029 million loss. Transfer and processing costs were unchanged within numerical tolerance.
+
+**Supplementary Table S2. Decomposition of the minimum-cost disruption loss without NY–NJ (disrupted minus undisturbed reference, USD million).**
+
+| Destination and delay | Transport | Waiting and holding | Transfer and processing | Tardiness | Total loss |
+|---|---:|---:|---:|---:|---:|
+| Chicago, 288 h | 4.961 | 1.000 | 0.000 | 51.049 | 57.009 |
+| Memphis, 288 h | 4.901 | 0.987 | 0.000 | 50.196 | 56.084 |
+| Columbus, 240 h | 5.299 | 0.808 | 0.000 | 38.922 | 45.029 |
+
 ## 7.3 Cost components and sensitivity to penalty rates
 
 The sources of the minimum-cost benefit differed by destination (Table 5). At Chicago 288 h, the USD 1.732 million saving combined lower transport, waiting and holding, and tardiness costs. At Memphis 288 h, NY–NJ increased transport expenditure by USD 1.109 million but reduced waiting and holding cost by USD 0.350 million and tardiness cost by USD 2.129 million. At Columbus 240 h, the USD 0.827 million benefit arose mainly from reductions in tardiness and waiting and holding costs.
@@ -100,6 +110,16 @@ The sources of the minimum-cost benefit differed by destination (Table 5). At Ch
 | Columbus, 240 h | +0.018 | +0.284 | +0.525 | +0.827 |
 
 As the common penalty multiplier increased, tardiness loss evaluated at the original shipment-specific rates decreased monotonically; total tardiness in FEU-hours also decreased in this case. The NY–NJ share itself was non-monotonic. For Memphis at 288 h, it was 10.21% at zero penalty, zero at 25% of the baseline rate, 22.60% at 50%, and 32.66% at the baseline, 150%, and 200% rates. Shipment-level comparison showed that the zero-to-25% change reassigned the four NY–NJ batches to earlier West Coast connections, whereas the 25%-to-50% change reassigned ten batches partly or wholly to NY–NJ. The complete loss sequence and batch identifiers are reported in the supplementary results. Thus, changing the penalty multiplier reordered discrete path and timetable configurations without reversing the monotonic response of the penalised loss. NY–NJ also remained in the three focal minimum-cost solutions when the penalty was zero; these tests used Chicago at 288 h, Memphis at 288 h, and Columbus at 240 h. Changing the holding-cost rate from zero to twice baseline did not change whether NY–NJ was used in those conditions, although it changed the exact value and allocation.
+
+To keep the recovery calculation internally matched, the tardiness penalty was also set to zero in the undisturbed reference solutions (Supplementary Table S3). The cost-loss recovery fractions were then 91.00% for Chicago at 288 h, 11.05% for Memphis at 288 h, and 99.38% for Columbus at 240 h. The matched undisturbed solutions with NY–NJ access already assigned 89.79%, 10.21%, and 89.79% to NY–NJ, respectively. These ratios therefore quantify sensitivity of the cost result to removal of the tardiness penalty; they do not describe disruption-induced activation from a zero-share baseline.
+
+**Supplementary Table S3. Matched zero-penalty cost-loss recovery at the focal delays.**
+
+| Destination and delay | Zero-penalty undisturbed cost with NY–NJ (USD million) | Disrupted cost without NY–NJ (USD million) | Disrupted cost with NY–NJ (USD million) | Avoided loss (USD million) | Recovered (%) | Undisturbed NY–NJ share (%) |
+|---|---:|---:|---:|---:|---:|---:|
+| Chicago, 288 h | 22.651 | 23.874 | 22.761 | 1.113 | 91.00 | 89.79 |
+| Memphis, 288 h | 22.303 | 23.330 | 23.217 | 0.113 | 11.05 | 10.21 |
+| Columbus, 240 h | 22.000 | 24.422 | 22.015 | 2.408 | 99.38 | 89.79 |
 
 ## 7.4 Robustness to shipment-release design and demand intensity
 
