@@ -1,0 +1,3 @@
+case_id,condition_id,delay_h,binding_arc_id,binding_arc_capacity_multiplier,endpoint_region,ny_nj_min_share,ny_nj_max_share,min_proven,max_proven,meets_5pct,meets_10pct,meets_20pct
+D3,delay_216h_inland_us-d-03_capacity_100pct,216.0,us-d-03,1.0,min_cost_then_time,0.1005611672278339,0.1005611672278339,1,1,1,1,0
+D3,delay_216h_inland_us-d-03_capacity_100pct,216.0,us-d-03,1.0,min_time_then_cost,0.0,0.0,1,1,0,0,0

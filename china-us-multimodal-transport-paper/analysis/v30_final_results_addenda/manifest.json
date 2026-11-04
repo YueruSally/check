@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-11-04T19:51:34.419725+00:00",
+  "structural_source": "results/v21_full_structural_core_exact",
+  "cost_sensitivity_source": "results/v22_full_structural_cost_sensitivity",
+  "inland_source": "results/v26_full_structural_inland_bottleneck",
+  "matched_zero_penalty_endpoint_tasks": 6,
+  "common_delay_grid_h": [
+    0.0,
+    168.0,
+    240.0,
+    264.0,
+    288.0,
+    336.0
+  ],
+  "activation_criteria": [
+    0.05,
+    0.1,
+    0.2
+  ],
+  "zero_penalty_recovery_definition": "(disrupted restricted cost - disrupted allowed cost) / (disrupted restricted cost - undisturbed allowed cost), with the tardiness penalty fixed at zero throughout"
+}
