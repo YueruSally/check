@@ -74,7 +74,9 @@ The sources of the minimum-cost benefit differed by destination (Table 5). At Ch
 | Memphis, 288 h | −1.109 | +0.350 | +2.129 | +1.370 |
 | Columbus, 240 h | +0.018 | +0.284 | +0.525 | +0.827 |
 
-NY/NJ remained in the minimum-cost solution when the tardiness penalty was set to zero. The proven shares were 89.79% for Chicago, 10.21% for Memphis, and 100% for Columbus, with cost savings of USD 1.113, 0.113, and 2.408 million, respectively. The penalty rate nevertheless affected both allocation and value. For Memphis, the minimum-cost NY/NJ share was 10.21% at zero penalty, zero at 25% of the baseline rate, 22.60% at 50%, and 32.66% at the baseline, 150%, and 200% rates. These results show that changing the penalty rate reordered the total costs of alternative configurations; the available evidence does not assign the non-monotonic share response to one individual constraint. Changing the holding-cost rate from zero to twice baseline did not change whether NY/NJ was used in the three focal conditions, although it changed its exact value and allocation.
+NY/NJ remained in the minimum-cost solution when the tardiness penalty was set to zero. The proven shares were 89.79% for Chicago, 10.21% for Memphis, and 100% for Columbus, with cost savings of USD 1.113, 0.113, and 2.408 million, respectively. The penalty rate nevertheless affected both allocation and value. For Memphis, the minimum-cost NY/NJ share was 10.21% at zero penalty, zero at 25% of the baseline rate, 22.60% at 50%, and 32.66% at the baseline, 150%, and 200% rates.
+
+Shipment-level comparison explains this non-monotonic gateway share without violating the expected response of the penalised quantity. From zero to 25% of the baseline rate, the four batches using NY/NJ—227.5 FEU in total—returned to Los Angeles/Long Beach. Those batches arrived 26.0–99.9 h earlier after the reconfiguration, and many other batches also moved to earlier West Coast connections. From 25% to 50%, ten batches comprising 503.5 FEU were instead assigned partly or wholly to NY/NJ; their weighted mean arrival times fell by 42.6–60.0 h relative to the 25% solution. Across the penalty multipliers of 0, 0.25, 0.5, 1, 1.5, and 2, total tardiness decreased from 533,321 to 421,584.75, 364,506.9, and 354,964.5 FEU-hours and then remained unchanged. When evaluated at the unscaled shipment-specific penalty rates, the corresponding tardiness exposure decreased monotonically from USD 73.996 million to 55.156, 48.820, and 48.179 million and then remained constant. The non-monotonic NY/NJ share therefore reflects a reordering among several discrete path and timetable configurations, not a reversal in the optimiser's response to increasing tardiness cost. Changing the holding-cost rate from zero to twice baseline did not change whether NY/NJ was used in the three focal conditions, although it changed its exact value and allocation.
 
 ## 7.4 Robustness to shipment-release design and demand intensity
 
@@ -101,15 +103,30 @@ The dispersed-release results generated shares ranging from intermediate values 
 
 Demand scaling preserved the principal endpoint asymmetries. At Chicago 288 h, the minimum-cost share was 64.89%, 64.89%, and 61.48% under 80%, 100%, and 120% demand, while the minimum-time share was 15.83%, 32.66%, and 37.41%. Memphis 288 h used 15.83%, 32.66%, and 37.41% at both endpoints. Columbus 240 h used the same respective shares at the minimum-cost endpoint but zero at the minimum-time endpoint. Demand intensity therefore changed the amount of diversion without eliminating destination and objective dependence.
 
-## 7.5 Interaction between sailing delay and inland capacity
+## 7.5 Regional inland-capacity reductions and local bottlenecks
 
-The inland-capacity experiment varied a diagnosed Los Angeles/Long Beach-to-destination daily arc to 50%, 100%, and 150% of baseline. It covered Memphis and Columbus and should be interpreted as a local mechanism test rather than a complete inland-network capacity experiment.
+The regional inland-capacity test reduced together all four daily-capacity arcs—rail and road from both Los Angeles/Long Beach and Seattle/Tacoma—serving the selected inland destination. Service-departure capacities and gateway-node capacities were unchanged. All 48 allowed and restricted endpoint problems were proven optimal, as were the endpoint-equivalent NY/NJ share bounds.
+
+With no additional sailing delay, reducing these regional inland capacities to either 50% or 30% did not introduce NY/NJ at either endpoint for any destination (Table 7). The same was true at 50% inland capacity combined with 168 h of delay. At 30% capacity and 168 h of delay, Chicago and Memphis continued to use no NY/NJ, whereas Columbus used a proven 5.724% at the coincident cost and time endpoints. Allowing NY/NJ in that Columbus condition avoided USD 71,787 of cost and 0.538 h of weighted mean delivery time. The share remained below the pre-specified 10% material-use criterion, but the non-zero value shows that a sufficiently severe regional inland restriction can interact with sailing delay before material activation occurs.
+
+**Table 7. Proven NY/NJ shares under regional West Coast inland-capacity reductions (%; minimum cost/minimum time).**
+
+| West Coast delay (h) | Remaining inland capacity | Chicago | Memphis | Columbus |
+|---:|---:|---:|---:|---:|
+| 0 | 50% | 0/0 | 0/0 | 0/0 |
+| 0 | 30% | 0/0 | 0/0 | 0/0 |
+| 168 | 50% | 0/0 | 0/0 | 0/0 |
+| 168 | 30% | 0/0 | 0/0 | 5.724/5.724 |
+
+In the Columbus 30%-capacity-plus-168 h condition, the Los Angeles/Long Beach road arc `us-d-03` reached its reduced 450 FEU/day limit in periods 29 and 31, and the corresponding rail arc `us-r-03` reached its 300 FEU/day limit in period 29. The Seattle/Tacoma road arc `us-d-06` also reached 450 FEU/day in periods 30 and 31. Thus, the small East Coast allocation appeared when capacity was simultaneously tight at multiple gateway–date resources, rather than as a response to an isolated arc alone.
+
+The separate local-bottleneck experiment varied one diagnosed Los Angeles/Long Beach-to-destination daily arc to 50%, 100%, and 150% of baseline. It covered Memphis and Columbus and should be interpreted as a local mechanism test rather than a regional inland-capacity experiment.
 
 ![Delay–inland-capacity interaction](figures/fig09_inland_capacity_interaction.png)
 
 **Figure 3.** Exact NY/NJ shares under joint changes in West Coast sailing delay and the diagnosed Los Angeles/Long Beach inland daily-arc capacity. Solid and dashed lines denote the minimum-cost and minimum-time endpoints.
 
-**Table 7. Exact NY/NJ shares under the inland-capacity interaction (%; minimum cost/minimum time).**
+**Table 8. Exact NY/NJ shares under the local inland-capacity interaction (%; minimum cost/minimum time).**
 
 | Destination | Delay (h) | 50% inland capacity | 100% inland capacity | 150% inland capacity |
 |---|---:|---:|---:|---:|
@@ -136,4 +153,4 @@ For Chicago, the allowed NY/NJ share increased from 32.66% at the minimum-time e
 
 For Columbus, the restricted model remained feasible at all eight internal limits. The allowed NY/NJ share increased from 3.63% to 29.03%, crossing 10% between the tested limits of 850.796 and 851.605 h. Cost avoided at the same time limit increased from USD 0.110 million to USD 0.774 million. Together with the zero-share minimum-time endpoint and the 32.66% minimum-cost endpoint, these results show that gateway use varied with the decision-maker’s delivery-time requirement.
 
-Overall, four findings remain consistent with the exact and robustness evidence. First, the tested West Coast gateway-node capacity reductions were accommodated without NY/NJ, whereas sufficiently long sailing delays and delay–inland-capacity interactions generated alternative-gateway value. Second, cost and time preferences produced different gateway choices, particularly for Columbus. Third, NY/NJ recovered only a limited share of the initial disruption loss but became more valuable as disruption severity increased. Fourth, gateway use depended on the temporal distribution and intensity of demand as well as on destination-specific inland capacity. These findings apply to the constructed network, its deterministic schedules, the tested delay levels, and the specified objective components.
+Overall, four findings remain consistent with the exact and robustness evidence. First, neither the tested gateway-node reductions nor isolated regional inland-capacity reductions activated NY/NJ; sufficiently long sailing delay did so, while severe regional or local inland restrictions amplified the response when combined with delay. Second, cost and time preferences produced different gateway choices, particularly for Columbus. Third, NY/NJ recovered only a limited share of the initial disruption loss but became more valuable as disruption severity increased. Fourth, gateway use depended on the temporal distribution and intensity of demand as well as on destination-specific inland capacity. These findings apply to three independently solved destination cases in the constructed network, its deterministic schedules, the tested disruption levels, and the specified objective components.
