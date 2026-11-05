@@ -14,7 +14,7 @@ and PDF versions from the stored result and analysis CSV files.
 | Figure | Main source files | Interpretation |
 | --- | --- | --- |
 | 1 | baseline/compound archives plus v1.2 targeted `combined_pareto.csv` | Discrete cost–time alternatives under baseline and severe disruption |
-| 2 | historical activation tables plus `analysis/v12_final_validation/closed_front_classification.csv` | Full retained-configuration NY/NJ share ranges; ranges are not confidence intervals |
+| 2 | historical activation tables plus `analysis/v12_final_validation/closed_front_classification.csv` | Full retained-configuration NYNJ share ranges; ranges are not confidence intervals |
 | 3 | `analysis/paper_revised/activation_classification.csv` | Exploratory allowed-search capacity–delay regime map |
 | 4 | `analysis/v12_final_validation/closed_front_points.csv` and v1.2 restricted fronts | Configuration-preserving closed approximate fronts |
 | 5 | `results/v12_exact_endpoint_validation/exact_counterfactual_value.csv` | Proven lexicographic endpoint differences |

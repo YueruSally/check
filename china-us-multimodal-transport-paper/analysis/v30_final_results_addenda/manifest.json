@@ -17,5 +17,9 @@
     0.1,
     0.2
   ],
-  "zero_penalty_recovery_definition": "(disrupted restricted cost - disrupted allowed cost) / (disrupted restricted cost - undisturbed allowed cost), with the tardiness penalty fixed at zero throughout"
+  "authoritative_activation_criterion_output": "activation_criterion_all_single_wave.csv",
+  "zero_penalty_gateway_value_definition": "V(delta) = disrupted cost without NYNJ - disrupted cost with NYNJ; V(0) = undisturbed cost without NYNJ - undisturbed cost with NYNJ; incremental value = V(delta) - V(0), with the tardiness penalty fixed at zero throughout",
+  "authoritative_zero_penalty_output": "zero_penalty_incremental_gateway_value.csv",
+  "zero_penalty_capacity_diagnostic": "zero_penalty_gateway_capacity_diagnostic.csv",
+  "legacy_zero_penalty_recovery_output": "zero_penalty_loss_recovery.csv is retained for provenance but is not used in the final manuscript"
 }

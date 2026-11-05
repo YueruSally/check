@@ -1,90 +1,89 @@
-# 6. Experimental design
+# 6. Experimental design and analysis
 
-## 6.1 Research logic and computational settings
+## 6.1 Exact solution framework
 
-The experiments identify when New York/New Jersey (NY/NJ) becomes an operationally material alternative in a scheduled China--US multimodal freight network. Three cases represent the inland destinations Chicago (D1), Memphis (D2), and Columbus (D3). Freight can enter the United States through Los Angeles/Long Beach, Seattle/Tacoma, or NY/NJ. The model contains no carbon price, emission constraint, or emission objective.
+The final analysis is based on a path-allocation mixed-integer linear program rather than on the earlier exploratory evolutionary searches. All simple structural paths satisfying the model limits were enumerated: a path may contain at most eight transport legs and four mode changes, and it may not revisit a node. This produced eight feasible structural paths for every origin–destination–gateway combination. A structural path fixes the sequence of nodes and modes; for each scheduled arc, the evaluator assigns the earliest departure whose cutoff can still be met after the shipment arrives and completes the required transfer processing. The model does not allow a shipment to wait deliberately for a later departure on the same structural path.
 
-The two objectives minimize total operational cost and quantity-weighted mean delivery time. Cost includes transport, transfer, waiting, processing, and shipment-specific tardiness. Every scenario enforces demand conservation, fixed timetables, transfer compatibility, service-departure capacity, daily arc capacity, and node-day capacity. A shipment may use at most three paths, and every active path must carry at least 10% of that shipment's demand. This path-level execution constraint is distinct from the network-level gateway criterion in Section 6.3.
+Every model enforces shipment conservation, at most three active paths per shipment, a minimum allocation of 10% of the shipment quantity on every active path, service-departure capacity, daily arc capacity, node-day capacity, path continuity, timetable compatibility, and transfer processing time. The daily capacity period is zero based: period (j) represents the 24 h interval ([24j,24(j+1))), measured from the model time origin. A shipment's delivery time is its final arrival time minus its release time. The second objective is the quantity-weighted mean of these shipment delivery times.
 
-Each case--scenario combination is solved by 30 independent NSGA-II runs with the common seed sequence 20260906--20260935. A run uses 48 individuals and 99 generations after initialization, hence (48(99+1)=4{,}800) objective evaluations. Crossover and mutation probabilities are 0.90 and 0.12. Paired comparisons use the same seeds and evaluation budget. These searches provide best-found approximate fronts; they are not labelled exact Pareto fronts.
+For every case and condition, two access designs were solved: one with NYNJ in the gateway choice set and one without NYNJ. Two lexicographic endpoints were obtained for each design:
 
-## 6.2 Experiment architecture
+1. minimise total cost, then minimise weighted mean delivery time while retaining the proven cost optimum within the specified absolute-plus-relative tolerance; and
+2. minimise weighted mean delivery time, then minimise cost while retaining the proven time optimum within the corresponding tolerance.
 
-The experiments are organized by inferential purpose rather than software version (Table 1).
+An endpoint is reported as proven only when both stages terminate optimally within the recorded tolerance. Each decoded allocation is then recomputed by an independent evaluator. The term *evaluator-consistent* means that the independently recomputed feasibility status, objective values, shipment balances, and all service, arc-day, and node-day capacity accounts agree with the solver output within the stated numerical tolerances. At every endpoint with NYNJ, two additional models minimise and maximise the NYNJ share while retaining both endpoint objectives within their tolerances. The resulting interval identifies all proven aggregate shares in that endpoint-equivalent objective region; equality of the bounds establishes a unique aggregate gateway share, not a unique shipment-level allocation.
 
-Table 1. Experimental architecture and evidential role.
+## 6.2 Case structure and reference design
 
-| Stage | Conditions | Purpose | Primary evidence |
-| --- | --- | --- | --- |
-| Baseline | Original capacities and schedules | Establish normal gateway allocation and cost--time trade-offs | Cross-seed non-dominated archive |
-| Capacity mechanism | Regional West Coast capacity at 70%, 67.5%, 65%, 60%, 40%, and 35%; either West Coast gateway at 50% | Test whether capacity reductions are accommodated through West Coast reallocation | Gateway shares and reconstructed utilization |
-| Delay activation | Regional delays of 96, 120, 168, 240, 264, 288, 312, and 336 h | Locate destination-specific gateway-use regimes | Configuration-preserving closed archives at the critical conditions |
-| Capacity--delay interaction | Remaining capacity of 60%, 40%, or 35% crossed with delays of 0, 168, or 288 h; additional 30% compound condition | Screen how capacity modifies delay-driven substitution | Allowed-search regime map plus a closed Chicago compound comparison |
-| NY/NJ counterfactual | NY/NJ allowed versus prohibited under four critical delays and one compound disruption | Separate gateway value from disruption loss | Closed fronts and exact lexicographic endpoints |
-| Mechanism audit | Seed-paired minimum-time solutions at four critical delays | Attribute system time changes to shipment-matched NY/NJ and West Coast components | Paired decomposition and service-departure flow changes |
+Chicago, Memphis, and Columbus are analysed as three separate destination cases. They do not compete simultaneously for one shared capacity pool. The capacity inputs are therefore interpreted as capacity available to the modelled focal flow in each case, not as total observed facility utilisation or as an empirically observed contract quota. Each case contains 40 shipment batches and 2,227.5 FEU. The single-wave reference releases all batches at time zero and represents a concentrated-release case. It is retained as the controlled reference for the core delay, capacity, and counterfactual comparisons; the multi-wave experiments test how far its results depend on the temporal distribution of demand.
 
-Capacity percentages denote capacity remaining relative to baseline. Delays are added to affected West Coast ocean departures and propagated to arrivals and inland connections. The quantity obtained by dividing demand (FEU) by combined daily West Coast capacity (FEU/day) is reported only as *nominal capacity-days required*. Because it has units of days, it is not treated as a utilization ratio; binding is assessed from the reconstructed resource accounts.
+The total-cost objective contains transport, transfer and processing, waiting and holding, and shipment-specific tardiness costs. Tardiness is measured against the shipment due time. The batch-specific penalty rates in the case-study workbook range from USD 60 to USD 200 per FEU-hour. They are constructed inputs for a time-sensitive cargo case and are not calibrated to an observed shipper contract. This modelling choice is material: a high tardiness price favours West Coast routes when they retain a delivery-time advantage, whereas a cost-focused shipper facing a lower tardiness price can use more East Coast capacity. The zero-penalty experiment is therefore treated as a specification sensitivity analysis rather than as an alternative empirical calibration.
 
-## 6.3 Configuration-preserving archives and activation definitions
+## 6.3 Core experimental conditions
 
-For each run, objective-point records used for hypervolume and plots are separated from route-allocation configurations used for gateway shares. All distinct configurations *found* at retained objective coordinates are preserved; exact duplicates may be removed. A separate observational archive records feasible non-dominated configurations during the search but does not enter tournament selection or environmental replacement. It therefore does not change the 4,800-evaluation search budget.
+The final experiments are organised by their evidential role.
 
-At the four critical delay conditions, the allowed and matching NY/NJ-restricted configurations are pooled and screened again for non-dominance. The restricted set is nested in the allowed feasible set, (X^R\subseteq X^A); adding restricted solutions before filtering closes an omission that can arise from independent heuristic searches. All distinct found configurations attached to retained objective coordinates remain in the share calculation. This is a configuration-preserving closure of the solutions found, not a claim to enumerate every feasible configuration or the unknown exact Pareto set.
+| Experiment | Conditions | Primary question |
+|---|---|---|
+| Undisturbed reference | Original timetable and capacities | How do the exact cost and time endpoints allocate freight? |
+| Gateway-node capacity | 60%, 40%, and 35% of baseline; 30% plus 168 h delay | Can West Coast reallocation absorb gateway-node reductions? |
+| Sailing delay | Tested single-wave grid plus focused observations at Columbus 216 h and Memphis 276 h | At which tested delays does NYNJ become materially used? |
+| Counterfactual access | With NYNJ versus without NYNJ under the same disruption | What cost or time loss does NYNJ avoid? |
+| Cost sensitivity | Tardiness penalty from 0 to 200% of baseline; holding cost from 0 to 200% | How does the objective specification change gateway use and value? |
+| Release design | Single wave, two weekly waves, four weekly waves, and daily release over four weeks | How does the temporal distribution of demand affect gateway use? |
+| Demand scale | 80%, 100%, and 120% of reference demand | Does freight volume change the endpoint response? |
+| Inland capacity | Regional West Coast inland capacity at 50% and 30%; focused local-arc levels at 50%, 100%, and 150% | Does capacity location change the gateway response? |
+| Delivery-time preference | Eight internal time limits for Chicago 288 h and Columbus 240 h | How does gateway use change between the two exact endpoints? |
 
-For a retained configuration (x), the network share routed through NY/NJ is
+When release times are reassigned in the multi-wave experiments, each shipment due time is shifted by the same amount, so its release-to-due allowance is preserved. Five predetermined assignments distribute batches across each multi-wave pattern while keeping shipment quantities and total demand unchanged. The same West Coast delay applies throughout each constructed instance.
 
-\[
-g(x)=\frac{Q_{\mathrm{NY/NJ}}(x)}{Q_{\mathrm{total}}}.
-\]
+## 6.4 Gateway use and criterion sensitivity
 
-The primary operational-materiality criterion is (	au=0.10). Two events are distinguished:
-
-\[
-\text{first-solution activation if }\max_{x\in F_{d,s}}g(x)\geq\tau,
-\]
+For allocation (x), the NYNJ share is
 
 \[
-\text{front-wide activation if }\min_{x\in F_{d,s}}g(x)\geq\tau.
+g(x)=\frac{Q_{\mathrm{NYNJ}}(x)}{Q_{\mathrm{total}}}.
 \]
 
-If the first condition holds but the second does not, the condition is a *transition*. Thus first-solution activation shows that NY/NJ is competitive for at least one found cost--time preference, whereas front-wide activation means that every retained found configuration uses it materially. “Front-wide” always refers to the retained best-found approximate archive. Because disruption levels are discrete, boundaries are interval-censored and no interpolation is made between tested conditions. The stored archives are also reclassified at 5% and 20% without rerunning the optimizer.
+The primary material-use criterion is 10%. Five and 20% are reported as criterion sensitivities. For each endpoint, classification uses the proven minimum share in the endpoint-equivalent objective region. A destination's first material-use condition is the first tested single-wave delay at which the proven minimum share at either endpoint reaches 10%. Because delays are evaluated at discrete levels, the reported brackets describe adjacent tested conditions rather than continuously estimated switching times.
 
-## 6.4 Counterfactual comparison and exact endpoint validation
+The release-design comparison uses the common grid \(\{0,168,240,264,288,336\}\) h. The focused Columbus observation at 216 h and Memphis observation at 276 h refine the single-wave evidence but are not inserted into multi-wave designs that were not solved at those levels.
 
-Comparing a disrupted case with the undisrupted baseline cannot isolate NY/NJ value. The counterfactual instead compares the same disruption with NY/NJ allowed and prohibited. Closed heuristic fronts describe the shape of the found trade-off set, but primary endpoint values are obtained from a path-allocation mixed-integer linear program using the same candidate-path library and all original allocation constraints.
+## 6.5 Counterfactual value, disruption loss, and recovery
 
-For each access condition, two lexicographic endpoints are solved:
-
-1. minimize cost, then minimize time while retaining the proven cost optimum within an explicit absolute-plus-relative tolerance; and
-2. minimize time, then minimize cost under the analogous time-optimality tolerance.
-
-The validation covers ten case--condition--access models at two endpoints, giving 20 endpoint tasks and at most 40 solver calls. The MILP contains shipment conservation, at most three active paths, the 10% active-path minimum, timetable and transfer accounting, service-departure capacity, daily arc capacity, node-day capacity, and scenario-specific gateway restrictions. An endpoint is called *proven* only when both solver stages terminate optimally within the recorded tolerance. Decoded allocations are independently re-evaluated for feasibility, both objectives, and all three capacity accounts. Exactness therefore applies to the candidate-path MILP, not to routes outside the generated candidate library.
-
-For an endpoint (e), the value of access is reported as
+Let (f_{m,B}) be the undisturbed reference value for metric (m), (f_{m,R}(\delta)) the disrupted value without NYNJ, and (f_{m,A}(\delta)) the disrupted value with NYNJ. The avoided loss from access to NYNJ is
 
 \[
-\Delta C_e=C^R_e-C^A_e,
-\qquad
-\Delta T_e=T^R_e-T^A_e.
+G_m(\delta)=f_{m,R}(\delta)-f_{m,A}(\delta).
 \]
 
-Positive values favour allowing NY/NJ. Because the cost-optimal and time-optimal rows represent different decision preferences, their cost and time differences are not combined into a single benefit score.
-
-## 6.5 Seed-paired mechanism audit
-
-Mechanism evidence uses the minimum-time configuration from each allowed--restricted seed pair. If the independently found restricted endpoint dominates the allowed endpoint, closure selects the restricted configuration because it is also feasible in the allowed problem. Each shipment's mean lead time in the restricted configuration becomes its matching benchmark. The quantity-weighted system change is decomposed as
+The disrupted loss without NYNJ is (L_m(\delta)=f_{m,R}(\delta)-f_{m,B}). When this denominator is positive and exceeds the numerical tolerance, the recovered fraction is
 
 \[
-\Delta T_{\mathrm{NY/NJ}}+
-\Delta T_{\mathrm{West}}+
-\Delta T_{\mathrm{other}}
-=T^A-T^R.
+R_m(\delta)=\frac{G_m(\delta)}{L_m(\delta)}.
 \]
 
-The sign convention is allowed minus restricted, so negative values denote improvement. The identity is checked for every seed. This is a shipment-matched decomposition, not unique tracing of each unit of split freight. Service-departure quantity changes are reported separately; a capacity-release interpretation is made only where both the component accounting and service changes support it.
+Cost recovery is evaluated at the minimum-cost endpoint and time recovery at the minimum-time endpoint. These are different allocations and are not combined into one benefit measure.
 
-For each component, the analysis reports the mean, median, a 95% percentile bootstrap interval from 10,000 paired resamples, and the numbers of negative, positive, and tied seeds. These intervals measure stochastic-search variation under fixed inputs, not real-world uncertainty in demand, prices, schedules, or disruption duration.
+Under the zero-penalty specification, the undisturbed solution with NYNJ may already outperform the one without it. The analysis therefore reports incremental gateway value instead of a recovery ratio. With
 
-## 6.6 Scope of the capacity--delay map
+\[
+V(\delta)=C_R(\delta)-C_A(\delta), \qquad
+V(0)=C_R(0)-C_A(0),
+\]
 
-The broad capacity--delay grid was generated by the NY/NJ-allowed search and is retained as a screening map. Only the four targeted delay conditions were rerun with configuration-preserving allowed/restricted closure. The historical Chicago condition with 30% remaining capacity and a 168 h delay has an existing closed objective archive sufficient to reject front-wide activation, but it was not rerun as a configuration-complete condition. Cells without a matching restricted closure are therefore labelled exploratory rather than final front-wide evidence.
+the disruption-induced increment is
+
+\[
+\Delta V(\delta)=V(\delta)-V(0).
+\]
+
+All differences and ratios are computed from unrounded objective values.
+
+## 6.6 Exact intermediate trade-off solutions
+
+For Chicago at 288 h and Columbus at 240 h, eight internal delivery-time limits were placed between the exact endpoints with NYNJ. At each limit, cost was minimised and time was used as the lexicographic tie-breaker. The identical limit was imposed on the model without NYNJ. Additional share-minimisation and share-maximisation models established the NYNJ share range at each exact intermediate solution. These points are exact solutions to the stated epsilon-constrained problems; they are not presented as an enumeration of a continuous Pareto frontier.
+
+## 6.7 Evidential scope
+
+The principal claims use the complete structural path set, proven lexicographic endpoints, proven endpoint share bounds, and exact epsilon-constrained solutions. Historical NSGA-II results are retained only as exploratory development records and do not determine the final endpoint, gateway-share, or activation conclusions. Exactness remains conditional on the modelled choice set and the earliest-reachable-service rule. The three destination cases are independent, the case-study parameters are constructed from the workbook and cited secondary sources, and the network contains NYNJ as its only East Coast alternative. These scope conditions are considered when interpreting the numerical delay brackets and capacity responses.

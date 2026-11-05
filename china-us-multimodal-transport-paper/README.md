@@ -126,7 +126,7 @@ but shared-server load may change this estimate. Use
 ## v0.6 threshold and gateway-specific suite
 
 v0.6 refines the West Coast capacity threshold at 70%, 65% and 60%,
-separates LA/LB from Seattle/Tacoma capacity and 72-hour delay shocks, extends
+separates LALB from SETA capacity and 72-hour delay shocks, extends
 regional delays to 96, 120 and 168 hours, and tests a 50%-capacity plus
 120-hour compound disruption. It contains no carbon mechanism. The baseline
 is included in the same run with the same seed sequence.
@@ -153,7 +153,7 @@ The analysis reports raw median changes relative to the version-matched
 baseline. Hypervolume values normalized within different case/scenario groups
 should not be interpreted as directly comparable effect sizes.
 
-## v0.7 NY/NJ activation experiment
+## v0.7 NYNJ activation experiment
 
 v0.7 adds a 67.5% West Coast capacity threshold, 240-hour and 336-hour
 West Coast departure delays, and 30%/40% capacity plus 168-hour compound
@@ -176,7 +176,7 @@ confidence intervals.
 
 ## v0.8 focused activation thresholds
 
-v0.8 narrows the NY/NJ activation boundary for D1 and D2. It tests West
+v0.8 narrows the NYNJ activation boundary for D1 and D2. It tests West
 Coast departure delays of 264, 288 and 312 hours plus a 35%-capacity,
 168-hour compound disruption. The same-seed baseline is included, giving 300
 runs in total: 240 new scenario runs and 60 baseline controls. The experiment
@@ -190,7 +190,7 @@ echo $! > logs/v08_focused_activation_thresholds.pid
 ```
 
 After completion, use the scenario and paired-statistics analysis commands in
-`docs/v08_focused_threshold_protocol.md`. The decision rule treats NY/NJ as a
+`docs/v08_focused_threshold_protocol.md`. The decision rule treats NYNJ as a
 meaningful alternative gateway when its cross-seed non-dominated-union share
 reaches at least 10%.
 
@@ -201,8 +201,8 @@ paper's mechanism and managerial claims:
 
 1. a 3 × 3 remaining-capacity by sailing-delay activation regime, including
    actual utilization diagnostics and a nominal capacity-days comparison;
-2. same-seed, same-disruption counterfactuals with NY/NJ allowed versus
-   disabled, which quantify the value of retaining the alternative gateway;
+2. same-seed, same-disruption counterfactuals with and without NYNJ, which
+   quantify the value of retaining the alternative gateway;
 3. a destination-level cost and time decomposition immediately below and
    above the observed activation intervals.
 
@@ -227,14 +227,15 @@ bash scripts/build_revised_paper_outputs.sh
 
 This command performs post-processing only; it does not run NSGA-II. It writes
 the manuscript tables to `analysis/paper_revised/` and refreshes PNG, SVG and
-PDF files in `paper/figures/`. The canonical experimental-design and results
-texts are `paper/06_experimental_design.md` and `paper/07_results.md`, with
-Chinese working versions in the corresponding `_CN.md` files.
+PDF files in `paper/figures/`. The canonical manuscript sections are
+`paper/03_problem_and_data.md`, `paper/06_experimental_design.md`,
+`paper/07_results.md`, and `paper/08_discussion.md`, with Chinese working
+versions in the corresponding `_CN.md` files.
 
 ## v1.2 final evidence-consistency validation
 
 The final validation stage is complete. It does not expand the broad scenario grid. It reruns
-four targeted allowed/restricted delay comparisons (240 runs), retains all
+four targeted comparisons with and without NYNJ (240 runs), retains all
 distinct configurations found at equal non-dominated objective coordinates,
 performs a seed-paired shipment-matched time decomposition with an identity
 check, and validates selected cost/time endpoints with a path-allocation MILP.
@@ -254,10 +255,11 @@ echo $! > logs/v12_final_validation.pid
 Definitions, scope limits, output files, runtime bounds, and completion rules
 are documented in `docs/v12_final_validation_protocol.md`.
 
-The authoritative final interpretation is in `paper/07_results.md` and
-`paper/RESULTS_SUMMARY_CN.md`. After pulling v1.2 outputs or figure-code
-changes, regenerate figures without rerunning any experiment:
+The authoritative final interpretation is in `paper/07_results.md`,
+`paper/08_discussion.md`, and `paper/RESULTS_SUMMARY_CN.md`. After pulling
+result or figure-code changes, regenerate the final figures without rerunning
+any experiment:
 
 ```bash
-python paper/render_figures.py
+python paper/render_final_results_figures.py
 ```

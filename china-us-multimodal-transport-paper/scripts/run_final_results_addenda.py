@@ -221,6 +221,43 @@ def criterion_rows(activation_rows: list[dict[str, str]]) -> list[dict[str, obje
     return rows
 
 
+def all_single_wave_criterion_rows(
+    activation_rows: list[dict[str, str]],
+    supplemental_rows: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    observations: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
+    for row in activation_rows:
+        if row["case_id"] in CASES and row["condition_id"].startswith("delay_"):
+            observations[(row["case_id"], row["endpoint"])].append(
+                (float(row["delay_h"]), float(row["ny_nj_min_share"]))
+            )
+    for row in supplemental_rows:
+        observations[(str(row["case_id"]), str(row["endpoint"]))].append(
+            (216.0, float(row["ny_nj_min_share"]))
+        )
+
+    result: list[dict[str, object]] = []
+    for case_id in CASES:
+        for endpoint in ("min_cost_then_time", "min_time_then_cost"):
+            for criterion in CRITERIA:
+                qualifying = sorted(
+                    delay_h
+                    for delay_h, minimum_share in observations[(case_id, endpoint)]
+                    if minimum_share >= criterion - 1e-9
+                )
+                result.append(
+                    {
+                        "case_id": case_id,
+                        "endpoint": endpoint,
+                        "criterion_share": criterion,
+                        "first_tested_single_wave_delay_h": (
+                            qualifying[0] if qualifying else ""
+                        ),
+                    }
+                )
+    return result
+
+
 def absolute_recovery_rows(
     recovery_rows: list[dict[str, str]],
     v26_endpoints: list[dict[str, str]],
@@ -348,7 +385,7 @@ def main() -> None:
         args.cost_sensitivity_results / "exact_endpoint_summary.csv"
     )
     sensitivity_index = {row["validation_id"]: row for row in sensitivity_endpoints}
-    zero_recovery_rows: list[dict[str, object]] = []
+    zero_incremental_rows: list[dict[str, object]] = []
     for case_id in CASES:
         delay_h = FOCAL_DELAYS[case_id]
         prefix = f"{case_id}_delay_{int(delay_h)}h_penalty_000pct"
@@ -356,32 +393,31 @@ def main() -> None:
         restricted = sensitivity_index[f"{prefix}_restricted_min_cost_then_time"]
         baseline_allowed = zero_index[(case_id, "allowed")]
         baseline_restricted = zero_index[(case_id, "restricted")]
-        baseline = float(baseline_allowed["total_cost_usd"])
+        undisturbed_allowed = float(baseline_allowed["total_cost_usd"])
+        undisturbed_restricted = float(baseline_restricted["total_cost_usd"])
         disrupted_allowed = float(allowed["total_cost_usd"])
         disrupted_restricted = float(restricted["total_cost_usd"])
-        loss = disrupted_restricted - baseline
-        avoided = disrupted_restricted - disrupted_allowed
-        zero_recovery_rows.append(
+        undisturbed_value = undisturbed_restricted - undisturbed_allowed
+        disrupted_value = disrupted_restricted - disrupted_allowed
+        zero_incremental_rows.append(
             {
                 "case_id": case_id,
                 "delay_h": delay_h,
-                "endpoint": "min_cost_then_time",
-                "penalty_multiplier": 0.0,
-                "baseline_reference_access": "allowed",
-                "baseline_allowed_cost_usd": baseline,
-                "baseline_restricted_cost_usd": float(
-                    baseline_restricted["total_cost_usd"]
+                "undisturbed_without_nynj_cost_usd": undisturbed_restricted,
+                "undisturbed_with_nynj_cost_usd": undisturbed_allowed,
+                "undisturbed_gateway_value_usd": undisturbed_value,
+                "disrupted_without_nynj_cost_usd": disrupted_restricted,
+                "disrupted_with_nynj_cost_usd": disrupted_allowed,
+                "disrupted_gateway_value_usd": disrupted_value,
+                "incremental_gateway_value_usd": (
+                    disrupted_value - undisturbed_value
                 ),
-                "baseline_allowed_ny_nj_share": baseline_allowed["ny_nj_share"],
-                "disrupted_restricted_cost_usd": disrupted_restricted,
-                "disrupted_allowed_cost_usd": disrupted_allowed,
-                "disruption_loss_usd": loss,
-                "ny_nj_avoided_loss_usd": avoided,
-                "recovery_ratio": avoided / loss if loss > 1e-6 else "",
-                "ratio_reportable": int(loss > 1e-6),
             }
         )
-    write_csv(args.output / "zero_penalty_loss_recovery.csv", zero_recovery_rows)
+    write_csv(
+        args.output / "zero_penalty_incremental_gateway_value.csv",
+        zero_incremental_rows,
+    )
 
     activation_rows = read_csv(
         Path("analysis/v21_full_structural_core_exact/endpoint_activation_status.csv")
@@ -409,6 +445,10 @@ def main() -> None:
     write_csv(
         args.output / "activation_criterion_supplemental_216h.csv",
         supplemental_rows,
+    )
+    write_csv(
+        args.output / "activation_criterion_all_single_wave.csv",
+        all_single_wave_criterion_rows(activation_rows, supplemental_rows),
     )
 
     recovery_rows = read_csv(
@@ -487,10 +527,25 @@ def main() -> None:
                 "matched_zero_penalty_endpoint_tasks": len(zero_payloads),
                 "common_delay_grid_h": list(COMMON_DELAY_GRID),
                 "activation_criteria": list(CRITERIA),
-                "zero_penalty_recovery_definition": (
-                    "(disrupted restricted cost - disrupted allowed cost) / "
-                    "(disrupted restricted cost - undisturbed allowed cost), "
-                    "with the tardiness penalty fixed at zero throughout"
+                "authoritative_activation_criterion_output": (
+                    "activation_criterion_all_single_wave.csv"
+                ),
+                "zero_penalty_gateway_value_definition": (
+                    "V(delta) = disrupted cost without NYNJ - disrupted cost "
+                    "with NYNJ; V(0) = undisturbed cost without NYNJ - "
+                    "undisturbed cost with NYNJ; incremental value = "
+                    "V(delta) - V(0), with the tardiness penalty fixed at "
+                    "zero throughout"
+                ),
+                "authoritative_zero_penalty_output": (
+                    "zero_penalty_incremental_gateway_value.csv"
+                ),
+                "zero_penalty_capacity_diagnostic": (
+                    "zero_penalty_gateway_capacity_diagnostic.csv"
+                ),
+                "legacy_zero_penalty_recovery_output": (
+                    "zero_penalty_loss_recovery.csv is retained for provenance "
+                    "but is not used in the final manuscript"
                 ),
             },
             indent=2,

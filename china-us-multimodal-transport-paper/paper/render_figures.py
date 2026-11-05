@@ -360,7 +360,7 @@ for index, (case_id, comparison, title) in enumerate(front_order):
         color="#333333",
         linewidths=1.1,
         s=35,
-        label="Exact NY/NJ-restricted endpoint",
+        label="Exact endpoint without NYNJ",
         zorder=3,
     )
     if classification[(case_id, comparison)]["exact_allowed_endpoint_relation"].startswith(
@@ -459,7 +459,7 @@ positions = list(range(len(mechanism_order)))
 figure, axis = plt.subplots(figsize=(9.6, 4.6))
 width = 0.30
 for offset, component, label, color in (
-    (-width / 2, "ny_nj_contribution_h", "NY/NJ-assigned component", "#D55E00"),
+    (-width / 2, "ny_nj_contribution_h", "NYNJ-assigned component", "#D55E00"),
     (width / 2, "west_coast_contribution_h", "West Coast-assigned component", "#0072B2"),
 ):
     estimates = []

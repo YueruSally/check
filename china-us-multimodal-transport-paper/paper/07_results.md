@@ -2,13 +2,13 @@
 
 ## 7.1 Exact reference solutions
 
-The final analysis used all simple structural paths satisfying the limits of eight transport legs, four mode changes, and no repeated node. Enumeration produced eight feasible paths for each origin–destination–gateway combination. The model with NY–NJ contained 960 shipment–path variables, while the model without NY–NJ contained 640. For every destination, disruption condition, and gateway-access design, the minimum-cost-then-time and minimum-time-then-cost lexicographic endpoints were solved exactly. All 180 core endpoint models were evaluator-consistent and proven optimal; the maximum relative solver gap was \(9.98\times10^{-9}\). Exactness is conditional on the stated structural paths and on selecting, for each scheduled arc, the earliest departure whose cutoff can still be met after the cargo arrives and completes the required transfer processing.
+The final analysis used all simple structural paths satisfying the limits of eight transport legs, four mode changes, and no repeated node. Enumeration produced eight feasible paths for each origin–destination–gateway combination. The model with NYNJ contained 960 shipment–path variables, while the model without NYNJ contained 640. For every destination, disruption condition, and gateway-access design, the minimum-cost-then-time and minimum-time-then-cost lexicographic endpoints were solved exactly. All 180 core endpoint models were evaluator-consistent and proven optimal; the maximum relative solver gap was \(9.98\times10^{-9}\). Exactness is conditional on the stated structural paths and on selecting, for each scheduled arc, the earliest departure whose cutoff can still be met after the cargo arrives and completes the required transfer processing.
 
-Table 2 reports the undisturbed reference solutions. NY–NJ was absent from every endpoint-equivalent region: both its proven minimum and maximum shares were zero. The reference solutions were therefore supported entirely by the two West Coast gateways, although the difference between the cost and time endpoints shows a substantial cost–time trade-off.
+Table 2 reports the undisturbed reference solutions. NYNJ was absent from every endpoint-equivalent region: both its proven minimum and maximum shares were zero. The reference solutions were therefore supported entirely by the two West Coast gateways, although the difference between the cost and time endpoints shows a substantial cost–time trade-off.
 
 **Table 2. Exact baseline endpoints under the complete structural path library.**
 
-| Destination | Endpoint | Total cost (USD million) | Weighted mean delivery time (h) | NY–NJ share (%) |
+| Destination | Endpoint | Total cost (USD million) | Weighted mean delivery time (h) | NYNJ share (%) |
 |---|---|---:|---:|---:|
 | Chicago | Minimum cost, then time | 22.863 | 668.351 | 0 |
 | Chicago | Minimum time, then cost | 29.886 | 602.296 | 0 |
@@ -17,23 +17,23 @@ Table 2 reports the undisturbed reference solutions. NY–NJ was absent from eve
 | Columbus | Minimum cost, then time | 23.969 | 700.544 | 0 |
 | Columbus | Minimum time, then cost | 31.558 | 609.177 | 0 |
 
-Baseline sensitivity checks produced the same qualitative result. Reducing the NY–NJ ocean cost by as much as 30% or shortening the Panama-route transit time by 48 h did not activate NY–NJ at either endpoint. A 96 h transit-time reduction introduced a 7.16% NY–NJ share only at the Columbus minimum-cost endpoint, below the pre-specified 10% material-use criterion. These tests establish sensitivity to the selected one-factor changes; they are not a calibration to observed market shares.
+Baseline sensitivity checks produced the same qualitative result. Reducing the NYNJ ocean cost by as much as 30% or shortening the Panama-route transit time by 48 h did not activate NYNJ at either endpoint. A 96 h transit-time reduction introduced a 7.16% NYNJ share only at the Columbus minimum-cost endpoint, below the pre-specified 10% material-use criterion.
 
 ## 7.2 Gateway capacity, sailing delay, and avoided disruption losses
 
-Reducing the common West Coast gateway-node capacity to 60%, 40%, or 35% of baseline did not introduce NY–NJ at either endpoint for any destination. The compound condition combining 30% remaining gateway-node capacity with 168 h of West Coast sailing delay also produced zero NY–NJ shares. This result was unchanged when total demand at 35% gateway-node capacity was scaled to 80%, 100%, or 120% of baseline. Maximum daily-arc utilisation nevertheless reached 100% in these experiments, and maximum node-day utilisation ranged from 95.24% to 100%. The tested gateway-node reductions were therefore accommodated through other West Coast path and timetable choices; this result does not extend to every type of capacity restriction.
+Reducing the common West Coast gateway-node capacity to 60%, 40%, or 35% of baseline did not introduce NYNJ at either endpoint for any destination. The compound condition combining 30% remaining gateway-node capacity with 168 h of West Coast sailing delay also produced zero NYNJ shares. This result was unchanged when total demand at 35% gateway-node capacity was scaled to 80%, 100%, or 120% of baseline. Maximum daily-arc utilisation nevertheless reached 100% in these experiments, and maximum node-day utilisation ranged from 95.24% to 100%. The tested gateway-node reductions were accommodated through other West Coast path and timetable choices.
 
-Sailing delay produced a different response. Figure 1 reports the exact value of NY–NJ access over the West Coast delay grid, augmented by the unchanged-capacity observations at 216 h for Columbus and 276 h for Memphis. Panel (a) reports the minimum-cost endpoint and Panel (b) reports the minimum-time endpoint.
+Sailing delay produced a different response. Figure 1 reports the exact value of NYNJ access over the West Coast delay grid, augmented by the unchanged-capacity observations at 216 h for Columbus and 276 h for Memphis. Panel (a) reports the minimum-cost endpoint and Panel (b) reports the minimum-time endpoint.
 
-![Exact NY–NJ value curves](figures/fig07_final_gateway_value_curves.png)
+![Exact NYNJ value curves](figures/fig07_final_gateway_value_curves.png)
 
-**Figure 1.** Exact value of NY–NJ access under additional West Coast sailing delay. Positive values equal the objective without NY–NJ minus the objective with NY–NJ.
+**Figure 1.** Exact value of NYNJ access under additional West Coast sailing delay. Positive values equal the objective without NYNJ minus the objective with NYNJ.
 
-Chicago used no NY–NJ through 264 h and used it materially at 288 h at both endpoints. Memphis still used no NY–NJ at 276 h but used it materially at 288 h. Columbus used 10.056% NY–NJ at the minimum-cost endpoint at 216 h, while its minimum-time endpoint remained at zero. At 264 h, both Columbus endpoints used NY–NJ. Accordingly, the tested single-wave brackets are \((264,288]\) h for Chicago, \((276,288]\) h for Memphis, \((168,216]\) h for the Columbus minimum-cost endpoint, and \((240,264]\) h for the Columbus minimum-time endpoint. These brackets identify adjacent tested conditions with different gateway-use states; they do not establish monotonic switching within the untested intervals. The 10.056% Columbus share satisfies the 5% and 10% criteria but not a 20% criterion.
+Chicago used no NYNJ through 264 h and used it materially at 288 h at both endpoints. Memphis still used no NYNJ at 276 h but used it materially at 288 h. Columbus used 10.056% NYNJ at the minimum-cost endpoint at 216 h, while its minimum-time endpoint remained at zero. At 264 h, both Columbus endpoints used NYNJ. Accordingly, the tested single-wave brackets are \((264,288]\) h for Chicago, \((276,288]\) h for Memphis, \((168,216]\) h for the Columbus minimum-cost endpoint, and \((240,264]\) h for the Columbus minimum-time endpoint. The 10.056% Columbus share satisfies the 5% and 10% criteria but not a 20% criterion.
 
 **Table 3. Exact endpoint results at the decisive single-wave delay conditions.**
 
-| Destination | Delay (h) | Endpoint | NY–NJ share (%) | Cost avoided (USD million) | Time avoided (h) |
+| Destination | Delay (h) | Endpoint | NYNJ share (%) | Cost avoided (USD million) | Time avoided (h) |
 |---|---:|---|---:|---:|---:|
 | Chicago | 264 | Minimum cost, then time | 0 | 0.000 | 0.000 |
 | Chicago | 288 | Minimum cost, then time | 64.89 | 1.732 | 5.030 |
@@ -48,13 +48,13 @@ Chicago used no NY–NJ through 264 h and used it materially at 288 h at both en
 | Columbus | 264 | Minimum cost, then time | 56.48 | 2.960 | −1.579 |
 | Columbus | 264 | Minimum time, then cost | 32.66 | 2.944 | 0.555 |
 
-**Note:** Cost and time differences are calculated as the solution without NY–NJ minus the solution with NY–NJ. A negative time difference therefore means that the corresponding minimum-cost solution with NY–NJ is slower, even though its primary cost objective is lower.
+**Note:** Cost and time differences are calculated as the solution without NYNJ minus the solution with NYNJ. A negative time difference therefore means that the corresponding minimum-cost solution with NYNJ is slower, even though its primary cost objective is lower.
 
-The proven share ranges at these endpoints were effectively point-valued. For example, Chicago at 288 h fixed the NY–NJ share at 64.89% in the minimum-cost region and 32.66% in the minimum-time region. Memphis at 288 h fixed the aggregate share at 32.66% at both endpoints. Columbus at 216 h fixed the minimum-cost share at 10.056% and the minimum-time share at zero. This identifies the aggregate gateway share; it does not require a unique shipment-level allocation.
+The proven share ranges at these endpoints were effectively point-valued. For example, Chicago at 288 h fixed the NYNJ share at 64.89% in the minimum-cost region and 32.66% in the minimum-time region. Memphis at 288 h fixed the aggregate share at 32.66% at both endpoints. Columbus at 216 h fixed the minimum-cost share at 10.056% and the minimum-time share at zero.
 
-The share criterion was also checked at 5%, 10%, and 20% on the common delay grid \(\{0,168,240,264,288,336\}\) h (Supplementary Table S1). All three criteria gave the same first tested level within this common grid: 288 h for both Chicago endpoints and both Memphis endpoints, 240 h for the Columbus minimum-cost endpoint, and 264 h for the Columbus minimum-time endpoint. The supplemental Columbus observation at 216 h met the 5% and 10% criteria but not the 20% criterion.
+The share criterion was checked at 5%, 10%, and 20% using all available single-wave delay observations (Supplementary Table S1). Chicago and Memphis first met all three criteria at 288 h at both endpoints. The Columbus minimum-cost endpoint first met the 5% and 10% criteria at 216 h and the 20% criterion at 240 h; its minimum-time endpoint first met all three criteria at 264 h.
 
-**Supplementary Table S1. First common-grid delay at which the proven minimum NY–NJ share met each criterion (h).**
+**Supplementary Table S1. First tested single-wave delay at which the proven minimum NYNJ share met each criterion (h).**
 
 | Destination | Endpoint | 5% criterion | 10% criterion | 20% criterion |
 |---|---|---:|---:|---:|
@@ -62,21 +62,14 @@ The share criterion was also checked at 5%, 10%, and 20% on the common delay gri
 | Chicago | Minimum time, then cost | 288 | 288 | 288 |
 | Memphis | Minimum cost, then time | 288 | 288 | 288 |
 | Memphis | Minimum time, then cost | 288 | 288 | 288 |
-| Columbus | Minimum cost, then time | 240 | 240 | 240 |
+| Columbus | Minimum cost, then time | 216 | 216 | 240 |
 | Columbus | Minimum time, then cost | 264 | 264 | 264 |
 
-For metric \(m\), the recovered fraction of disruption loss was calculated as
-
-\[
-R_m(\delta)=\frac{f_{m,R}(\delta)-f_{m,A}(\delta)}
-{f_{m,R}(\delta)-f_{m,B}},
-\]
-
-where \(B\) is the undisturbed baseline, \(R\) is the disrupted solution without NY–NJ, and \(A\) is the disrupted solution with NY–NJ. A destination's first material-use condition is the first tested delay at which the proven minimum share at either endpoint reached 10%. Table 4 reports the absolute values used in this calculation. Only a positive primary-objective disruption loss above the numerical tolerance was used as a denominator.
+The recovery metric is defined in Section 6.5. A destination's first observed single-wave material-use condition is the first tested delay at which the proven minimum share at either endpoint reached 10%. Table 4 reports the absolute values used in the calculation. Only a positive primary-objective disruption loss above the numerical tolerance was used as a denominator.
 
 **Table 4. Absolute objectives and recovered disruption loss at the first material-use conditions.**
 
-| Destination | Condition | Metric | Baseline | Disrupted without NY–NJ | Disrupted with NY–NJ | Disruption loss | Avoided loss | Recovered (%) |
+| Destination | Condition | Metric | Baseline | Disrupted without NYNJ | Disrupted with NYNJ | Disruption loss | Avoided loss | Recovered (%) |
 |---|---:|---|---:|---:|---:|---:|---:|---:|
 | Chicago | 288 h | Cost (USD million) | 22.863 | 79.872 | 78.140 | 57.009 | 1.732 | 3.04 |
 | Chicago | 288 h | Time (h) | 602.296 | 890.296 | 887.030 | 288.000 | 3.266 | 1.13 |
@@ -85,11 +78,11 @@ where \(B\) is the undisturbed baseline, \(R\) is the disrupted solution without
 | Columbus | 216 h | Cost (USD million) | 23.969 | 62.143 | 61.999 | 38.174 | 0.144 | 0.38 |
 | Columbus | 216 h | Time (h) | 609.177 | 825.177 | 825.177 | 216.000 | 0.000 | 0.00 |
 
-At 336 h, the corresponding recovery fractions were 17.50%, 10.91%, and 28.46% for cost and 9.00%, 7.37%, and 11.87% for time for Chicago, Memphis, and Columbus, respectively. These values were clearly higher than at the first material-use condition within the tested delay set. A large gateway share nevertheless did not imply that most of the disruption loss had been recovered.
+At 336 h, the corresponding recovery fractions were 17.50%, 10.91%, and 28.46% for cost and 9.00%, 7.37%, and 11.87% for time for Chicago, Memphis, and Columbus, respectively. These values were higher than at the first material-use condition within the tested delay set. A large gateway share nevertheless did not imply that most of the disruption loss had been recovered. Under the baseline tardiness penalty, NYNJ offset only a small share of the modelled cost loss at the first material-use condition. Its monetary value depends on how tardiness is priced. The time results do not depend on the penalty rate, because the minimum-time endpoint optimises delivery time first.
 
-The restricted disruption loss was dominated by tardiness cost rather than by transport or holding cost (Supplementary Table S2). At the focal common-grid conditions, tardiness accounted for USD 51.049 million of Chicago's USD 57.009 million cost loss, USD 50.196 million of Memphis's USD 56.084 million loss, and USD 38.922 million of Columbus's USD 45.029 million loss. Transfer and processing costs were unchanged within numerical tolerance.
+The disruption loss without NYNJ was dominated by tardiness cost rather than by transport or holding cost (Supplementary Table S2). At the focal common-grid conditions, tardiness accounted for USD 51.049 million of Chicago's USD 57.009 million cost loss, USD 50.196 million of Memphis's USD 56.084 million loss, and USD 38.922 million of Columbus's USD 45.029 million loss. Transfer and processing costs were unchanged within numerical tolerance.
 
-**Supplementary Table S2. Decomposition of the minimum-cost disruption loss without NY–NJ (disrupted minus undisturbed reference, USD million).**
+**Supplementary Table S2. Decomposition of the minimum-cost disruption loss without NYNJ at selected representative conditions (disrupted minus undisturbed reference, USD million).**
 
 | Destination and delay | Transport | Waiting and holding | Transfer and processing | Tardiness | Total loss |
 |---|---:|---:|---:|---:|---:|
@@ -97,11 +90,13 @@ The restricted disruption loss was dominated by tardiness cost rather than by tr
 | Memphis, 288 h | 4.901 | 0.987 | 0.000 | 50.196 | 56.084 |
 | Columbus, 240 h | 5.299 | 0.808 | 0.000 | 38.922 | 45.029 |
 
+**Note:** Totals were calculated from unrounded values.
+
 ## 7.3 Cost components and sensitivity to penalty rates
 
-The sources of the minimum-cost benefit differed by destination (Table 5). At Chicago 288 h, the USD 1.732 million saving combined lower transport, waiting and holding, and tardiness costs. At Memphis 288 h, NY–NJ increased transport expenditure by USD 1.109 million but reduced waiting and holding cost by USD 0.350 million and tardiness cost by USD 2.129 million. At Columbus 240 h, the USD 0.827 million benefit arose mainly from reductions in tardiness and waiting and holding costs.
+The sources of the minimum-cost benefit differed by destination (Table 5). At Chicago 288 h, the USD 1.732 million saving combined lower transport, waiting and holding, and tardiness costs. At Memphis 288 h, NYNJ increased transport expenditure by USD 1.109 million but reduced waiting and holding cost by USD 0.350 million and tardiness cost by USD 2.129 million. At Columbus 240 h, the USD 0.827 million benefit arose mainly from reductions in tardiness and waiting and holding costs.
 
-**Table 5. Exact minimum-cost saving decomposition (restricted minus allowed, USD million).**
+**Table 5. Exact minimum-cost saving decomposition (without NYNJ minus with NYNJ, USD million).**
 
 | Destination and delay | Transport | Waiting and holding | Tardiness | Total |
 |---|---:|---:|---:|---:|
@@ -109,27 +104,33 @@ The sources of the minimum-cost benefit differed by destination (Table 5). At Ch
 | Memphis, 288 h | −1.109 | +0.350 | +2.129 | +1.370 |
 | Columbus, 240 h | +0.018 | +0.284 | +0.525 | +0.827 |
 
-As the common penalty multiplier increased, tardiness loss evaluated at the original shipment-specific rates decreased monotonically; total tardiness in FEU-hours also decreased in this case. The NY–NJ share itself was non-monotonic. For Memphis at 288 h, it was 10.21% at zero penalty, zero at 25% of the baseline rate, 22.60% at 50%, and 32.66% at the baseline, 150%, and 200% rates. Shipment-level comparison showed that the zero-to-25% change reassigned the four NY–NJ batches to earlier West Coast connections, whereas the 25%-to-50% change reassigned ten batches partly or wholly to NY–NJ. The complete loss sequence and batch identifiers are reported in the supplementary results. Thus, changing the penalty multiplier reordered discrete path and timetable configurations without reversing the monotonic response of the penalised loss. NY–NJ also remained in the three focal minimum-cost solutions when the penalty was zero; these tests used Chicago at 288 h, Memphis at 288 h, and Columbus at 240 h. Changing the holding-cost rate from zero to twice baseline did not change whether NY–NJ was used in those conditions, although it changed the exact value and allocation.
+As the common penalty multiplier increased, tardiness loss evaluated at the original shipment-specific rates decreased monotonically; total tardiness in FEU-hours also decreased in this case. The NYNJ share itself was non-monotonic. For Memphis at 288 h, it was 10.21% at zero penalty, zero at 25% of the baseline rate, 22.60% at 50%, and 32.66% at the baseline, 150%, and 200% rates. Shipment-level comparison showed that the zero-to-25% change reassigned the four NYNJ batches to earlier West Coast connections, whereas the 25%-to-50% change reassigned ten batches partly or wholly to NYNJ. The complete loss sequence and batch identifiers are reported in the supplementary results. Thus, changing the penalty multiplier reordered discrete path and timetable configurations without reversing the monotonic response of the penalised loss.
 
-To keep the recovery calculation internally matched, the tardiness penalty was also set to zero in the undisturbed reference solutions (Supplementary Table S3). The cost-loss recovery fractions were then 91.00% for Chicago at 288 h, 11.05% for Memphis at 288 h, and 99.38% for Columbus at 240 h. The matched undisturbed solutions with NY–NJ access already assigned 89.79%, 10.21%, and 89.79% to NY–NJ, respectively. These ratios therefore quantify sensitivity of the cost result to removal of the tardiness penalty; they do not describe disruption-induced activation from a zero-share baseline.
+With a zero tardiness penalty, the undisturbed solutions already assigned 89.79% of freight to NYNJ for Chicago and Columbus and 10.21% for Memphis (Supplementary Table S3). The tardiness penalty therefore determines whether the reference minimum-cost solutions rely on the West Coast gateways. Changing the holding-cost rate from zero to twice baseline did not change whether NYNJ was used at Chicago 288 h, Memphis 288 h, or Columbus 240 h, although it changed the exact value and allocation.
 
-**Supplementary Table S3. Matched zero-penalty cost-loss recovery at the focal delays.**
+For the zero-penalty specification, Supplementary Table S3 reports incremental gateway value rather than a recovery ratio. Let \(V(\delta)=C_R(\delta)-C_A(\delta)\) be the value of NYNJ access under disruption and \(V(0)=C_R(0)-C_A(0)\) its value without disruption. The disruption-induced increment is \(\Delta V(\delta)=V(\delta)-V(0)\). It was USD 0.902 million for Chicago at 288 h, USD 0.098 million for Memphis at 288 h, and USD 0.823 million for Columbus at 240 h. This comparison separates the value generated by disruption from the value that NYNJ already had under the zero-penalty reference specification.
 
-| Destination and delay | Zero-penalty undisturbed cost with NY–NJ (USD million) | Disrupted cost without NY–NJ (USD million) | Disrupted cost with NY–NJ (USD million) | Avoided loss (USD million) | Recovered (%) | Undisturbed NY–NJ share (%) |
-|---|---:|---:|---:|---:|---:|---:|
-| Chicago, 288 h | 22.651 | 23.874 | 22.761 | 1.113 | 91.00 | 89.79 |
-| Memphis, 288 h | 22.303 | 23.330 | 23.217 | 0.113 | 11.05 | 10.21 |
-| Columbus, 240 h | 22.000 | 24.422 | 22.015 | 2.408 | 99.38 | 89.79 |
+**Supplementary Table S3. Incremental value of NYNJ access under a zero tardiness penalty.**
+
+| Destination and delay | Undisturbed value, \(V(0)\) (USD million) | Disrupted value, \(V(\delta)\) (USD million) | Increment, \(\Delta V(\delta)\) (USD million) | Undisturbed NYNJ share (%) |
+|---|---:|---:|---:|---:|
+| Chicago, 288 h | 0.211 | 1.113 | 0.902 | 89.79 |
+| Memphis, 288 h | 0.016 | 0.113 | 0.098 | 10.21 |
+| Columbus, 240 h | 1.584 | 2.408 | 0.823 | 89.79 |
+
+**Note:** All values were calculated from unrounded objective values.
+
+The complementary 89.79% and 10.21% shares correspond to 2,000 and 227.5 FEU out of 2,227.5 FEU. They are capacity-constrained corner allocations rather than rounding artefacts. In the Chicago and Columbus zero-penalty reference solutions, NYNJ rail services used 1,000 FEU on each of two binding model days, leaving 227.5 FEU on LALB. In Memphis, the LALB rail service instead used 1,000 FEU on each of two binding model days, leaving 227.5 FEU for NYNJ. Relative route cost determined which gateway received the 2,000 FEU block.
 
 ## 7.4 Robustness to shipment-release design and demand intensity
 
-The concentrated single-wave design was used as the concentrated-arrival reference case. The release robustness experiment retained the same shipments, batch quantities, and total demand. For every reassigned shipment, its due time was shifted by the same amount as its release time, preserving its delivery allowance. Five fixed seeds changed only the volume-balanced assignment of shipment batches to the specified release waves. The same West Coast delay was applied throughout each constructed instance.
+The single-wave design, in which all batches are released at time zero, serves as the concentrated-release reference case. The release robustness experiment retained the same shipments, batch quantities, and total demand. For every reassigned shipment, its due time was shifted by the same amount as its release time, preserving its delivery allowance. Five fixed seeds changed only the volume-balanced assignment of shipment batches to the specified release waves. The same West Coast delay was applied throughout each constructed instance.
 
 The common release-design grid was \(\{0,168,240,264,288,336\}\) h; 312 h was not tested. Table 6 and Figure 2 therefore report the first observed material-use level within that common discrete set, rather than a continuous activation threshold. Chicago minimum-cost use reached 10% at 288 h in every release design. Its minimum-time use reached 10% at 288 h in the single-wave design, whereas every multi-wave instance remained below 10% at 288 h and reached the criterion at 336 h. Memphis showed the same 288–336 h change in most multi-wave instances. Columbus was the most sensitive to the temporal distribution of demand.
 
 ![Activation under alternative release patterns](figures/fig08_release_robustness.png)
 
-**Figure 2.** First observed tested delay at which all endpoint-equivalent solutions used at least 10% NY–NJ. Multi-wave points are based on the discrete grid \(\{0,168,240,264,288,336\}\) h.
+**Figure 2.** First tested delay on the common grid \(\{0,168,240,264,288,336\}\) h at which the proven minimum NYNJ share reached 10%. All release designs are displayed on this common grid; the supplemental Columbus observation at 216 h is reported separately in Table 3 and Supplementary Table S1.
 
 **Table 6. First observed tested material-use levels under alternative release designs (hours).**
 
@@ -150,11 +151,11 @@ Demand scaling preserved the principal endpoint asymmetries. At Chicago 288 h, t
 
 ## 7.5 Regional inland-capacity reductions and local bottlenecks
 
-The regional inland-capacity test reduced together all four daily-capacity arcs—rail and road from both Los Angeles–Long Beach and Seattle–Tacoma—serving the selected inland destination. Service-departure capacities and gateway-node capacities were unchanged. All 48 endpoint problems, with and without NY–NJ, were proven optimal, as were the endpoint-equivalent NY–NJ share bounds.
+The regional inland-capacity test reduced together all four daily-capacity arcs—rail and road from both LALB and SETA—serving the selected inland destination. Service-departure capacities and gateway-node capacities were unchanged. All 48 endpoint problems, with and without NYNJ, were proven optimal, as were the endpoint-equivalent NYNJ share bounds.
 
-With no additional sailing delay, reducing these regional inland capacities to either 50% or 30% did not introduce NY–NJ at either endpoint for any destination (Table 7). The same was true at 50% inland capacity combined with 168 h of delay. At 30% capacity and 168 h of delay, Chicago and Memphis continued to use no NY–NJ, whereas Columbus used a proven 5.724% at the coincident cost and time endpoints. Allowing NY–NJ in that Columbus condition avoided USD 71,787 of cost and 0.538 h of weighted mean delivery time. The share remained below the pre-specified 10% material-use criterion, but the non-zero value shows that a sufficiently severe regional inland restriction can interact with sailing delay before material activation occurs.
+With no additional sailing delay, reducing these regional inland capacities to either 50% or 30% did not introduce NYNJ at either endpoint for any destination (Table 7). The same was true at 50% inland capacity combined with 168 h of delay. At 30% capacity and 168 h of delay, Chicago and Memphis continued to use no NYNJ, whereas Columbus used a proven 5.724% at the coincident cost and time endpoints. With NYNJ, that Columbus condition avoided USD 71,787 of cost and 0.538 h of weighted mean delivery time. This share met the 5% criterion but not the 10% or 20% criteria.
 
-**Table 7. Proven NY–NJ shares under regional West Coast inland-capacity reductions (%; minimum cost; minimum time).**
+**Table 7. Proven NYNJ shares under regional West Coast inland-capacity reductions (%; minimum cost; minimum time).**
 
 | West Coast delay (h) | Remaining inland capacity | Chicago | Memphis | Columbus |
 |---:|---:|---:|---:|---:|
@@ -163,15 +164,15 @@ With no additional sailing delay, reducing these regional inland capacities to e
 | 168 | 50% | 0; 0 | 0; 0 | 0; 0 |
 | 168 | 30% | 0; 0 | 0; 0 | 5.724; 5.724 |
 
-In the Columbus 30%-capacity-plus-168 h condition, the Los Angeles–Long Beach road connection reached its reduced 450 FEU/day limit in periods 29 and 31, and the corresponding rail connection reached its 300 FEU/day limit in period 29. The Seattle–Tacoma road connection also reached 450 FEU/day in periods 30 and 31. The same solution therefore exhibited binding daily capacities on several West Coast inland connections together with a small East Coast allocation. Arc identifiers are reported in the supplementary resource table.
+In the Columbus 30%-capacity-plus-168 h condition, the LALB road connection reached its reduced 450 FEU/day limit in periods 29 and 31, and the corresponding rail connection reached its 300 FEU/day limit in period 29. The SETA road connection also reached 450 FEU/day in periods 30 and 31. The same solution therefore exhibited binding daily capacities on several West Coast inland connections together with a small East Coast allocation. Arc identifiers are reported in the supplementary resource table.
 
-The separate local-bottleneck experiment varied one diagnosed Los Angeles–Long Beach-to-destination daily arc to 50%, 100%, and 150% of baseline. It covered Memphis and Columbus and should be interpreted as a local mechanism test rather than a regional inland-capacity experiment.
+The separate local-bottleneck experiment varied one diagnosed LALB-to-destination daily arc to 50%, 100%, and 150% of baseline. It covered Memphis and Columbus and complements the regional inland-capacity experiment by isolating one connection.
 
 ![Delay–inland-capacity interaction](figures/fig09_inland_capacity_interaction.png)
 
-**Figure 3.** Exact NY–NJ shares under joint changes in West Coast sailing delay and the diagnosed Los Angeles–Long Beach inland daily-arc capacity. Solid and dashed lines denote the minimum-cost and minimum-time endpoints.
+**Figure 3.** Exact NYNJ shares under joint changes in West Coast sailing delay and the diagnosed LALB inland daily-arc capacity. Solid and dashed lines denote the minimum-cost and minimum-time endpoints.
 
-**Table 8. Exact NY–NJ shares under the local inland-capacity interaction (%; minimum cost; minimum time).**
+**Table 8. Exact NYNJ shares under the local inland-capacity interaction (%; minimum cost; minimum time).**
 
 | Destination | Delay (h) | 50% inland capacity | 100% inland capacity | 150% inland capacity |
 |---|---:|---:|---:|---:|
@@ -182,18 +183,18 @@ The separate local-bottleneck experiment varied one diagnosed Los Angeles–Long
 | Columbus | 240 | 66.33; 0 | 32.66; 0 | 7.25; 0 |
 | Columbus | 264 | 66.33; 66.33 | 56.48; 32.66 | 56.48; 0 |
 
-At Columbus 216 h and 100% inland capacity, the diagnosed Los Angeles–Long Beach road connection reached its 1,500 FEU/day limit in model period 31. The minimum-cost allocation assigned 1,500 FEU through Los Angeles–Long Beach, 503.5 FEU through Seattle–Tacoma, and 224 FEU through NY–NJ. This is the condition producing the proven 10.056% NY–NJ share. The resource account links the aggregate gateway result to a specific connection and period; its code is provided in the supplementary resource table.
+At Columbus 216 h and 100% inland capacity, the diagnosed LALB road connection reached its 1,500 FEU/day limit in model period 31. The minimum-cost allocation assigned 1,500 FEU through LALB, 503.5 FEU through SETA, and 224 FEU through NYNJ. This is the condition producing the proven 10.056% NYNJ share. The resource account links the aggregate gateway result to a specific connection and period; its code is provided in the supplementary resource table.
 
-For Memphis, 50% inland capacity introduced NY–NJ at the minimum-cost endpoint at 276 h, while the minimum-time endpoint remained at zero. At 288 h, the same capacity level produced 66.33% NY–NJ at both endpoints; raising capacity to 150% removed NY–NJ completely. Columbus responded differently. At 240 h, raising inland capacity reduced minimum-cost NY–NJ use from 66.33% to 32.66% and then 7.25%, while the minimum-time endpoint remained at zero. At 264 h, the minimum-cost share remained 56.48% at both 100% and 150% capacity, but the minimum-time share fell from 32.66% to zero. Gateway-node capacity and the two inland-capacity designs therefore produced distinct allocation responses. Sailing delay further altered those responses.
+For Memphis, 50% inland capacity introduced NYNJ at the minimum-cost endpoint at 276 h, while the minimum-time endpoint remained at zero. At 288 h, the same capacity level produced 66.33% NYNJ at both endpoints; raising capacity to 150% removed NYNJ completely. Columbus responded differently. At 240 h, raising inland capacity reduced minimum-cost NYNJ use from 66.33% to 32.66% and then 7.25%, while the minimum-time endpoint remained at zero. At 264 h, the minimum-cost share remained 56.48% at both 100% and 150% capacity, but the minimum-time share fell from 32.66% to zero. Gateway-node capacity and the two inland-capacity designs therefore produced distinct allocation responses. Sailing delay further altered those responses.
 
 ## 7.6 Preference-dependent gateway value
 
-Eight internal delivery-time limits were solved exactly between the two allowed endpoints for Chicago at 288 h and Columbus at 240 h. At each limit, cost was minimised and delivery time was used as a lexicographic tie-breaker. The same limit was imposed on the NY–NJ-restricted model.
+Eight internal delivery-time limits were solved exactly between the two endpoints with NYNJ for Chicago at 288 h and Columbus at 240 h. At each limit, cost was minimised and delivery time was used as a lexicographic tie-breaker. The same limit was imposed on the model without NYNJ.
 
 ![Exact epsilon-constrained trade-off solutions](figures/fig10_exact_epsilon_tradeoffs.png)
 
-**Figure 4.** Exact endpoint and ε-constrained solutions. Colour denotes the proven NY–NJ share in the allowed solution; crosses denote feasible restricted solutions at the same delivery-time limit.
+**Figure 4.** Exact endpoint and ε-constrained solutions. Colour denotes the proven NYNJ share in the solution with NYNJ; crosses denote feasible solutions without NYNJ at the same delivery-time limit.
 
-For Chicago, the allowed NY–NJ share increased from 32.66% at the minimum-time endpoint to 64.89% at the minimum-cost endpoint. Across the eight internal limits it increased from 36.24% to 61.31%. The restricted model was proven infeasible at the first five limits, from 887.581 to 889.787 h, but the unrestricted core model remained feasible. Thus, NY–NJ access expanded the attainable delivery-time region under these additional performance requirements. At the three internal limits where both models were feasible, allowing NY–NJ reduced minimum cost by USD 2.456, 2.375, and 2.289 million.
+For Chicago, the NYNJ share in the model with NYNJ increased from 32.66% at the minimum-time endpoint to 64.89% at the minimum-cost endpoint. Across the eight internal limits it increased from 36.24% to 61.31%. The model without NYNJ was proven infeasible at the first five limits, from 887.581 to 889.787 h. The model without NYNJ remained feasible when the additional delivery-time limit was removed. Thus, NYNJ access expanded the attainable delivery-time region under these additional performance requirements. At the three internal limits where both models were feasible, NYNJ access reduced minimum cost by USD 2.456, 2.375, and 2.289 million.
 
-For Columbus, the restricted model remained feasible at all eight internal limits. The allowed NY–NJ share increased from 3.63% to 29.03%, crossing 10% between the tested limits of 850.796 and 851.605 h. Cost avoided at the same time limit increased from USD 0.110 million to USD 0.774 million. Together with the zero-share minimum-time endpoint and the 32.66% minimum-cost endpoint, these results show that gateway use varied with the decision-maker’s delivery-time requirement.
+For Columbus, the model without NYNJ remained feasible at all eight internal limits. In the model with NYNJ, its share increased from 3.63% to 29.03%, crossing 10% between the tested limits of 850.796 and 851.605 h. Cost avoided at the same time limit increased from USD 0.110 million to USD 0.774 million. Together with the zero-share minimum-time endpoint and the 32.66% minimum-cost endpoint, these results show that gateway use varied with the decision-maker’s delivery-time requirement.

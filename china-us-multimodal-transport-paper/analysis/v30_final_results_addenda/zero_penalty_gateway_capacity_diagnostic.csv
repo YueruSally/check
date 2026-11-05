@@ -1,0 +1,7 @@
+case_id,preferred_gateway,preferred_gateway_quantity_feu,residual_gateway,residual_gateway_quantity_feu,binding_arc_id,binding_arc_origin,binding_arc_destination,model_day,used_feu,capacity_feu,interpretation
+D1,NYNJ,1999.999738122409,LALB,227.500261877591,us-r-07,NYNJ,Chicago,36,1000.0,1000.0,NYNJ inland rail daily capacity binds
+D1,NYNJ,1999.999738122409,LALB,227.500261877591,us-r-07,NYNJ,Chicago,38,1000.0,1000.0,NYNJ inland rail daily capacity binds
+D2,LALB,2000.0,NYNJ,227.5,us-r-02,LALB,Memphis,22,1000.0,1000.0,LALB inland rail daily capacity binds
+D2,LALB,2000.0,NYNJ,227.5,us-r-02,LALB,Memphis,24,1000.0,1000.0,LALB inland rail daily capacity binds
+D3,NYNJ,1999.9999709278015,LALB,227.50002907219852,us-r-09,NYNJ,Columbus,36,1000.0,1000.0,NYNJ inland rail daily capacity binds
+D3,NYNJ,1999.9999709278015,LALB,227.50002907219852,us-r-09,NYNJ,Columbus,38,1000.0,1000.0,NYNJ inland rail daily capacity binds
