@@ -154,6 +154,8 @@ def endpoint_fields() -> list[str]:
         "resource_max_abs_error_feu", "ny_nj_share", "la_lb_share",
         "seattle_tacoma_share", "solver_call_count", "solver_runtime_seconds",
         "maximum_relative_gap", "reused_from",
+        "service_choice_rule", "max_extra_service_departures",
+        "candidate_itineraries",
     ]
 
 
@@ -189,6 +191,12 @@ def build_full_model(
             f"missing={sorted(missing)[:3]}, extra={sorted(extra)[:3]}"
         )
     return model, max_paths
+
+
+def structural_variant_suffix(max_extra_service_departures: int) -> str:
+    if max_extra_service_departures == 0:
+        return "structural_full"
+    return f"structural_full_service_plus_{max_extra_service_departures}"
 
 
 def write_coverage_audit(args, data, base_config, case_enumerations):
@@ -327,8 +335,17 @@ def write_coverage_audit(args, data, base_config, case_enumerations):
     return summary_rows
 
 
-def run_full_endpoints(args, data, base_config, conditions, case_enumerations):
+def run_full_endpoints(
+    args,
+    data,
+    base_config,
+    conditions,
+    case_enumerations,
+    *,
+    max_extra_service_departures: int = 0,
+):
     checkpoints = args.output / "checkpoints" / "endpoints"
+    variant = structural_variant_suffix(max_extra_service_departures)
     total = len(conditions) * 2 * len(ENDPOINTS)
     completed = 0
     for condition in conditions:
@@ -341,7 +358,7 @@ def run_full_endpoints(args, data, base_config, conditions, case_enumerations):
             for endpoint, primary in ENDPOINTS:
                 task_id = (
                     f"{condition.case_id}_{condition.condition_id}_{access}_"
-                    f"{endpoint}_structural_full"
+                    f"{endpoint}_{variant}"
                 )
                 checkpoint = checkpoints / f"{task_id}.json"
                 if checkpoint.exists():
@@ -352,7 +369,12 @@ def run_full_endpoints(args, data, base_config, conditions, case_enumerations):
                         continue
                 if model is None:
                     model, max_paths = build_full_model(
-                        case_data, config, enumerations
+                        case_data,
+                        config,
+                        enumerations,
+                        max_extra_service_departures=(
+                            max_extra_service_departures
+                        ),
                     )
                 result = solve_lexicographic_endpoint(
                     model,
@@ -371,7 +393,16 @@ def run_full_endpoints(args, data, base_config, conditions, case_enumerations):
                     max_paths_per_gateway=int(max_paths),
                 )
                 payload["validation_id"] = task_id
-                payload["library_variant"] = "structural_full"
+                payload["library_variant"] = variant
+                payload["service_choice_rule"] = (
+                    "earliest_only"
+                    if max_extra_service_departures == 0
+                    else f"earliest_plus_{max_extra_service_departures}"
+                )
+                payload["max_extra_service_departures"] = (
+                    max_extra_service_departures
+                )
+                payload["candidate_itineraries"] = model.quantity_variable_count
                 write_json_atomic(checkpoint, payload)
                 completed += 1
                 print(
@@ -382,16 +413,25 @@ def run_full_endpoints(args, data, base_config, conditions, case_enumerations):
                 )
 
 
-def run_full_share_bounds(args, data, base_config, conditions, case_enumerations):
+def run_full_share_bounds(
+    args,
+    data,
+    base_config,
+    conditions,
+    case_enumerations,
+    *,
+    max_extra_service_departures: int = 0,
+):
     endpoint_root = args.output / "checkpoints" / "endpoints"
     bound_root = args.output / "checkpoints" / "share_bounds"
+    variant = structural_variant_suffix(max_extra_service_departures)
     planned = []
     for condition in conditions:
         endpoints = {
             endpoint: load_json(
                 endpoint_root / (
                     f"{condition.case_id}_{condition.condition_id}_allowed_"
-                    f"{endpoint}_structural_full.json"
+                    f"{endpoint}_{variant}.json"
                 )
             )
             for endpoint, _ in ENDPOINTS
@@ -424,7 +464,7 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
         for direction in ("min", "max"):
             bound_id = (
                 f"{condition.case_id}_{condition.condition_id}_{region}_"
-                f"{direction}_ny_nj_share_structural_full"
+                f"{direction}_ny_nj_share_{variant}"
             )
             checkpoint = bound_root / f"{bound_id}.json"
             if checkpoint.exists():
@@ -449,6 +489,15 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
                     time_upper_bound=time_bound,
                     endpoint=endpoint,
                 )
+                payload["library_variant"] = variant
+                payload["service_choice_rule"] = (
+                    "earliest_only"
+                    if max_extra_service_departures == 0
+                    else f"earliest_plus_{max_extra_service_departures}"
+                )
+                payload["max_extra_service_departures"] = (
+                    max_extra_service_departures
+                )
                 write_json_atomic(checkpoint, payload)
                 completed += 1
                 print(
@@ -462,6 +511,9 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
                     case_data,
                     config,
                     case_enumerations[condition.case_id],
+                    max_extra_service_departures=(
+                        max_extra_service_departures
+                    ),
                 )
             (
                 result,
@@ -487,7 +539,15 @@ def run_full_share_bounds(args, data, base_config, conditions, case_enumerations
                 result=result,
                 data=case_data,
             )
-            payload["library_variant"] = "structural_full"
+            payload["library_variant"] = variant
+            payload["service_choice_rule"] = (
+                "earliest_only"
+                if max_extra_service_departures == 0
+                else f"earliest_plus_{max_extra_service_departures}"
+            )
+            payload["max_extra_service_departures"] = (
+                max_extra_service_departures
+            )
             payload["strict_cost_upper_bound_usd"] = cost_bound
             payload["strict_time_upper_bound_h"] = time_bound
             payload["share_bound_retry_mode"] = retry_mode
@@ -695,6 +755,9 @@ def finalize(args, data, conditions):
                     "quantity_feu": allocation.quantity_feu,
                     "gateway": gateway_for_path(case_data, allocation.arc_ids),
                     "arc_ids": "|".join(allocation.arc_ids),
+                    "service_departure_ranks": "|".join(
+                        str(item) for item in allocation.service_departure_ranks
+                    ),
                 }
             )
     write_csv(
@@ -711,7 +774,7 @@ def finalize(args, data, conditions):
         allocation_rows,
         [
             "validation_id", "allocation_id", "shipment_id", "quantity_feu",
-            "gateway", "arc_ids",
+            "gateway", "arc_ids", "service_departure_ranks",
         ],
     )
 
@@ -734,6 +797,10 @@ def finalize(args, data, conditions):
                     "quantity_feu": allocation["quantity_feu"],
                     "gateway": allocation["gateway"],
                     "arc_ids": "|".join(allocation["arc_ids"]),
+                    "service_departure_ranks": "|".join(
+                        str(item)
+                        for item in allocation.get("service_departure_ranks", [])
+                    ),
                 }
             )
     write_csv(
@@ -750,7 +817,7 @@ def finalize(args, data, conditions):
         share_allocation_rows,
         [
             "bound_id", "allocation_id", "shipment_id", "quantity_feu",
-            "gateway", "arc_ids",
+            "gateway", "arc_ids", "service_departure_ranks",
         ],
     )
     share_groups = {}
@@ -838,6 +905,9 @@ def finalize(args, data, conditions):
         share_rows,
         list(share_rows[0].keys()),
     )
+
+    if not getattr(args, "paths8_results", None):
+        return endpoint_payloads, share_rows
 
     condition_keys = {(item.case_id, item.condition_id) for item in conditions}
     path8_share_rows = [
