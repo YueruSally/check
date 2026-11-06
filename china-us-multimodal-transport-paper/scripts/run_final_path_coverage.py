@@ -582,10 +582,12 @@ def solve_share_bound_with_numerical_retry(
 
     A lexicographic endpoint itself certifies that the strict region is
     nonempty.  HiGHS can nevertheless declare the two-row intersection
-    infeasible during presolve.  We first disable presolve without changing
-    the model.  Only if that also returns proven infeasible do we apply a
-    practically zero endpoint-equivalence tolerance of USD 1 and one
-    second.  Every attempt is retained in the checkpoint.
+    infeasible during presolve, or return a numerically decoded allocation
+    that narrowly fails the independent evaluator check.  We first disable
+    presolve without changing the model.  If the result is still not both
+    proven and evaluator-consistent, we apply a practically zero
+    endpoint-equivalence tolerance of USD 1 and one second.  Every attempt
+    is retained in the checkpoint.
     """
     objective = model.gateway_share_coefficients("ny_nj")
     cost_coefficients = model.objective_coefficients("cost")
@@ -618,7 +620,7 @@ def solve_share_bound_with_numerical_retry(
     retry_mode = "strict_with_presolve"
     applied_cost = cost_bound
     applied_time = time_bound
-    if result.proven_infeasible:
+    if not result.proven_optimal:
         result = solve(cost_bound, time_bound, presolve=False)
         retry_mode = "strict_without_presolve"
         attempts.append(
@@ -629,7 +631,7 @@ def solve_share_bound_with_numerical_retry(
                 **asdict(result.solver_call),
             }
         )
-    if result.proven_infeasible:
+    if not result.proven_optimal:
         applied_cost = cost_bound + 1.0
         applied_time = time_bound + (1.0 / 3600.0)
         result = solve(applied_cost, applied_time, presolve=False)
