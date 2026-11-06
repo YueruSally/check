@@ -1,0 +1,10 @@
+case_id,origin,destination,gateway,structural_enumeration_complete,structural_path_count,structural_nondominated_count,statically_dominated_count,martins_4_count,martins_8_count,martins_12_count,martins_16_count,martins_4_subset_8,martins_8_subset_12,martins_12_subset_16,martins_16_subset_structural_full,martins_8_cap_reached,nondominated_missing_at_8,nondominated_missing_at_16,full_paths_missing_at_8,explored_labels,enumeration_cap,coverage_reason
+D1,xian,chicago,la_lb,1,8,4,4,4,4,4,4,1,1,1,1,0,0,0,4,33,100000,additional_structural_paths_removed_by_static_dominance
+D1,xian,chicago,seattle_tacoma,1,8,8,0,4,8,8,8,1,1,1,1,1,0,0,0,33,100000,martins_library_is_structurally_complete
+D1,xian,chicago,ny_nj,1,8,4,4,4,4,4,4,1,1,1,1,0,0,0,4,33,100000,additional_structural_paths_removed_by_static_dominance
+D2,xian,memphis,la_lb,1,8,4,4,4,4,4,4,1,1,1,1,0,0,0,4,33,100000,additional_structural_paths_removed_by_static_dominance
+D2,xian,memphis,seattle_tacoma,1,8,8,0,4,8,8,8,1,1,1,1,1,0,0,0,33,100000,martins_library_is_structurally_complete
+D2,xian,memphis,ny_nj,1,8,4,4,4,4,4,4,1,1,1,1,0,0,0,4,33,100000,additional_structural_paths_removed_by_static_dominance
+D3,xian,columbus,la_lb,1,8,4,4,4,4,4,4,1,1,1,1,0,0,0,4,33,100000,additional_structural_paths_removed_by_static_dominance
+D3,xian,columbus,seattle_tacoma,1,8,8,0,4,8,8,8,1,1,1,1,1,0,0,0,33,100000,martins_library_is_structurally_complete
+D3,xian,columbus,ny_nj,1,8,4,4,4,4,4,4,1,1,1,1,0,0,0,4,33,100000,additional_structural_paths_removed_by_static_dominance

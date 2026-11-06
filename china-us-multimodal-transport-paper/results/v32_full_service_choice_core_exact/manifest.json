@@ -1,0 +1,335 @@
+{
+  "generated_at_utc": "2026-11-06T13:08:55.886257+00:00",
+  "experiment": "full_service_choice_core_exact",
+  "conditions": [
+    {
+      "case_id": "D1",
+      "condition_id": "delay_0h",
+      "family": "baseline",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_24h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 24.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_72h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 72.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_96h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 96.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_120h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 120.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_168h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_312h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 312.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "delay_336h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 336.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "capacity_60pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.6,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "capacity_40pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.4,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D1",
+      "condition_id": "compound_30pct_delay_168h",
+      "family": "compound_disruption",
+      "uswc_capacity_multiplier": 0.3,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_0h",
+      "family": "baseline",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_24h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 24.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_72h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 72.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_96h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 96.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_120h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 120.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_168h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_312h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 312.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "delay_336h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 336.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "capacity_60pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.6,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "capacity_40pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.4,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D2",
+      "condition_id": "compound_30pct_delay_168h",
+      "family": "compound_disruption",
+      "uswc_capacity_multiplier": 0.3,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_0h",
+      "family": "baseline",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_24h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 24.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_72h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 72.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_96h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 96.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_120h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 120.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_168h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 168.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_240h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 240.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_264h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 264.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_288h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 288.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_312h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 312.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "delay_336h",
+      "family": "regional_delay",
+      "uswc_capacity_multiplier": 1.0,
+      "uswc_delay_h": 336.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "capacity_60pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.6,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "capacity_40pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.4,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "capacity_35pct",
+      "family": "capacity_reduction",
+      "uswc_capacity_multiplier": 0.35,
+      "uswc_delay_h": 0.0
+    },
+    {
+      "case_id": "D3",
+      "condition_id": "compound_30pct_delay_168h",
+      "family": "compound_disruption",
+      "uswc_capacity_multiplier": 0.3,
+      "uswc_delay_h": 168.0
+    }
+  ],
+  "structural_enumeration_complete": true,
+  "enumeration_cap_per_gateway": 100000,
+  "martins_limits_audited": [
+    4,
+    8,
+    12,
+    16
+  ],
+  "max_extra_service_departures": 2,
+  "service_choice_rule": "earliest feasible departure plus the next two feasible departure events on every scheduled leg",
+  "reused_proven_v31_endpoints": 24,
+  "endpoint_tasks": 180,
+  "share_regions": 88,
+  "interpretation_limit": "Exactness is conditional on the complete registered structural path set and the three-event service-choice set."
+}
