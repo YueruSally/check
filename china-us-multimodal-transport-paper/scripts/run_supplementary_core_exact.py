@@ -29,7 +29,7 @@ from china_us_multimodal.exact_endpoint import (
     solve_lexicographic_endpoint,
 )
 from china_us_multimodal.io import load_model_data, select_case
-from china_us_multimodal.schedule import earliest_departure
+from china_us_multimodal.schedule import ranked_departure
 from china_us_multimodal.supplementary_design import (
     CASES,
     ExactCondition,
@@ -85,6 +85,9 @@ def allocations_from_payload(payload: dict[str, object]) -> tuple[RouteAllocatio
             shipment_id=str(row["shipment_id"]),
             quantity_feu=float(row["quantity_feu"]),
             arc_ids=tuple(str(item) for item in row["arc_ids"]),
+            service_departure_ranks=tuple(
+                int(item) for item in row.get("service_departure_ranks", [])
+            ),
         )
         for row in payload.get("allocations", [])
     )
@@ -176,6 +179,9 @@ def endpoint_payload(
                 "quantity_feu": allocation.quantity_feu,
                 "gateway": gateway_for_path(model.data, allocation.arc_ids),
                 "arc_ids": list(allocation.arc_ids),
+                "service_departure_ranks": list(
+                    allocation.service_departure_ranks
+                ),
             }
             for allocation in result.allocations
         ],
@@ -463,6 +469,9 @@ def share_bound_payload(
                 "quantity_feu": allocation.quantity_feu,
                 "gateway": gateway_for_path(data, allocation.arc_ids),
                 "arc_ids": list(allocation.arc_ids),
+                "service_departure_ranks": list(
+                    allocation.service_departure_ranks
+                ),
             }
             for allocation in result.allocations
         ],
@@ -485,11 +494,18 @@ def service_leg_rows(data, allocations, config, validation_id: str):
                     current_h += transfer_h
             ready_h = current_h
             service_id = ""
+            service_departure_rank = 0
             published_departure_h = ready_h
             actual_departure_h = ready_h
             if config.constraints.enforce_timetable and arc.service_ids:
                 services = [data.services[item] for item in arc.service_ids]
-                scheduled = earliest_departure(services, ready_h)
+                rank = (
+                    allocation.service_departure_ranks[leg_number - 1]
+                    if allocation.service_departure_ranks
+                    else 0
+                )
+                service_departure_rank = rank
+                scheduled = ranked_departure(services, ready_h, rank=rank)
                 service_id = scheduled.service_id
                 published_departure_h = scheduled.departure_h
                 actual_departure_h = published_departure_h + (
@@ -509,6 +525,7 @@ def service_leg_rows(data, allocations, config, validation_id: str):
                     "destination": arc.destination,
                     "mode": arc.mode.value,
                     "service_id": service_id,
+                    "service_departure_rank": service_departure_rank,
                     "transfer_before_leg_h": transfer_h,
                     "ready_h": ready_h,
                     "published_departure_h": published_departure_h,

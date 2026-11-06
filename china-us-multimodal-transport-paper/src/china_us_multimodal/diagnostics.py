@@ -10,7 +10,20 @@ from .evaluator import (
     _scenario_ocean_departure_delay_h,
     _scenario_port_capacity_multiplier,
 )
-from .schedule import earliest_departure
+from .schedule import ranked_departure
+
+
+def _departure_rank(allocation: RouteAllocation, arc_index: int) -> int:
+    if not allocation.service_departure_ranks:
+        return 0
+    if len(allocation.service_departure_ranks) != len(allocation.arc_ids):
+        raise ValueError(
+            "A route allocation must provide either no departure ranks or one per arc."
+        )
+    rank = int(allocation.service_departure_ranks[arc_index])
+    if rank < 0:
+        raise ValueError("Service-departure ranks must be non-negative.")
+    return rank
 
 
 def capacity_usage_rows(
@@ -32,7 +45,7 @@ def capacity_usage_rows(
         arcs = [data.arcs[arc_id] for arc_id in allocation.arc_ids]
         current_h = shipment.release_h
         previous = None
-        for arc in arcs:
+        for arc_index, arc in enumerate(arcs):
             if previous is not None:
                 rule = data.transfer_rules.get((arc.origin, previous.mode, arc.mode))
                 if rule is not None:
@@ -41,7 +54,11 @@ def capacity_usage_rows(
             departure_h = current_h
             if config.constraints.enforce_timetable and arc.service_ids:
                 services = [data.services[service_id] for service_id in arc.service_ids]
-                scheduled = earliest_departure(services, current_h)
+                scheduled = ranked_departure(
+                    services,
+                    current_h,
+                    rank=_departure_rank(allocation, arc_index),
+                )
                 scheduled_departure_h = scheduled.departure_h
                 departure_h = (
                     scheduled_departure_h
@@ -177,7 +194,7 @@ def route_component_rows(
             "processing_cost_usd": 0.0,
         }
 
-        for arc in arcs:
+        for arc_index, arc in enumerate(arcs):
             if previous is not None:
                 rule = data.transfer_rules.get((arc.origin, previous.mode, arc.mode))
                 if rule is not None:
@@ -195,7 +212,11 @@ def route_component_rows(
             departure_h = current_h
             if config.constraints.enforce_timetable and arc.service_ids:
                 services = [data.services[service_id] for service_id in arc.service_ids]
-                scheduled = earliest_departure(services, current_h)
+                scheduled = ranked_departure(
+                    services,
+                    current_h,
+                    rank=_departure_rank(allocation, arc_index),
+                )
                 departure_h = (
                     scheduled.departure_h
                     + _scenario_ocean_departure_delay_h(arc, config)

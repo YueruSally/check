@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+from itertools import product
 import math
 import time
 from typing import Iterable
@@ -17,6 +18,7 @@ class PathProfile:
     shipment_id: str
     path_index: int
     arc_ids: tuple[str, ...]
+    service_departure_ranks: tuple[int, ...]
     unit_cost_usd: float
     lead_time_h: float
     resource_coefficients: tuple[tuple[tuple[str, str, str], float], ...]
@@ -138,8 +140,11 @@ def build_exact_endpoint_model(
     *,
     max_paths_per_gateway: int = 4,
     required_paths_by_shipment: dict[str, tuple[tuple[str, ...], ...]] | None = None,
+    max_extra_service_departures: int = 0,
 ) -> ExactEndpointModel:
     """Build the path-allocation MILP using the evaluator's route accounting."""
+    if max_extra_service_departures < 0:
+        raise ValueError("max_extra_service_departures must be non-negative.")
     library = build_gateway_aware_library(
         data,
         max_legs=config.constraints.max_legs_per_path,
@@ -168,37 +173,74 @@ def build_exact_endpoint_model(
     profiles: list[PathProfile] = []
     resource_capacities: dict[tuple[str, str, str], float] = {}
     for shipment_id in sorted(library):
-        for path_index, arc_ids in enumerate(library[shipment_id]):
-            unit_allocation = RouteAllocation(shipment_id, 1.0, arc_ids)
-            components = route_component_rows(data, [unit_allocation], config)
-            if len(components) != 1:
-                raise RuntimeError("A unit path must produce exactly one route profile.")
-            component = components[0]
-            resource_coefficients: dict[tuple[str, str, str], float] = {}
-            if config.constraints.enforce_capacity:
-                for row in capacity_usage_rows(data, [unit_allocation], config):
-                    key = (
-                        str(row["resource_type"]),
-                        str(row["resource_id"]),
-                        str(row["period"]),
-                    )
-                    resource_coefficients[key] = float(row["used_feu"])
-                    capacity = float(row["capacity_feu"])
-                    if key in resource_capacities and not math.isclose(
-                        resource_capacities[key], capacity, rel_tol=0.0, abs_tol=1e-9
-                    ):
-                        raise RuntimeError(f"Inconsistent capacity for resource {key}.")
-                    resource_capacities[key] = capacity
-            profiles.append(
-                PathProfile(
-                    shipment_id=shipment_id,
-                    path_index=path_index,
-                    arc_ids=arc_ids,
-                    unit_cost_usd=float(component["total_cost_usd"]),
-                    lead_time_h=float(component["lead_time_h"]),
-                    resource_coefficients=tuple(sorted(resource_coefficients.items())),
-                )
+        profile_index = 0
+        for arc_ids in library[shipment_id]:
+            scheduled_positions = tuple(
+                index
+                for index, arc_id in enumerate(arc_ids)
+                if config.constraints.enforce_timetable and data.arcs[arc_id].service_ids
             )
+            choices = product(
+                range(max_extra_service_departures + 1),
+                repeat=len(scheduled_positions),
+            )
+            seen_variants: set[
+                tuple[float, float, tuple[tuple[tuple[str, str, str], float], ...]]
+            ] = set()
+            for selected_ranks in choices:
+                ranks = [0] * len(arc_ids)
+                for position, rank in zip(scheduled_positions, selected_ranks):
+                    ranks[position] = rank
+                rank_tuple = tuple(ranks)
+                unit_allocation = RouteAllocation(
+                    shipment_id,
+                    1.0,
+                    arc_ids,
+                    service_departure_ranks=rank_tuple,
+                )
+                components = route_component_rows(data, [unit_allocation], config)
+                if len(components) != 1:
+                    raise RuntimeError("A unit path must produce exactly one route profile.")
+                component = components[0]
+                resource_coefficients: dict[tuple[str, str, str], float] = {}
+                if config.constraints.enforce_capacity:
+                    for row in capacity_usage_rows(data, [unit_allocation], config):
+                        key = (
+                            str(row["resource_type"]),
+                            str(row["resource_id"]),
+                            str(row["period"]),
+                        )
+                        resource_coefficients[key] = float(row["used_feu"])
+                        capacity = float(row["capacity_feu"])
+                        if key in resource_capacities and not math.isclose(
+                            resource_capacities[key],
+                            capacity,
+                            rel_tol=0.0,
+                            abs_tol=1e-9,
+                        ):
+                            raise RuntimeError(f"Inconsistent capacity for resource {key}.")
+                        resource_capacities[key] = capacity
+                resource_tuple = tuple(sorted(resource_coefficients.items()))
+                variant_signature = (
+                    float(component["total_cost_usd"]),
+                    float(component["lead_time_h"]),
+                    resource_tuple,
+                )
+                if variant_signature in seen_variants:
+                    continue
+                seen_variants.add(variant_signature)
+                profiles.append(
+                    PathProfile(
+                        shipment_id=shipment_id,
+                        path_index=profile_index,
+                        arc_ids=arc_ids,
+                        service_departure_ranks=rank_tuple,
+                        unit_cost_usd=float(component["total_cost_usd"]),
+                        lead_time_h=float(component["lead_time_h"]),
+                        resource_coefficients=resource_tuple,
+                    )
+                )
+                profile_index += 1
     demand_by_shipment = tuple(
         (
             shipment_id,
@@ -433,6 +475,9 @@ def _decode_allocations(
                     shipment_id=shipment_id,
                     quantity_feu=quantity,
                     arc_ids=model.profiles[index].arc_ids,
+                    service_departure_ranks=(
+                        model.profiles[index].service_departure_ranks
+                    ),
                 )
             )
     return tuple(allocations)

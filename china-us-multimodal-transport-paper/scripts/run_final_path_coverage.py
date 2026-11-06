@@ -157,7 +157,13 @@ def endpoint_fields() -> list[str]:
     ]
 
 
-def build_full_model(case_data, config, enumerations):
+def build_full_model(
+    case_data,
+    config,
+    enumerations,
+    *,
+    max_extra_service_departures: int = 0,
+):
     required, max_paths = full_required_library(
         case_data,
         enumerations,
@@ -168,6 +174,7 @@ def build_full_model(case_data, config, enumerations):
         config,
         max_paths_per_gateway=max_paths,
         required_paths_by_shipment=required,
+        max_extra_service_departures=max_extra_service_departures,
     )
     required_signatures = {
         (shipment_id, path)

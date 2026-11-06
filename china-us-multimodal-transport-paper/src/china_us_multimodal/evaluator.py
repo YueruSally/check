@@ -6,7 +6,7 @@ import math
 
 from .config import ModelConfig
 from .domain import Arc, ModelData, RouteAllocation
-from .schedule import earliest_departure
+from .schedule import ranked_departure
 
 
 @dataclass(frozen=True)
@@ -83,7 +83,23 @@ def _path_arcs(data: ModelData, allocation: RouteAllocation) -> list[Arc]:
     for previous, current in zip(arcs, arcs[1:]):
         if previous.destination != current.origin:
             raise ValueError(f"Non-contiguous path: {previous.id} -> {current.id}.")
+    if allocation.service_departure_ranks and len(
+        allocation.service_departure_ranks
+    ) != len(arcs):
+        raise ValueError(
+            f"Shipment {shipment.id} has {len(arcs)} arcs but "
+            f"{len(allocation.service_departure_ranks)} departure ranks."
+        )
     return arcs
+
+
+def _departure_rank(allocation: RouteAllocation, arc_index: int) -> int:
+    if not allocation.service_departure_ranks:
+        return 0
+    rank = int(allocation.service_departure_ranks[arc_index])
+    if rank < 0:
+        raise ValueError("Service-departure ranks must be non-negative.")
+    return rank
 
 
 def evaluate_solution(
@@ -173,7 +189,7 @@ def evaluate_solution(
             current_h = shipment.release_h
             route_cost = 0.0
             previous: Arc | None = None
-            for arc in arcs:
+            for arc_index, arc in enumerate(arcs):
                 if previous is not None:
                     rule = data.transfer_rules.get((arc.origin, previous.mode, arc.mode))
                     if previous.mode != arc.mode and rule is None:
@@ -193,7 +209,11 @@ def evaluate_solution(
                 departure_h = current_h
                 if config.constraints.enforce_timetable and arc.service_ids:
                     services = [data.services[item] for item in arc.service_ids]
-                    scheduled = earliest_departure(services, current_h)
+                    scheduled = ranked_departure(
+                        services,
+                        current_h,
+                        rank=_departure_rank(plan, arc_index),
+                    )
                     scheduled_departure_h = scheduled.departure_h
                     departure_h = (
                         scheduled_departure_h

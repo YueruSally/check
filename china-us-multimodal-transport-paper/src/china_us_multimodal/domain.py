@@ -79,6 +79,11 @@ class RouteAllocation:
     shipment_id: str
     quantity_feu: float
     arc_ids: tuple[str, ...]
+    # One zero-based feasible-departure rank per arc.  Rank zero preserves the
+    # historical rule (the earliest departure whose cutoff can be met).  An
+    # empty tuple is retained as a backwards-compatible spelling of all-zero
+    # ranks for historical results and exploratory algorithms.
+    service_departure_ranks: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
