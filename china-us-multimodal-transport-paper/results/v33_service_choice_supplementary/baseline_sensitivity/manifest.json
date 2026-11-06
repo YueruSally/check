@@ -1,0 +1,225 @@
+{
+  "generated_at_utc": "2026-11-06T15:40:25.674193+00:00",
+  "library_variant": "structural_full_service_plus_2",
+  "max_extra_service_departures": 2,
+  "structural_source": "results/v32_full_service_choice_core_exact",
+  "usec_ocean_cost_multipliers": [
+    1.0,
+    0.9,
+    0.8,
+    0.7
+  ],
+  "panama_transit_time_reductions_h": [
+    0.0,
+    48.0,
+    96.0
+  ],
+  "cost_and_time_changes_are_one_factor_at_a_time": true,
+  "specifications": [
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "baseline_usec_cost_100pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 1.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "baseline_usec_cost_090pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.9
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "baseline_usec_cost_080pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.8
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "baseline_usec_cost_070pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.7
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "baseline_panama_time_minus_48h",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "panama_transit_time_reduction_h",
+      "value": 48.0
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "baseline_panama_time_minus_96h",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "panama_transit_time_reduction_h",
+      "value": 96.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "baseline_usec_cost_100pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 1.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "baseline_usec_cost_090pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.9
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "baseline_usec_cost_080pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.8
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "baseline_usec_cost_070pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.7
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "baseline_panama_time_minus_48h",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "panama_transit_time_reduction_h",
+      "value": 48.0
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "baseline_panama_time_minus_96h",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "panama_transit_time_reduction_h",
+      "value": 96.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "baseline_usec_cost_100pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 1.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "baseline_usec_cost_090pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.9
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "baseline_usec_cost_080pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.8
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "baseline_usec_cost_070pct",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "usec_ocean_cost_multiplier",
+      "value": 0.7
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "baseline_panama_time_minus_48h",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "panama_transit_time_reduction_h",
+      "value": 48.0
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "baseline_panama_time_minus_96h",
+        "family": "baseline_gateway_calibration",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 0.0
+      },
+      "dimension": "panama_transit_time_reduction_h",
+      "value": 96.0
+    }
+  ],
+  "endpoint_tasks": 72,
+  "share_bound_tasks": 72,
+  "interpretation_limits": [
+    "The tested levels identify a sampled transition interval, not a continuous market threshold.",
+    "Static path inventory omits schedule waiting and is descriptive only; optimization results include timetable and capacity constraints.",
+    "Gateway share uniqueness does not imply allocation uniqueness."
+  ]
+}

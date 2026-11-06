@@ -1,0 +1,7 @@
+case_id,preferred_gateway,preferred_gateway_quantity_feu,residual_gateway,residual_gateway_quantity_feu,binding_arc_id,binding_arc_origin,binding_arc_destination,model_day,used_feu,capacity_feu,interpretation
+D1,NYNJ,2227.5,LALB,0.0,us-r-07,ny_nj,chicago,36,1000.0000550169298,1000.0,NYNJ outbound rail daily capacity binds
+D1,NYNJ,2227.5,LALB,0.0,us-r-07,ny_nj,chicago,37,1000.0000000000044,1000.0,NYNJ outbound rail daily capacity binds
+D2,LALB,2227.5,NYNJ,0.0,us-r-02,la_lb,memphis,22,1000.0,1000.0,LALB outbound rail daily capacity binds
+D2,LALB,2227.5,NYNJ,0.0,us-r-02,la_lb,memphis,24,999.9999999999991,1000.0,LALB outbound rail daily capacity binds
+D3,NYNJ,2227.5,LALB,0.0,us-r-09,ny_nj,columbus,36,1000.0,1000.0,NYNJ outbound rail daily capacity binds
+D3,NYNJ,2227.5,LALB,0.0,us-r-09,ny_nj,columbus,37,1000.0,1000.0,NYNJ outbound rail daily capacity binds

@@ -1,0 +1,836 @@
+{
+  "validation_id": "D3_demand_120pct_delay_240h_allowed_min_time_then_cost",
+  "case_id": "D3",
+  "condition_id": "demand_120pct_delay_240h",
+  "family": "total_demand_scale",
+  "gateway_access": "allowed",
+  "scenario": "supp_demand_120pct_delay_240h",
+  "uswc_capacity_multiplier": 1.0,
+  "uswc_delay_h": 240.0,
+  "endpoint": "min_time_then_cost",
+  "primary_objective": "time",
+  "secondary_objective": "cost",
+  "max_paths_per_gateway": 8,
+  "candidate_paths": 11520,
+  "binary_variables": 11520,
+  "service_choice_rule": "earliest_plus_2",
+  "max_extra_service_departures": 2,
+  "candidate_itineraries": 11520,
+  "stage_one_proven": 1,
+  "lexicographic_proven": 1,
+  "evaluator_consistent": 1,
+  "primary_optimum": 852.3312008978676,
+  "primary_tolerance": 1.8523312008978676e-06,
+  "total_cost_usd": 84427327.56576,
+  "quantity_weighted_mean_delivery_time_h": 852.3312008978677,
+  "feasible": 1,
+  "violations": "",
+  "evaluator_cost_abs_error": 1.4901161193847656e-08,
+  "evaluator_time_abs_error": 2.2737367544323206e-13,
+  "resource_max_abs_error_feu": 6.821210263296962e-13,
+  "ny_nj_share": 0.0,
+  "la_lb_share": 0.5611672278338944,
+  "seattle_tacoma_share": 0.4388327721661056,
+  "solver_calls": [
+    {
+      "stage": 1,
+      "objective": "time",
+      "status_code": 0,
+      "status": "optimal_within_tolerance",
+      "success": true,
+      "objective_value": 852.3312008978676,
+      "dual_bound": 852.3312008978676,
+      "relative_gap": 0.0,
+      "node_count": 1,
+      "elapsed_seconds": 1.5660327402874827,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)"
+    },
+    {
+      "stage": 2,
+      "objective": "cost",
+      "status_code": 0,
+      "status": "optimal_within_tolerance",
+      "success": true,
+      "objective_value": 84427327.56575999,
+      "dual_bound": 84427327.56575999,
+      "relative_gap": 0.0,
+      "node_count": 12,
+      "elapsed_seconds": 31.17796925920993,
+      "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)"
+    }
+  ],
+  "solver_call_count": 2,
+  "solver_runtime_seconds": 32.744001999497414,
+  "maximum_relative_gap": 0.0,
+  "reused_from": "",
+  "allocations": [
+    {
+      "shipment_id": "D3-01",
+      "quantity_feu": 72.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-02",
+      "quantity_feu": 66.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-03",
+      "quantity_feu": 60.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-04",
+      "quantity_feu": 57.0,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-05",
+      "quantity_feu": 7.800000000000097,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-05",
+      "quantity_feu": 70.1999999999999,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-06",
+      "quantity_feu": 62.1,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-06",
+      "quantity_feu": 6.899999999999999,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-07",
+      "quantity_feu": 6.300000000000001,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-07",
+      "quantity_feu": 56.7,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-08",
+      "quantity_feu": 54.0,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-09",
+      "quantity_feu": 7.5,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-09",
+      "quantity_feu": 67.5,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-10",
+      "quantity_feu": 84.0,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-11",
+      "quantity_feu": 48.6,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-12",
+      "quantity_feu": 67.49999999999986,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-12",
+      "quantity_feu": 7.500000000000142,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-13",
+      "quantity_feu": 78.6,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-14",
+      "quantity_feu": 54.6,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-15",
+      "quantity_feu": 73.2,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-16",
+      "quantity_feu": 75.6,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-17",
+      "quantity_feu": 5.400000000000006,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-17",
+      "quantity_feu": 48.599999999999994,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-18",
+      "quantity_feu": 59.4,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-19",
+      "quantity_feu": 90.0,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-20",
+      "quantity_feu": 61.8,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-21",
+      "quantity_feu": 87.6,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-22",
+      "quantity_feu": 56.4,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-23",
+      "quantity_feu": 73.2,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-24",
+      "quantity_feu": 6.48,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-24",
+      "quantity_feu": 58.31999999999999,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-25",
+      "quantity_feu": 52.199999999999996,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-26",
+      "quantity_feu": 6.780000000000001,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-26",
+      "quantity_feu": 61.019999999999996,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-27",
+      "quantity_feu": 89.39999999999999,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-28",
+      "quantity_feu": 10.379999999999978,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-28",
+      "quantity_feu": 52.62000000000002,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-29",
+      "quantity_feu": 49.199999999999996,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-30",
+      "quantity_feu": 81.6,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-31",
+      "quantity_feu": 71.82,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-31",
+      "quantity_feu": 7.98,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-32",
+      "quantity_feu": 55.199999999999996,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-33",
+      "quantity_feu": 58.8,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-34",
+      "quantity_feu": 57.239999999999995,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-34",
+      "quantity_feu": 6.359999999999999,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-35",
+      "quantity_feu": 69.6,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-36",
+      "quantity_feu": 60.599999999999994,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        2,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-37",
+      "quantity_feu": 49.199999999999996,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-38",
+      "quantity_feu": 50.4,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-39",
+      "quantity_feu": 84.0,
+      "gateway": "seattle_tacoma",
+      "arc_ids": [
+        "cn-r-02",
+        "sea-04",
+        "us-d-06"
+      ],
+      "service_departure_ranks": [
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "shipment_id": "D3-40",
+      "quantity_feu": 67.8,
+      "gateway": "la_lb",
+      "arc_ids": [
+        "cn-r-01",
+        "sea-01",
+        "us-d-03"
+      ],
+      "service_departure_ranks": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "library_variant": "structural_full_service_plus_2",
+  "base_condition_id": "delay_240h",
+  "demand_multiplier": 1.2
+}

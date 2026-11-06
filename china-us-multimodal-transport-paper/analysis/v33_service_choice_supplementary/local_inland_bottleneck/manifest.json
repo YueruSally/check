@@ -1,0 +1,16 @@
+{
+  "generated_at_utc": "2026-11-06T17:33:29.133558+00:00",
+  "core_source": "analysis/v32_full_service_choice_core_exact",
+  "inland_source": "results/v33_service_choice_supplementary/local_inland_bottleneck",
+  "findings": [
+    "Inland capacity and West Coast delay interact; neither has a destination-independent effect on NY/NJ use.",
+    "For Memphis, 50% inland capacity activates the minimum-cost endpoint at 276 h and both endpoints at 288 h, whereas 150% capacity removes NY/NJ at 288 h.",
+    "For Columbus, the minimum-cost endpoint uses NY/NJ at lower delays than the minimum-time endpoint, and the share response varies materially with inland capacity.",
+    "The mechanism is endpoint-dependent: tightening inland capacity can make NY/NJ cost-effective before it makes NY/NJ time-optimal."
+  ],
+  "limits": [
+    "One diagnosed LA/LB-to-destination daily arc is varied per destination.",
+    "The design identifies a local interaction mechanism and is not a full inland-network capacity grid.",
+    "Maximum-utilization diagnostics in this table cover newly solved v2.6 tasks; reused v2.1 values remain exact but are labelled by source."
+  ]
+}
