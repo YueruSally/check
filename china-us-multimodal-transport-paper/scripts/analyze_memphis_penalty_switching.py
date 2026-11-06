@@ -74,6 +74,11 @@ def main() -> None:
                 shipment_id=row["shipment_id"],
                 quantity_feu=float(row["quantity_feu"]),
                 arc_ids=tuple(row["arc_ids"].split("|")),
+                service_departure_ranks=tuple(
+                    int(item)
+                    for item in row.get("service_departure_ranks", "").split("|")
+                    if item != ""
+                ),
             )
         )
 

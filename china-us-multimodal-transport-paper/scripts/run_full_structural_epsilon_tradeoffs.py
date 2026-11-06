@@ -244,6 +244,7 @@ def main() -> None:
     parser.add_argument("--mip-relative-gap", type=float, default=1e-8)
     parser.add_argument("--relative-tolerance", type=float, default=1e-9)
     parser.add_argument("--absolute-tolerance", type=float, default=1e-6)
+    parser.add_argument("--max-extra-service-departures", type=int, default=0)
     args = parser.parse_args()
     if args.internal_levels < 1:
         raise ValueError("--internal-levels must be positive.")
@@ -322,7 +323,10 @@ def main() -> None:
                     continue
                 if model is None:
                     model, _ = build_full_model(
-                        case_data, config, enumerations[condition.case_id]
+                        case_data,
+                        config,
+                        enumerations[condition.case_id],
+                        max_extra_service_departures=args.max_extra_service_departures,
                     )
                 payload = solve_tradeoff(
                     model=model,
@@ -365,7 +369,10 @@ def main() -> None:
         if key not in models:
             config = condition_config(base_config, condition, gateway_access="allowed")
             models[key], _ = build_full_model(
-                base_cases[condition.case_id], config, enumerations[condition.case_id]
+                base_cases[condition.case_id],
+                config,
+                enumerations[condition.case_id],
+                max_extra_service_departures=args.max_extra_service_departures,
             )
         model = models[key]
         cost_bound = float(point["applied_cost_upper_bound_usd"])
@@ -502,6 +509,9 @@ def main() -> None:
                     "shipment_id": allocation.shipment_id,
                     "quantity_feu": allocation.quantity_feu,
                     "arc_ids": "|".join(allocation.arc_ids),
+                    "service_departure_ranks": "|".join(
+                        str(item) for item in allocation.service_departure_ranks
+                    ),
                 }
             )
     solver_fields = list(solver_rows[0])
@@ -544,7 +554,11 @@ def main() -> None:
         args.output / "manifest.json",
         {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "library_variant": "structural_full",
+            "library_variant": (
+                "structural_full" if args.max_extra_service_departures == 0
+                else f"structural_full_service_plus_{args.max_extra_service_departures}"
+            ),
+            "max_extra_service_departures": args.max_extra_service_departures,
             "structural_source": str(args.core_results),
             "internal_time_caps_per_condition": args.internal_levels,
             "conditions": [asdict(condition) for condition in DESIGNS],

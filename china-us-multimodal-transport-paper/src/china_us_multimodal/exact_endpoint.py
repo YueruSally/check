@@ -86,6 +86,7 @@ class ExactEndpointModel:
     profiles: tuple[PathProfile, ...]
     demand_by_shipment: tuple[tuple[str, float], ...]
     resource_capacities: tuple[tuple[tuple[str, str, str], float], ...]
+    max_extra_service_departures: int = 0
 
     @property
     def quantity_variable_count(self) -> int:
@@ -254,6 +255,7 @@ def build_exact_endpoint_model(
         profiles=tuple(profiles),
         demand_by_shipment=demand_by_shipment,
         resource_capacities=tuple(sorted(resource_capacities.items())),
+        max_extra_service_departures=max_extra_service_departures,
     )
 
 

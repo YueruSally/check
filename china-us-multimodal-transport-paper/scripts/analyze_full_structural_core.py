@@ -28,7 +28,9 @@ def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         raise ValueError(f"Refusing to write an empty analysis table: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -63,11 +65,23 @@ def main() -> None:
         type=Path,
         default=Path("analysis/v21_full_structural_core_exact"),
     )
+    parser.add_argument(
+        "--reference-results",
+        type=Path,
+        default=None,
+        help=(
+            "Optional earlier exact-grid result directory. When supplied, "
+            "write a row-wise endpoint comparison against that grid."
+        ),
+    )
     args = parser.parse_args()
 
     endpoint_rows = read_csv(args.results / "full_exact_endpoint_summary.csv")
     share_rows = read_csv(args.results / "full_endpoint_share_ranges.csv")
-    difference_rows = read_csv(args.results / "endpoint_difference_8_vs_full.csv")
+    path_library_difference = args.results / "endpoint_difference_8_vs_full.csv"
+    difference_rows = (
+        read_csv(path_library_difference) if path_library_difference.exists() else []
+    )
     endpoint_index = {
         (r["case_id"], r["condition_id"], r["gateway_access"], r["endpoint"]): r
         for r in endpoint_rows
@@ -188,6 +202,100 @@ def main() -> None:
             )
     write_csv(args.output / "disruption_loss_recovery.csv", recovery_rows)
 
+    reference_change_rows: list[dict[str, object]] = []
+    if args.reference_results is not None:
+        reference_rows = read_csv(
+            args.reference_results / "full_exact_endpoint_summary.csv"
+        )
+        reference_index = {
+            (r["case_id"], r["condition_id"], r["gateway_access"], r["endpoint"]): r
+            for r in reference_rows
+        }
+        for row in endpoint_rows:
+            key = (
+                row["case_id"],
+                row["condition_id"],
+                row["gateway_access"],
+                row["endpoint"],
+            )
+            if key not in reference_index:
+                continue
+            reference = reference_index[key]
+            reference_change_rows.append(
+                {
+                    "case_id": row["case_id"],
+                    "condition_id": row["condition_id"],
+                    "gateway_access": row["gateway_access"],
+                    "endpoint": row["endpoint"],
+                    "reference_cost_usd": float(reference["total_cost_usd"]),
+                    "current_cost_usd": float(row["total_cost_usd"]),
+                    "cost_change_current_minus_reference_usd": (
+                        float(row["total_cost_usd"])
+                        - float(reference["total_cost_usd"])
+                    ),
+                    "reference_time_h": float(
+                        reference["quantity_weighted_mean_delivery_time_h"]
+                    ),
+                    "current_time_h": float(
+                        row["quantity_weighted_mean_delivery_time_h"]
+                    ),
+                    "time_change_current_minus_reference_h": (
+                        float(row["quantity_weighted_mean_delivery_time_h"])
+                        - float(
+                            reference["quantity_weighted_mean_delivery_time_h"]
+                        )
+                    ),
+                    "reference_ny_nj_share": float(reference["ny_nj_share"]),
+                    "current_ny_nj_share": float(row["ny_nj_share"]),
+                    "ny_nj_share_change": (
+                        float(row["ny_nj_share"])
+                        - float(reference["ny_nj_share"])
+                    ),
+                }
+            )
+        write_csv(
+            args.output / "reference_endpoint_changes.csv", reference_change_rows
+        )
+
+    criterion_rows: list[dict[str, object]] = []
+    tested_delays = sorted(
+        {
+            int(row["delay_h"])
+            for row in activation_rows
+            if row["delay_h"] is not None
+        }
+    )
+    for case_id in CASES:
+        for endpoint in ENDPOINTS:
+            endpoint_rows_for_case = {
+                int(row["delay_h"]): row
+                for row in activation_rows
+                if row["case_id"] == case_id
+                and row["endpoint"] == endpoint
+                and row["delay_h"] is not None
+            }
+            for criterion in (0.05, 0.10, 0.20):
+                first_delay = next(
+                    (
+                        delay
+                        for delay in tested_delays
+                        if float(
+                            endpoint_rows_for_case[delay]["ny_nj_min_share"]
+                        )
+                        >= criterion - 1e-9
+                    ),
+                    None,
+                )
+                criterion_rows.append(
+                    {
+                        "case_id": case_id,
+                        "endpoint": endpoint,
+                        "criterion_share": criterion,
+                        "first_tested_delay_h": first_delay,
+                    }
+                )
+    write_csv(args.output / "activation_criterion_common_grid.csv", criterion_rows)
+
     material_endpoint_changes = [
         row
         for row in difference_rows
@@ -195,7 +303,11 @@ def main() -> None:
         or abs(float(row["time_change_full_minus_8_h"])) > (1.0 / 3600.0)
         or abs(float(row["ny_nj_share_change"])) > 1e-9
     ]
-    write_csv(args.output / "material_path_library_changes.csv", material_endpoint_changes)
+    if material_endpoint_changes:
+        write_csv(
+            args.output / "material_path_library_changes.csv",
+            material_endpoint_changes,
+        )
 
     first_use: dict[str, dict[str, object]] = {}
     for case_id in CASES:
@@ -217,8 +329,14 @@ def main() -> None:
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "results_source": str(args.results),
         "path_library_decision": "exhaustive_structural_library_required",
-        "materially_changed_endpoint_count": len(material_endpoint_changes),
-        "total_endpoint_count": len(difference_rows),
+        "materially_changed_endpoint_count": (
+            len(material_endpoint_changes) if difference_rows else None
+        ),
+        "total_endpoint_count": len(endpoint_rows),
+        "reference_results": (
+            str(args.reference_results) if args.reference_results is not None else None
+        ),
+        "reference_endpoint_change_count": len(reference_change_rows),
         "first_tested_delay_with_at_least_10pct_ny_nj_by_case": first_use,
         "interpretation_limits": [
             "Delay values are tested grid points, not continuous real-world thresholds.",

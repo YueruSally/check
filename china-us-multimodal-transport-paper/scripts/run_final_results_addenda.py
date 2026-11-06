@@ -73,6 +73,11 @@ def allocations_by_validation(path: Path) -> dict[str, list[RouteAllocation]]:
                 shipment_id=row["shipment_id"],
                 quantity_feu=float(row["quantity_feu"]),
                 arc_ids=tuple(row["arc_ids"].split("|")),
+                service_departure_ranks=tuple(
+                    int(item)
+                    for item in row.get("service_departure_ranks", "").split("|")
+                    if item != ""
+                ),
             )
         )
     return result
@@ -145,7 +150,10 @@ def solve_matched_zero_penalty_baselines(args, data, base_config):
                     continue
             config = sensitivity_config(base_config, spec, access)
             model, max_paths = build_full_model(
-                case_data, config, enumerations[case_id]
+                case_data,
+                config,
+                enumerations[case_id],
+                max_extra_service_departures=args.max_extra_service_departures,
             )
             result = solve_lexicographic_endpoint(
                 model,
@@ -166,7 +174,10 @@ def solve_matched_zero_penalty_baselines(args, data, base_config):
             payload.update(
                 {
                     "validation_id": task_id,
-                    "library_variant": "structural_full",
+                    "library_variant": (
+                        "structural_full" if args.max_extra_service_departures == 0
+                        else f"structural_full_service_plus_{args.max_extra_service_departures}"
+                    ),
                     "sensitivity_dimension": "tardiness_penalty",
                     "sensitivity_multiplier": 0.0,
                 }
@@ -359,6 +370,7 @@ def main() -> None:
     parser.add_argument("--mip-relative-gap", type=float, default=1e-8)
     parser.add_argument("--relative-tolerance", type=float, default=1e-9)
     parser.add_argument("--absolute-tolerance", type=float, default=1e-6)
+    parser.add_argument("--max-extra-service-departures", type=int, default=0)
     args = parser.parse_args()
 
     data = load_model_data(args.data)

@@ -122,6 +122,7 @@ def main() -> None:
     parser.add_argument("--mip-relative-gap", type=float, default=1e-8)
     parser.add_argument("--relative-tolerance", type=float, default=1e-9)
     parser.add_argument("--absolute-tolerance", type=float, default=1e-6)
+    parser.add_argument("--max-extra-service-departures", type=int, default=0)
     args = parser.parse_args()
 
     structural_manifest = load_json(args.structural_results / "manifest.json")
@@ -166,7 +167,10 @@ def main() -> None:
                         continue
                 if model is None:
                     model, max_paths = build_full_model(
-                        case_data, config, enumerations[case_id]
+                        case_data,
+                        config,
+                        enumerations[case_id],
+                        max_extra_service_departures=args.max_extra_service_departures,
                     )
                 from china_us_multimodal.exact_endpoint import solve_lexicographic_endpoint
 
@@ -189,7 +193,10 @@ def main() -> None:
                 payload.update(
                     {
                         "validation_id": task_id,
-                        "library_variant": "structural_full",
+                        "library_variant": (
+                            "structural_full" if args.max_extra_service_departures == 0
+                            else f"structural_full_service_plus_{args.max_extra_service_departures}"
+                        ),
                         "binding_arc_id": spec.binding_arc_id,
                         "binding_arc_capacity_multiplier": spec.capacity_multiplier,
                         "binding_arc_base_capacity_feu_per_day": (
@@ -286,7 +293,10 @@ def main() -> None:
             else:
                 if model is None:
                     model, _ = build_full_model(
-                        case_data, config, enumerations[case_id]
+                        case_data,
+                        config,
+                        enumerations[case_id],
+                        max_extra_service_departures=args.max_extra_service_departures,
                     )
                 result, applied_cost, applied_time, attempts, retry_mode = (
                     solve_share_bound_with_numerical_retry(
@@ -318,7 +328,10 @@ def main() -> None:
                 )
             payload.update(
                 {
-                    "library_variant": "structural_full",
+                    "library_variant": (
+                        "structural_full" if args.max_extra_service_departures == 0
+                        else f"structural_full_service_plus_{args.max_extra_service_departures}"
+                    ),
                     "binding_arc_id": spec.binding_arc_id,
                     "binding_arc_capacity_multiplier": spec.capacity_multiplier,
                 }
@@ -372,6 +385,10 @@ def main() -> None:
                     "quantity_feu": allocation["quantity_feu"],
                     "gateway": allocation["gateway"],
                     "arc_ids": "|".join(allocation["arc_ids"]),
+                    "service_departure_ranks": "|".join(
+                        str(item)
+                        for item in allocation.get("service_departure_ranks", [])
+                    ),
                 }
             )
         for row in capacity_usage_rows(case_data, allocations, config):
@@ -442,7 +459,11 @@ def main() -> None:
         args.output / "manifest.json",
         {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
-            "library_variant": "structural_full",
+            "library_variant": (
+                "structural_full" if args.max_extra_service_departures == 0
+                else f"structural_full_service_plus_{args.max_extra_service_departures}"
+            ),
+            "max_extra_service_departures": args.max_extra_service_departures,
             "structural_source": str(args.structural_results),
             "capacity_multipliers": list(CAPACITY_MULTIPLIERS),
             "targets": TARGETS,

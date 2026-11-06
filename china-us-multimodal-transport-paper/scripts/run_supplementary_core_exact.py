@@ -125,6 +125,9 @@ def endpoint_payload(
     evaluation = result.evaluation
     shares = gateway_shares(model.data, result.allocations)
     calls = [asdict(call) for call in result.stage_calls]
+    max_extra_service_departures = int(
+        getattr(model, "max_extra_service_departures", 0)
+    )
     return {
         "validation_id": endpoint_id(
             condition.case_id, condition.condition_id, gateway_access, endpoint
@@ -142,6 +145,13 @@ def endpoint_payload(
         "max_paths_per_gateway": max_paths_per_gateway,
         "candidate_paths": model.quantity_variable_count,
         "binary_variables": model.quantity_variable_count,
+        "service_choice_rule": (
+            "earliest_only"
+            if max_extra_service_departures == 0
+            else f"earliest_plus_{max_extra_service_departures}"
+        ),
+        "max_extra_service_departures": max_extra_service_departures,
+        "candidate_itineraries": model.quantity_variable_count,
         "stage_one_proven": int(result.stage_one_proven),
         "lexicographic_proven": int(result.lexicographic_proven),
         "evaluator_consistent": int(result.evaluator_consistent),
@@ -833,6 +843,9 @@ def finalize_outputs(args, data, base_config, conditions, checkpoints):
                         case_cache[str(payload["case_id"])], allocation.arc_ids
                     ),
                     "arc_ids": "|".join(allocation.arc_ids),
+                    "service_departure_ranks": "|".join(
+                        str(item) for item in allocation.service_departure_ranks
+                    ),
                 }
             )
         condition = condition_index[(str(payload["case_id"]), str(payload["condition_id"]))]
@@ -1070,6 +1083,9 @@ def finalize_outputs(args, data, base_config, conditions, checkpoints):
                     "quantity_feu": row["quantity_feu"],
                     "gateway": row["gateway"],
                     "arc_ids": "|".join(row["arc_ids"]),
+                    "service_departure_ranks": "|".join(
+                        str(item) for item in row.get("service_departure_ranks", [])
+                    ),
                 }
             )
     share_range_rows: list[dict[str, object]] = []
