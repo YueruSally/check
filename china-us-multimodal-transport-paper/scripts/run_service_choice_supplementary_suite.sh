@@ -50,10 +50,6 @@ python -u scripts/run_full_structural_release_robustness.py \
   "${COMMON_ARGS[@]}" \
   --structural-results "$CORE_RESULTS" \
   --output "$RESULT_ROOT/release_robustness"
-python -u scripts/analyze_full_structural_release_robustness.py \
-  --single-wave-analysis "$CORE_ANALYSIS" \
-  --release-results "$RESULT_ROOT/release_robustness" \
-  --output "$ANALYSIS_ROOT/release_robustness"
 
 echo "Stage 4/7: demand-scale robustness with selectable services"
 python -u scripts/run_full_structural_demand_scale.py \
@@ -81,6 +77,11 @@ python -u scripts/run_regional_inland_capacity.py \
 python -u scripts/analyze_regional_inland_capacity.py \
   --results "$RESULT_ROOT/regional_inland_capacity" \
   --output "$ANALYSIS_ROOT/regional_inland_capacity"
+python -u scripts/analyze_full_structural_release_robustness.py \
+  --single-wave-analysis "$CORE_ANALYSIS" \
+  --single-wave-inland-analysis "$ANALYSIS_ROOT/local_inland_bottleneck" \
+  --release-results "$RESULT_ROOT/release_robustness" \
+  --output "$ANALYSIS_ROOT/release_robustness"
 
 echo "Stage 6/7: epsilon-constrained trade-off solutions"
 python -u scripts/run_full_structural_epsilon_tradeoffs.py \

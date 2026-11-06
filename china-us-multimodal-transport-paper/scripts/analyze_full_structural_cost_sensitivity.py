@@ -29,7 +29,9 @@ def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         raise ValueError(f"Refusing to write an empty analysis table: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -206,7 +208,7 @@ def main() -> None:
             and row["endpoint"] == reference["endpoint"]
         ),
         "interpretation": [
-            "NY/NJ remains in every tested minimum-cost endpoint region when tardiness penalties are set to zero; its cost value is therefore not generated solely by tardiness penalties.",
+            "At zero tardiness penalty, NY/NJ remains in the D1 and D3 minimum-cost endpoint regions but not the D2 region; its cost value in D1 and D3 is therefore not generated solely by tardiness penalties.",
             "Minimum-cost gateway shares need not change monotonically with the tardiness multiplier because discrete path, service, and minimum-share choices change jointly.",
             "Cost-component differences are restricted minus allowed at the same lexicographic endpoint; positive values are avoided costs and negative values are added costs.",
             "Cost and time benefits remain endpoint-specific and must not be presented as simultaneous unless they occur in the same endpoint row.",

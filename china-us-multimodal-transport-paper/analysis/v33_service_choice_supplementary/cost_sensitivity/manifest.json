@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-06T15:02:54.075304+00:00",
+  "generated_at_utc": "2026-11-06T18:51:06.893659+00:00",
   "results_source": "results/v33_service_choice_supplementary/cost_sensitivity",
   "zero_tardiness_penalty_min_cost_endpoint": {
     "D1": {
@@ -137,7 +137,7 @@
   "all_zero_penalty_min_cost_regions_use_ny_nj": false,
   "holding_sensitivity_has_any_endpoint_activation_change": false,
   "interpretation": [
-    "NY/NJ remains in every tested minimum-cost endpoint region when tardiness penalties are set to zero; its cost value is therefore not generated solely by tardiness penalties.",
+    "At zero tardiness penalty, NY/NJ remains in the D1 and D3 minimum-cost endpoint regions but not the D2 region; its cost value in D1 and D3 is therefore not generated solely by tardiness penalties.",
     "Minimum-cost gateway shares need not change monotonically with the tardiness multiplier because discrete path, service, and minimum-share choices change jointly.",
     "Cost-component differences are restricted minus allowed at the same lexicographic endpoint; positive values are avoided costs and negative values are added costs.",
     "Cost and time benefits remain endpoint-specific and must not be presented as simultaneous unless they occur in the same endpoint row."

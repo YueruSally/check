@@ -1,7 +1,7 @@
 {
-  "generated_at_utc": "2026-11-06T17:00:43.218222+00:00",
+  "generated_at_utc": "2026-11-06T18:51:07.150637+00:00",
   "single_wave_source": "analysis/v32_full_service_choice_core_exact",
-  "single_wave_additional_delay_source": "analysis/v26_full_structural_inland_bottleneck",
+  "single_wave_additional_delay_source": "analysis/v33_service_choice_supplementary/local_inland_bottleneck",
   "multi_wave_source": "results/v33_service_choice_supplementary/release_robustness",
   "activation_share": 0.1,
   "interpretation": [

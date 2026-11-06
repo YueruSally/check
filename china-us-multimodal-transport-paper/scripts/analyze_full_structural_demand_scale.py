@@ -23,7 +23,9 @@ def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         raise ValueError(f"Refusing to write an empty table: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -79,7 +81,7 @@ def main() -> None:
                 "time_avoided_h": float(
                     row["time_avoided_by_allowing_ny_nj_h"]
                 ),
-                "source": "v21_exact_core",
+                "source": str(args.core_analysis),
             }
         )
 
@@ -107,7 +109,7 @@ def main() -> None:
                 "time_avoided_h": float(
                     row["time_avoided_by_allowing_ny_nj_h"]
                 ),
-                "source": "v25_demand_scale",
+                "source": str(args.demand_results),
             }
         )
     evidence.sort(

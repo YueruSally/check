@@ -26,7 +26,9 @@ def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         raise ValueError(f"Refusing to write an empty table: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            handle, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -85,7 +87,7 @@ def main() -> None:
         evidence.append(
             {
                 "release_pattern": "single_wave",
-                "release_instance_id": "v21_single_wave",
+                "release_instance_id": "single_wave_selectable_service",
                 "release_generator_seed": "",
                 "case_id": row["case_id"],
                 "delay_h": delay,
@@ -114,7 +116,7 @@ def main() -> None:
         evidence.append(
             {
                 "release_pattern": "single_wave",
-                "release_instance_id": "v21_single_wave",
+                "release_instance_id": "single_wave_selectable_service",
                 "release_generator_seed": "",
                 "case_id": row["case_id"],
                 "delay_h": delay,
