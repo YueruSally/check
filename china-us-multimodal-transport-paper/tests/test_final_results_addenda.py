@@ -1,4 +1,11 @@
-from scripts.run_final_results_addenda import (
+from pathlib import Path
+import sys
+
+
+SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
+sys.path.insert(0, str(SCRIPTS_DIR))
+
+from run_final_results_addenda import (  # noqa: E402
     absolute_recovery_rows,
     all_single_wave_criterion_rows,
     core_validation_id,
