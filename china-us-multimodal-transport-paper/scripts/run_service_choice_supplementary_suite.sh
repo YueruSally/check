@@ -96,6 +96,7 @@ echo "Stage 7/7: final addenda under the selectable-service model"
 python -u scripts/run_final_results_addenda.py \
   "${COMMON_ARGS[@]}" \
   --structural-results "$CORE_RESULTS" \
+  --core-analysis "$CORE_ANALYSIS" \
   --cost-sensitivity-results "$RESULT_ROOT/cost_sensitivity" \
   --inland-results "$RESULT_ROOT/local_inland_bottleneck" \
   --output "$ANALYSIS_ROOT/final_results_addenda"

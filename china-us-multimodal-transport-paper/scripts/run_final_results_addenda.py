@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 from china_us_multimodal.config import load_config
-from china_us_multimodal.diagnostics import route_component_rows
+from china_us_multimodal.diagnostics import capacity_usage_rows, route_component_rows
 from china_us_multimodal.domain import RouteAllocation
 from china_us_multimodal.exact_endpoint import solve_lexicographic_endpoint
 from china_us_multimodal.io import load_model_data, select_case
@@ -22,7 +22,13 @@ from run_full_structural_cost_sensitivity import (
     scaled_case_data,
     sensitivity_config,
 )
-from run_supplementary_core_exact import endpoint_payload, load_json, write_json_atomic
+from run_supplementary_core_exact import (
+    allocations_from_payload,
+    endpoint_payload,
+    gateway_for_path,
+    load_json,
+    write_json_atomic,
+)
 
 
 CASES = ("D1", "D2", "D3")
@@ -49,6 +55,35 @@ def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def require_fields(
+    rows: list[dict[str, object]], required: set[str], source: Path | str
+) -> None:
+    if not rows:
+        raise ValueError(f"Required input table is empty: {source}")
+    missing = required.difference(rows[0])
+    if missing:
+        fields = ", ".join(sorted(missing))
+        raise ValueError(f"Required fields missing from {source}: {fields}")
+
+
+def structural_library_variant(max_extra_service_departures: int) -> str:
+    if max_extra_service_departures == 0:
+        return "structural_full"
+    return f"structural_full_service_plus_{max_extra_service_departures}"
+
+
+def core_validation_id(
+    case_id: str,
+    condition_id: str,
+    endpoint: str,
+    max_extra_service_departures: int,
+) -> str:
+    return (
+        f"{case_id}_{condition_id}_restricted_{endpoint}_"
+        f"{structural_library_variant(max_extra_service_departures)}"
+    )
 
 
 def zero_penalty_spec(case_id: str) -> SensitivitySpec:
@@ -174,9 +209,8 @@ def solve_matched_zero_penalty_baselines(args, data, base_config):
             payload.update(
                 {
                     "validation_id": task_id,
-                    "library_variant": (
-                        "structural_full" if args.max_extra_service_departures == 0
-                        else f"structural_full_service_plus_{args.max_extra_service_departures}"
+                    "library_variant": structural_library_variant(
+                        args.max_extra_service_departures
                     ),
                     "sensitivity_dimension": "tardiness_penalty",
                     "sensitivity_multiplier": 0.0,
@@ -269,9 +303,36 @@ def all_single_wave_criterion_rows(
     return result
 
 
+def supplemental_216_rows(
+    supplemental_ranges: list[dict[str, str]], source: Path | str
+) -> list[dict[str, object]]:
+    require_fields(
+        supplemental_ranges,
+        {"case_id", "condition_id", "endpoint_region", "ny_nj_min_share"},
+        source,
+    )
+    rows = [
+        {
+            **row,
+            "endpoint": row["endpoint_region"],
+            "meets_5pct": int(float(row["ny_nj_min_share"]) >= 0.05 - 1e-9),
+            "meets_10pct": int(float(row["ny_nj_min_share"]) >= 0.10 - 1e-9),
+            "meets_20pct": int(float(row["ny_nj_min_share"]) >= 0.20 - 1e-9),
+        }
+        for row in supplemental_ranges
+        if row["case_id"] == "D3"
+        and row["condition_id"]
+        == "delay_216h_inland_us-d-03_capacity_100pct"
+    ]
+    if not rows:
+        raise ValueError(f"No D3 216 h supplemental share rows found in {source}.")
+    return rows
+
+
 def absolute_recovery_rows(
     recovery_rows: list[dict[str, str]],
-    v26_endpoints: list[dict[str, str]],
+    inland_endpoints: list[dict[str, str]],
+    core_endpoints: list[dict[str, str]],
 ) -> list[dict[str, object]]:
     targets = (
         ("D1", "delay_288h", 288.0),
@@ -295,33 +356,29 @@ def absolute_recovery_rows(
 
     endpoint_index = {
         (row["gateway_access"], row["endpoint"]): row
-        for row in v26_endpoints
+        for row in inland_endpoints
         if row["case_id"] == "D3"
         and row["condition_id"]
         == "delay_216h_inland_us-d-03_capacity_100pct"
     }
-    baseline_cost = 23968537.06396954
-    baseline_time = 609.1774410774411
-    for endpoint, metric, baseline in (
-        ("min_cost_then_time", "cost", baseline_cost),
-        ("min_time_then_cost", "time", baseline_time),
+    core_index = {
+        (row["case_id"], row["condition_id"], row["gateway_access"], row["endpoint"]): row
+        for row in core_endpoints
+    }
+    for endpoint, metric, value_field in (
+        ("min_cost_then_time", "cost", "total_cost_usd"),
+        (
+            "min_time_then_cost",
+            "time",
+            "quantity_weighted_mean_delivery_time_h",
+        ),
     ):
+        baseline_row = core_index[("D3", "delay_0h", "restricted", endpoint)]
+        baseline = float(baseline_row[value_field])
         allowed = endpoint_index[("allowed", endpoint)]
         restricted = endpoint_index[("restricted", endpoint)]
-        allowed_value = float(
-            allowed[
-                "total_cost_usd"
-                if metric == "cost"
-                else "quantity_weighted_mean_delivery_time_h"
-            ]
-        )
-        restricted_value = float(
-            restricted[
-                "total_cost_usd"
-                if metric == "cost"
-                else "quantity_weighted_mean_delivery_time_h"
-            ]
-        )
+        allowed_value = float(allowed[value_field])
+        restricted_value = float(restricted[value_field])
         loss = restricted_value - baseline
         avoided = restricted_value - allowed_value
         result.append(
@@ -343,6 +400,90 @@ def absolute_recovery_rows(
     return result
 
 
+def zero_penalty_capacity_diagnostic_rows(
+    data,
+    base_cases,
+    base_config,
+    zero_payloads: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    labels = {
+        "ny_nj": "NYNJ",
+        "la_lb": "LALB",
+        "seattle_tacoma": "SETA",
+    }
+    rows: list[dict[str, object]] = []
+    for payload in zero_payloads:
+        if str(payload["gateway_access"]) != "allowed":
+            continue
+        case_id = str(payload["case_id"])
+        allocations = list(allocations_from_payload(payload))
+        quantities = {gateway: 0.0 for gateway in labels}
+        for allocation in allocations:
+            gateway = gateway_for_path(data, allocation.arc_ids)
+            quantities[gateway] = quantities.get(gateway, 0.0) + allocation.quantity_feu
+        ranked = sorted(quantities.items(), key=lambda item: (-item[1], item[0]))
+        preferred_gateway, preferred_quantity = ranked[0]
+        residual_gateway, residual_quantity = ranked[1]
+
+        spec = zero_penalty_spec(case_id)
+        config = sensitivity_config(base_config, spec, "allowed")
+        binding_rows = [
+            row
+            for row in capacity_usage_rows(base_cases[case_id], allocations, config)
+            if row["resource_type"] == "arc_day"
+            and int(row["binding_100pct"]) == 1
+            and row["origin"] == preferred_gateway
+        ]
+        if not binding_rows:
+            rows.append(
+                {
+                    "case_id": case_id,
+                    "preferred_gateway": labels.get(
+                        preferred_gateway, preferred_gateway
+                    ),
+                    "preferred_gateway_quantity_feu": preferred_quantity,
+                    "residual_gateway": labels.get(residual_gateway, residual_gateway),
+                    "residual_gateway_quantity_feu": residual_quantity,
+                    "binding_arc_id": "",
+                    "binding_arc_origin": "",
+                    "binding_arc_destination": "",
+                    "model_day": "",
+                    "used_feu": "",
+                    "capacity_feu": "",
+                    "interpretation": (
+                        "No preferred-gateway outbound arc-day capacity binds"
+                    ),
+                }
+            )
+            continue
+        for binding in binding_rows:
+            arc = data.arcs[str(binding["resource_id"])]
+            rows.append(
+                {
+                    "case_id": case_id,
+                    "preferred_gateway": labels.get(
+                        preferred_gateway, preferred_gateway
+                    ),
+                    "preferred_gateway_quantity_feu": preferred_quantity,
+                    "residual_gateway": labels.get(residual_gateway, residual_gateway),
+                    "residual_gateway_quantity_feu": residual_quantity,
+                    "binding_arc_id": binding["resource_id"],
+                    "binding_arc_origin": binding["origin"],
+                    "binding_arc_destination": binding["destination"],
+                    "model_day": binding["period"],
+                    "used_feu": binding["used_feu"],
+                    "capacity_feu": binding["capacity_feu"],
+                    "interpretation": (
+                        f"{labels.get(preferred_gateway, preferred_gateway)} "
+                        f"outbound {arc.mode.value} daily capacity binds"
+                    ),
+                }
+            )
+    if len({str(row["case_id"]) for row in rows}) != len(CASES):
+        raise ValueError("Zero-penalty capacity diagnostics are incomplete.")
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("data", type=Path)
@@ -351,6 +492,11 @@ def main() -> None:
         "--structural-results",
         type=Path,
         default=Path("results/v21_full_structural_core_exact"),
+    )
+    parser.add_argument(
+        "--core-analysis",
+        type=Path,
+        default=Path("analysis/v21_full_structural_core_exact"),
     )
     parser.add_argument(
         "--cost-sensitivity-results",
@@ -392,9 +538,20 @@ def main() -> None:
         for row in zero_payloads
     ]
     write_csv(args.output / "matched_zero_penalty_baselines.csv", zero_summary)
+    write_csv(
+        args.output / "zero_penalty_gateway_capacity_diagnostic.csv",
+        zero_penalty_capacity_diagnostic_rows(
+            data, base_cases, base_config, zero_payloads
+        ),
+    )
 
     sensitivity_endpoints = read_csv(
         args.cost_sensitivity_results / "exact_endpoint_summary.csv"
+    )
+    require_fields(
+        sensitivity_endpoints,
+        {"validation_id", "total_cost_usd"},
+        args.cost_sensitivity_results / "exact_endpoint_summary.csv",
     )
     sensitivity_index = {row["validation_id"]: row for row in sensitivity_endpoints}
     zero_incremental_rows: list[dict[str, object]] = []
@@ -431,29 +588,21 @@ def main() -> None:
         zero_incremental_rows,
     )
 
-    activation_rows = read_csv(
-        Path("analysis/v21_full_structural_core_exact/endpoint_activation_status.csv")
+    activation_path = args.core_analysis / "endpoint_activation_status.csv"
+    activation_rows = read_csv(activation_path)
+    require_fields(
+        activation_rows,
+        {"case_id", "condition_id", "endpoint", "delay_h", "ny_nj_min_share"},
+        activation_path,
     )
     write_csv(
         args.output / "activation_criterion_common_grid.csv",
         criterion_rows(activation_rows),
     )
 
-    supplemental_ranges = read_csv(
-        args.inland_results / "endpoint_ny_nj_share_ranges.csv"
-    )
-    supplemental_rows = [
-        {
-            **row,
-            "meets_5pct": int(float(row["ny_nj_min_share"]) >= 0.05 - 1e-9),
-            "meets_10pct": int(float(row["ny_nj_min_share"]) >= 0.10 - 1e-9),
-            "meets_20pct": int(float(row["ny_nj_min_share"]) >= 0.20 - 1e-9),
-        }
-        for row in supplemental_ranges
-        if row["case_id"] == "D3"
-        and row["condition_id"]
-        == "delay_216h_inland_us-d-03_capacity_100pct"
-    ]
+    supplemental_path = args.inland_results / "endpoint_ny_nj_share_ranges.csv"
+    supplemental_ranges = read_csv(supplemental_path)
+    supplemental_rows = supplemental_216_rows(supplemental_ranges, supplemental_path)
     write_csv(
         args.output / "activation_criterion_supplemental_216h.csv",
         supplemental_rows,
@@ -463,13 +612,44 @@ def main() -> None:
         all_single_wave_criterion_rows(activation_rows, supplemental_rows),
     )
 
-    recovery_rows = read_csv(
-        Path("analysis/v21_full_structural_core_exact/disruption_loss_recovery.csv")
+    recovery_path = args.core_analysis / "disruption_loss_recovery.csv"
+    recovery_rows = read_csv(recovery_path)
+    require_fields(
+        recovery_rows,
+        {"case_id", "condition_id", "endpoint", "metric"},
+        recovery_path,
     )
-    v26_endpoints = read_csv(args.inland_results / "exact_endpoint_summary.csv")
+    inland_endpoint_path = args.inland_results / "exact_endpoint_summary.csv"
+    inland_endpoints = read_csv(inland_endpoint_path)
+    require_fields(
+        inland_endpoints,
+        {
+            "case_id",
+            "condition_id",
+            "gateway_access",
+            "endpoint",
+            "total_cost_usd",
+            "quantity_weighted_mean_delivery_time_h",
+        },
+        inland_endpoint_path,
+    )
+    core_endpoint_path = args.structural_results / "full_exact_endpoint_summary.csv"
+    core_endpoints = read_csv(core_endpoint_path)
+    require_fields(
+        core_endpoints,
+        {
+            "case_id",
+            "condition_id",
+            "gateway_access",
+            "endpoint",
+            "total_cost_usd",
+            "quantity_weighted_mean_delivery_time_h",
+        },
+        core_endpoint_path,
+    )
     write_csv(
         args.output / "first_material_use_absolute_recovery.csv",
-        absolute_recovery_rows(recovery_rows, v26_endpoints),
+        absolute_recovery_rows(recovery_rows, inland_endpoints, core_endpoints),
     )
 
     core_allocations = allocations_by_validation(
@@ -491,13 +671,28 @@ def main() -> None:
             family="regional_delay",
             uswc_delay_h=delay_h,
         )
-        baseline_id = (
-            f"{case_id}_delay_0h_restricted_min_cost_then_time_structural_full"
+        baseline_id = core_validation_id(
+            case_id,
+            "delay_0h",
+            "min_cost_then_time",
+            args.max_extra_service_departures,
         )
-        disrupted_id = (
-            f"{case_id}_delay_{int(delay_h)}h_restricted_"
-            "min_cost_then_time_structural_full"
+        disrupted_id = core_validation_id(
+            case_id,
+            f"delay_{int(delay_h)}h",
+            "min_cost_then_time",
+            args.max_extra_service_departures,
         )
+        missing_ids = [
+            validation_id
+            for validation_id in (baseline_id, disrupted_id)
+            if validation_id not in core_allocations
+        ]
+        if missing_ids:
+            raise ValueError(
+                "Core allocation validation IDs are missing: "
+                + ", ".join(missing_ids)
+            )
         baseline_components = component_totals(
             case_data,
             core_allocations[baseline_id],
@@ -534,6 +729,7 @@ def main() -> None:
             {
                 "generated_at_utc": datetime.now(timezone.utc).isoformat(),
                 "structural_source": str(args.structural_results),
+                "core_analysis_source": str(args.core_analysis),
                 "cost_sensitivity_source": str(args.cost_sensitivity_results),
                 "inland_source": str(args.inland_results),
                 "matched_zero_penalty_endpoint_tasks": len(zero_payloads),
@@ -554,10 +750,6 @@ def main() -> None:
                 ),
                 "zero_penalty_capacity_diagnostic": (
                     "zero_penalty_gateway_capacity_diagnostic.csv"
-                ),
-                "legacy_zero_penalty_recovery_output": (
-                    "zero_penalty_loss_recovery.csv is retained for provenance "
-                    "but is not used in the final manuscript"
                 ),
             },
             indent=2,
