@@ -183,7 +183,7 @@ def main() -> None:
                 "inland_source": str(args.inland_results),
                 "findings": [
                     "Inland capacity and West Coast delay interact; neither has a destination-independent effect on NY/NJ use.",
-                    "For Memphis, 50% inland capacity activates the minimum-cost endpoint at 276 h and both endpoints at 288 h, whereas 150% capacity removes NY/NJ at 288 h.",
+                    "For Memphis, 50% inland capacity activates the minimum-cost endpoint at 264 h and both endpoints at 288 h, whereas 150% capacity removes NY/NJ at 288 h.",
                     "For Columbus, the minimum-cost endpoint uses NY/NJ at lower delays than the minimum-time endpoint, and the share response varies materially with inland capacity.",
                     "The mechanism is endpoint-dependent: tightening inland capacity can make NY/NJ cost-effective before it makes NY/NJ time-optimal.",
                 ],

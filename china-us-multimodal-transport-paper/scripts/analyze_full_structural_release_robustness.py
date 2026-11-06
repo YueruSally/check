@@ -307,7 +307,7 @@ def main() -> None:
             "Release dispersion preserves the qualitative value of an alternative gateway but materially changes its first tested use and its objective dependence.",
             "Chicago minimum-cost use remains at 288 h across multi-wave designs, while its minimum-time use moves to 336 h.",
             "Memphis generally moves from 288 h under the single wave to 336 h under multi-wave release; one daily instance reaches 10% in the minimum-cost endpoint at 288 h.",
-            "Columbus minimum-cost use varies between 168 h and 264 h across daily assignments, whereas minimum-time use occurs at 336 h in every tested multi-wave instance.",
+            "Columbus minimum-cost use varies between 168 h and 240 h across daily assignments and occurs at 264 h in the weekly-wave designs, whereas minimum-time use occurs at 336 h in every tested multi-wave instance.",
             "The repeated 32.66% single-wave share is not a universal capacity ceiling: multi-wave exact shares cover multiple intermediate values and 100%.",
             "Most highlighted multi-wave solutions do not bind service, daily-arc, or node capacities, so gateway switching cannot be attributed solely to capacity overflow.",
         ],
