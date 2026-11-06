@@ -1,0 +1,100 @@
+{
+  "generated_at_utc": "2026-11-06T12:16:37.308718+00:00",
+  "experiment": "later_service_choice_validation",
+  "conditions": [
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "delay_288h",
+        "family": "regional_delay",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "current_source": "core",
+      "regional_inland_capacity_multiplier": null
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "delay_288h",
+        "family": "regional_delay",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 288.0
+      },
+      "current_source": "core",
+      "regional_inland_capacity_multiplier": null
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_216h",
+        "family": "regional_delay",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 216.0
+      },
+      "current_source": "inland_interaction",
+      "regional_inland_capacity_multiplier": null
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_240h",
+        "family": "regional_delay",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 240.0
+      },
+      "current_source": "core",
+      "regional_inland_capacity_multiplier": null
+    },
+    {
+      "condition": {
+        "case_id": "D1",
+        "condition_id": "capacity_35pct",
+        "family": "gateway_node_capacity",
+        "uswc_capacity_multiplier": 0.35,
+        "uswc_delay_h": 0.0
+      },
+      "current_source": "core",
+      "regional_inland_capacity_multiplier": null
+    },
+    {
+      "condition": {
+        "case_id": "D2",
+        "condition_id": "capacity_35pct",
+        "family": "gateway_node_capacity",
+        "uswc_capacity_multiplier": 0.35,
+        "uswc_delay_h": 0.0
+      },
+      "current_source": "core",
+      "regional_inland_capacity_multiplier": null
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "capacity_35pct",
+        "family": "gateway_node_capacity",
+        "uswc_capacity_multiplier": 0.35,
+        "uswc_delay_h": 0.0
+      },
+      "current_source": "core",
+      "regional_inland_capacity_multiplier": null
+    },
+    {
+      "condition": {
+        "case_id": "D3",
+        "condition_id": "delay_168h_regional_inland_capacity_030pct",
+        "family": "regional_inland_capacity",
+        "uswc_capacity_multiplier": 1.0,
+        "uswc_delay_h": 168.0
+      },
+      "current_source": "regional_inland",
+      "regional_inland_capacity_multiplier": 0.3
+    }
+  ],
+  "historical_rule": "earliest feasible scheduled departure only",
+  "expanded_rule": "each scheduled leg may choose its earliest feasible departure or either of the next two feasible departure events",
+  "new_expanded_endpoint_tasks": 32,
+  "historical_endpoint_tasks_reused": 32,
+  "structural_path_set": "complete under the registered restrictions",
+  "interpretation_limit": "The experiment validates two additional departure events per scheduled leg; it does not enumerate every later departure."
+}
